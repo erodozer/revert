@@ -1,4 +1,6 @@
+/src/Images/Thumbs.db
 *.class
+/bin/*
 
 # Package Files #
 *.jar
