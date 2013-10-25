@@ -42,13 +42,14 @@ import java.awt.*;
 import java.awt.image.*;
 import java.util.*;
 import java.io.*;
+
 import javax.imageio.*;
 import javax.swing.*;     // for ImageIcon
 
 
 public class ImagesLoader
 {
-  private final static String IMAGE_DIR = "../../../Images/";
+  private final static String IMAGE_DIR = "Images/";
 
   private HashMap<String, ArrayList<BufferedImage>> imagesMap; 
     /* The key is the filename prefix, the object (value) 
@@ -94,7 +95,8 @@ public class ImagesLoader
     String imsFNm = IMAGE_DIR + fnm;
     System.out.println("Reading file: " + imsFNm);
     try {
-      InputStream in = this.getClass().getResourceAsStream(imsFNm);
+      InputStream in = getClass().getClassLoader().getResourceAsStream(imsFNm);
+      System.out.println(in);
       BufferedReader br = new BufferedReader( new InputStreamReader(in));
       // BufferedReader br = new BufferedReader( new FileReader(imsFNm));
       String line;
@@ -650,7 +652,7 @@ public class ImagesLoader
    {
      try {
        BufferedImage im =  ImageIO.read( 
-                      getClass().getResource(IMAGE_DIR + fnm) );
+    		   getClass().getClassLoader().getResource(IMAGE_DIR + fnm) );
        // An image returned from ImageIO in J2SE <= 1.4.2 is 
        // _not_ a managed image, but is after copying!
 
@@ -703,7 +705,7 @@ public class ImagesLoader
       Uses ImageIcon.
    */
   { ImageIcon imIcon = new ImageIcon(
-                      getClass().getResource(IMAGE_DIR + fnm) );
+		  getClass().getClassLoader().getResource(IMAGE_DIR + fnm) );
     if (imIcon == null)
       return null;
 
@@ -751,7 +753,7 @@ public class ImagesLoader
   // load the image, waiting for it to be fully downloaded
   {
     Image image = Toolkit.getDefaultToolkit().getImage(
-                     getClass().getResource(IMAGE_DIR + fnm) );
+    		getClass().getClassLoader().getResource(IMAGE_DIR + fnm) );
     MediaTracker imageTracker = new MediaTracker( new JPanel() );
 
     imageTracker.addImage(image, 0);

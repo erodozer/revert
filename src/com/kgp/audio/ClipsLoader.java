@@ -24,11 +24,9 @@ import java.awt.*;
 import java.util.*;
 import java.io.*;
 
-
-
 public class ClipsLoader
 {
-  private final static String SOUND_DIR = "../../../Sounds/";
+  private final static String SOUND_DIR = "Sounds/";
 
   private HashMap clipsMap; 
     /* The key is the clip 'name', the object (value) 
@@ -54,7 +52,7 @@ public class ClipsLoader
     String sndsFNm = SOUND_DIR + soundsFnm;
     System.out.println("Reading file: " + sndsFNm);
     try {
-      InputStream in = this.getClass().getResourceAsStream(sndsFNm);
+      InputStream in = getClass().getClassLoader().getResourceAsStream(sndsFNm);
       BufferedReader br = new BufferedReader( new InputStreamReader(in));
       // BufferedReader br = new BufferedReader( new FileReader(sndsFNm));
       StringTokenizer tokens;

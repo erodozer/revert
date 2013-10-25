@@ -13,12 +13,13 @@ package com.kgp.audio;
 */
 
 import java.io.*;
+
 import javax.sound.midi.*;
 
 
 public class MidiInfo
 {
-  private final static String SOUND_DIR = "../../../Sounds/";
+  private final static String SOUND_DIR = "Sounds/";
 
   private String name, filename;
   private Sequence seq = null;
@@ -39,7 +40,7 @@ public class MidiInfo
   // load the Midi sequence
   { 
     try {
-      seq = MidiSystem.getSequence( getClass().getResource(filename) );
+      seq = MidiSystem.getSequence( getClass().getClassLoader().getResource(filename) );
     }
     catch (InvalidMidiDataException e) {
       System.out.println("Unreadable/unsupported midi file: " + filename);

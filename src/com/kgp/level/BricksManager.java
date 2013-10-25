@@ -40,7 +40,7 @@ import com.kgp.imaging.ImagesLoader;
 
 public class BricksManager
 {
-  private final static String IMAGE_DIR = "../../../Images/";
+  private final static String BRICKS_DIR = "Levels/";
   private final static int MAX_BRICKS_LINES = 15;
      // maximum number of lines (rows) of bricks in the scene
 
@@ -129,13 +129,14 @@ public class BricksManager
      comment lines (those starting with //), which are ignored.
   */
   { 
-    String imsFNm = IMAGE_DIR + fnm;
+    String imsFNm = BRICKS_DIR + fnm;
     System.out.println("Reading bricks file: " + imsFNm);
 
     int numStripImages = -1;
     int numBricksLines = 0;
     try {
-      BufferedReader br = new BufferedReader( new InputStreamReader(this.getClass().getResourceAsStream(imsFNm)));
+      InputStream in = getClass().getClassLoader().getResourceAsStream(imsFNm);
+      BufferedReader br = new BufferedReader( new InputStreamReader(in));
       String line;
       char ch;
       while((line = br.readLine()) != null) {

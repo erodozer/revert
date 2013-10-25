@@ -29,7 +29,9 @@ package com.kgp.audio;
 
 
 import java.io.*;
+
 import javax.sound.midi.*;
+
 import java.util.*;
 
 
@@ -39,7 +41,7 @@ public class MidisLoader implements MetaEventListener
   // midi meta-event constant used to signal the end of a track 
   private static final int END_OF_TRACK = 47;
 
-  private final static String SOUND_DIR = "../../../Sounds/";
+  private final static String SOUND_DIR = "Sounds/";
 
   private Sequencer sequencer;
 
@@ -103,7 +105,7 @@ public class MidisLoader implements MetaEventListener
     String sndsFNm = SOUND_DIR + soundsFnm;
     System.out.println("Reading file: " + sndsFNm);
     try {
-      InputStream in = this.getClass().getResourceAsStream(sndsFNm);
+      InputStream in = getClass().getClassLoader().getResourceAsStream(sndsFNm);
       BufferedReader br = new BufferedReader( new InputStreamReader(in));
       // BufferedReader br = new BufferedReader( new FileReader(sndsFNm));
       StringTokenizer tokens;

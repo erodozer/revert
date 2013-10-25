@@ -24,15 +24,15 @@ package com.kgp.audio;
 */
 
 import java.io.*;
-import javax.sound.sampled.*;
 
+import javax.sound.sampled.*;
 
 import java.text.DecimalFormat;
 
 
 public class ClipInfo implements LineListener
 {
-  private final static String SOUND_DIR = "../../../Sounds/";
+  private final static String SOUND_DIR = "Sounds/";
 
   private String name, filename;
   private Clip clip = null;
@@ -54,8 +54,8 @@ public class ClipInfo implements LineListener
   {
     try {
       // link an audio stream to the sound clip's file
-      AudioInputStream stream = AudioSystem.getAudioInputStream(
-                          getClass().getResource(fnm) );
+      InputStream in = getClass().getClassLoader().getResourceAsStream(fnm);
+      AudioInputStream stream = AudioSystem.getAudioInputStream( in );
 
       AudioFormat format = stream.getFormat();
 
