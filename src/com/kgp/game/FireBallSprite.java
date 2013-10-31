@@ -48,7 +48,7 @@ public class FireBallSprite extends Sprite
       h -= getHeight();    // so all on screen
 
     setPosition(getPWidth(), h);   
-    setStep(STEP + getRandRange(STEP_OFFSET), 0);   // move left
+    setVelocity(STEP + getRandRange(STEP_OFFSET), 0);   // move left
   } // end of initPosition()
 
 
@@ -74,7 +74,7 @@ public class FireBallSprite extends Sprite
     jackBox.grow(-jackBox.width/3, 0);   // make jack's bounded box thinner
 
     if (jackBox.intersects( getMyRectangle() )) {    // jack collision?
-      jp.showExplosion(locx, locy+getHeight()/2);  
+      jp.showExplosion(getXPosn(), getYPosn()+getHeight()/2);  
              // tell JackPanel, supplying it with a hit coordinate
       initPosition();
     }
@@ -84,7 +84,7 @@ public class FireBallSprite extends Sprite
   private void goneOffScreen()
   // when the ball has gone off the lhs, start it again.
   {
-    if (((locx+getWidth()) <= 0) && (dx < 0)) // off left and moving left
+    if (((getXPosn()+getWidth()) <= 0) && (getYVelocity() < 0)) // off left and moving left
       initPosition();   // start the ball in a new position
   }  // end of goneOffScreen()
 

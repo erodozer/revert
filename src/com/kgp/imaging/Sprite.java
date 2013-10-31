@@ -1,185 +1,238 @@
 package com.kgp.imaging;
 
-// Sprite.java
-// Andrew Davison, April 2005, ad@fivedots.coe.psu.ac.th
-
-/* A Sprite has a position, velocity (in terms of steps),
-   an image, and can be deactivated.
-
-   The sprite's image is managed with an ImagesLoader object,
-   and an ImagesPlayer object for looping.
-
-   The images stored until the image 'name' can be looped
-   through by calling loopImage(), which uses an
-   ImagesPlayer object.
-
-*/
 
 import java.awt.*;
-import javax.swing.*;
-
 
 import java.awt.image.*;
 
+/**
+ *  Sprite.java
+ *  
+ *  A Sprite has a position, velocity (in terms of steps),
+ *  an image, and can be deactivated.
+ *  The sprite's image is managed with an ImagesLoader object,
+ *  and an ImagesPlayer object for looping.
+ *  The images stored until the image 'name' can be looped
+ *  through by calling loopImage(), which uses an
+ *  ImagesPlayer object.
+ *  
+ *  @author Andrew Davison, April 2005, ad@fivedots.coe.psu.ac.th
+ */
+public class Sprite {
+	// default step sizes (how far to move in each update)
+	private static final int XSTEP = 5;
+	private static final int YSTEP = 5;
 
-public class Sprite 
-{
-  // default step sizes (how far to move in each update)
-  private static final int XSTEP = 5; 
-  private static final int YSTEP = 5;
+	// default dimensions when there is no image
+	private static final int SIZE = 12;
 
-  // default dimensions when there is no image
-  private static final int SIZE = 12;   
+	// image-related
+	private ImagesLoader imsLoader;
+	private String imageName;
+	private BufferedImage image;
+	
+	// for playing a loop of images
+	protected ImagesPlayer player;
+	protected boolean isLooping;
 
-  // image-related
-  private ImagesLoader imsLoader;
-  private String imageName;
-  private BufferedImage image;
-  private int width, height;     // image dimensions
+	// panel dimensions
+	private int pWidth, pHeight;
 
-  private ImagesPlayer player;  // for playing a loop of images
-  private boolean isLooping;
+	private boolean isActive = true;
+	// a sprite is updated and drawn only when it is active
 
-  private int pWidth, pHeight;   // panel dimensions
+	protected Rectangle myRect;
+	
+	/**
+	 * Amount the sprite will move per update cycle
+	 */
+	protected Point velocity;
+	/**
+	 * Real position of the sprite in the world
+	 */
+	protected Point position;
+	/**
+	 *  image dimensions
+	 */
+	protected Point dimensions;
+	
+	protected Point pDimensions;
 
-  private boolean isActive = true;      
-  // a sprite is updated and drawn only when it is active
+	public Sprite(int x, int y, int w, int h, ImagesLoader imsLd, String name) {
+		this.position = new Point(x, y);
 
-  // protected vars
-  protected int locx, locy;        // location of sprite
-  protected int dx, dy;            // amount to move for each update
+		this.velocity = new Point(XSTEP, YSTEP);
 
+		this.pDimensions = new Point(w, h);
 
+		this.imsLoader = imsLd;
+		
+		// the sprite's default image is 'name'
+		setImage(name); 
+	}
 
-  public Sprite(int x, int y, int w, int h, ImagesLoader imsLd, String name) 
-  { 
-    locx = x; locy = y;
-    pWidth = w; pHeight = h;
-    dx = XSTEP; dy = YSTEP;
+	/**
+	 * assign the name image to the sprite
+	 * @param name
+	 */
+	public void setImage(String name)
+	{
+		imageName = name;
+		image = imsLoader.getImage(imageName);
+		if (image == null) {
+			System.out.println("No sprite image for " + imageName);
+			dimensions = new Point(SIZE, SIZE);
+		} else {
+			dimensions = new Point(image.getWidth(), image.getHeight());
+		}
+		//create bounding box
+		this.myRect = new Rectangle(0, 0, dimensions.x, dimensions.y);
+		
+		// no image loop playing
+		player = null;
+		isLooping = false;
+	}
 
-    imsLoader = imsLd;
-    setImage(name);    // the sprite's default image is 'name'
-  } // end of Sprite()
+	/**
+	 * Switch on loop playing
+	 * 
+	 * @param animPeriod
+	 *            - period length in ms (from the enclosing panel)
+	 * @param seqDuration
+	 *            - The total time for the loop to play the sequence
+	 */
+	public void loopImage(int animPeriod, double seqDuration) {
+		if (imsLoader.numImages(imageName) > 1) {
+			player = null; // to encourage garbage collection of previous player
+			player = new ImagesPlayer(imageName, animPeriod, seqDuration, true,
+					imsLoader);
+			isLooping = true;
+		} else {
+			System.out.println(imageName + " is not a sequence of images");
+		}
+	}
 
+	public void stopLooping() {
+		if (isLooping) {
+			player.stop();
+			isLooping = false;
+		}
+	}
 
-  public void setImage(String name)
-  // assign the name image to the sprite
-  {
-    imageName = name;
-    image = imsLoader.getImage(imageName);
-    if (image == null) {    // no image of that name was found
-      System.out.println("No sprite image for " + imageName);
-      width = SIZE;
-      height = SIZE;
-    }
-    else {
-      width = image.getWidth();
-      height = image.getHeight();
-    }
-    // no image loop playing 
-    player = null;
-    isLooping = false;
-  }  // end of setImage()
+	public int getWidth() {
+		return dimensions.x;
+	}
 
+	public int getHeight() {
+		return dimensions.y;
+	}
 
-  public void loopImage(int animPeriod, double seqDuration)
-  /* Switch on loop playing. The total time for the loop is
-     seqDuration secs. The update interval (from the enclosing
-     panel) is animPeriod ms. */
-  {
-    if (imsLoader.numImages(imageName) > 1) {
-      player = null;   // to encourage garbage collection of previous player
-      player = new ImagesPlayer(imageName, animPeriod, seqDuration,
-                                       true, imsLoader);
-      isLooping = true;
-    }
-    else
-      System.out.println(imageName + " is not a sequence of images");
-  }  // end of loopImage()
+	public int getPWidth() {
+		return this.pDimensions.x;
+	}
 
+	public int getPHeight() {
+		return this.pDimensions.y;
+	}
 
-  public void stopLooping()
-  {
-    if (isLooping) {
-      player.stop();
-      isLooping = false;
-    }
-  }  // end of stopLooping()
+	public boolean isActive() {
+		return isActive;
+	}
 
+	public void setActive(boolean a) {
+		isActive = a;
+	}
 
-  public int getWidth()    // of the sprite's image
-  {  return width;  }
+	/**
+	 * Forcefully sets the actual position of the sprite
+	 * @param x
+	 * @param y
+	 */
+	public void setPosition(int x, int y) {
+		this.position.x = x;
+		this.position.y = y;
+	}
 
-  public int getHeight()   // of the sprite's image
-  {  return height;  }
+	/**
+	 * Shifts the sprites position relatively from its current position
+	 * @param xDist
+	 * @param yDist
+	 */
+	public void translate(int xDist, int yDist) {
+		this.position.translate(xDist, yDist);
+	}
 
-  public int getPWidth()   // of the enclosing panel
-  {  return pWidth;  }
+	public int getXPosn() {
+		return this.position.x;
+	}
 
-  public int getPHeight()  // of the enclosing panel
-  {  return pHeight;  }
+	public int getYPosn() {
+		return this.position.y;
+	}
 
+	/**
+	 * Forcefully sets the sprite's movement velocity
+	 * @param x - horizontal shift value
+	 * @param y - vertical shift value
+	 */
+	public void setVelocity(int dx, int dy) {
+		this.velocity.x = dx;
+		this.velocity.y = dy;
+	}
 
-  public boolean isActive() 
-  {  return isActive;  }
+	public int getXVelocity() {
+		return this.velocity.x;
+	}
 
-  public void setActive(boolean a) 
-  {  isActive = a;  }
+	public int getYVelocity() {
+		return this.velocity.y;
+	}
 
-  public void setPosition(int x, int y)
-  {  locx = x; locy = y;  }
+	/**
+	 * @return the bounding box of the sprite
+	 */
+	public Rectangle getMyRectangle() {
+		//set the rectangle's position only when requested
+		myRect.x = this.position.x;
+		myRect.y = this.position.y;
+		
+		return myRect;
+	}
 
-  public void translate(int xDist, int yDist)
-  {  locx += xDist;  locy += yDist;  }
+	/**
+	 * Perform standard actions for the sprite on each cycle
+	 */
+	public void updateSprite()
+	{
+		if (isActive()) {
+			this.position.translate(this.velocity.x, this.velocity.y);
+			
+			// update the animation
+			if (isLooping)
+			{
+				player.updateTick();
+			}
+		}
+	}
 
-  public int getXPosn()
-  {  return locx;  }
+	/**
+	 * Draws the sprite to the graphics context
+	 * @param g
+	 */
+	public void drawSprite(Graphics g) {
+		if (isActive()) {
+			// if the sprite has no image, draw a yellow circle instead
+			if (image == null) { 
+				g.setColor(Color.yellow);
+				g.fillOval(this.position.x, this.position.y, SIZE, SIZE);
+				g.setColor(Color.black);
+			} 
+			else {
+				if (isLooping)
+					image = player.getCurrentImage();
+				g.drawImage(image, this.position.x, this.position.y, null);
+			}
+		}
+	}
 
-  public int getYPosn()
-  {  return locy;  }
-
-
-  public void setStep(int dx, int dy)
-  {  this.dx = dx; this.dy = dy; }
-
-  public int getXStep()
-  {  return dx;  }
-
-  public int getYStep()
-  {  return dy;  }
-
-
-  public Rectangle getMyRectangle()
-  {  return  new Rectangle(locx, locy, width, height);  }
-
-
-  public void updateSprite()
-  // move the sprite
-  {
-    if (isActive()) {
-      locx += dx;
-      locy += dy;
-      if (isLooping)
-        player.updateTick();  // update the player
-    }
-  } // end of updateSprite()
-
-
-
-  public void drawSprite(Graphics g) 
-  {
-    if (isActive()) {
-      if (image == null) {   // the sprite has no image
-        g.setColor(Color.yellow);   // draw a yellow circle instead
-        g.fillOval(locx, locy, SIZE, SIZE);
-        g.setColor(Color.black);
-      }
-      else {
-        if (isLooping)
-          image = player.getCurrentImage();
-        g.drawImage(image, locx, locy, null);
-      }
-    }
-  } // end of drawSprite()
-
-}  // end of Sprite class
+}

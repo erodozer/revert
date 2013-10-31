@@ -76,15 +76,15 @@ public class JumperSprite extends Sprite
 
     brickMan = bm;
     period = p;
-    setStep(0,0);     // no movement
+    setVelocity(0,0);     // no movement
 
     isFacingRight = true;
     isStill = true;
 
     /* Adjust the sprite's y- position so it is
        standing on the brick at its mid x- psoition. */
-    locy = brickMan.findFloor(locx+getWidth()/2)-getHeight();
-    xWorld = locx; yWorld = locy;    // store current position
+    this.position.y = brickMan.findFloor(getXPosn()+getWidth()/2)-getHeight();
+    xWorld = getXPosn(); yWorld = getYPosn();    // store current position
 
     vertMoveMode = NOT_JUMPING;
     vertStep = brickMan.getBrickHeight()/2;   
