@@ -27,14 +27,17 @@ import java.awt.image.*;
 
 public class Ribbon {
 	private BufferedImage im;
-	private int width; // the width of the image (>= pWidth)
+	private float width; // the width of the image (>= pWidth)
+	private float height;
+	
+	private float wScale, hScale;
+	
 	private int pWidth, pHeight; // dimensions of display panel
 
 	private int moveSize; // size of the image move (in pixels)
 	private boolean isMovingRight; // movement flags
 	private boolean isMovingLeft;
 
-	private int xImHead;
 	private int head;
 	private int tail;
 	
@@ -68,6 +71,11 @@ public class Ribbon {
 		self = AffineTransform.getTranslateInstance(0, 0);
 		pre = AffineTransform.getTranslateInstance(-width, 0);
 		post = AffineTransform.getTranslateInstance(width, 0);
+		
+		height = Math.max(im.getHeight(), pHeight);
+		width *= pHeight/height;
+		wScale = pHeight/height;
+		hScale = pHeight/height;
 	} // end of Ribbon()
 
 	/*
@@ -91,6 +99,10 @@ public class Ribbon {
 		self.setToTranslation(head, 0);
 		pre.setToTranslation(head-width, 0);
 		post.setToTranslation(head+width, 0);
+		
+		self.scale(wScale, hScale);
+		pre.scale(wScale, hScale);
+		post.scale(wScale, hScale);
 
 		// System.out.println("xImHead is " + xImHead);
 	} // end of update()
