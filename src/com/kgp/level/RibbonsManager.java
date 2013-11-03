@@ -47,31 +47,16 @@ public class RibbonsManager {
 		}
 	}
 
-	public void moveRight() {
+	public void update(int dir) {
 		for (int i = 0; i < numRibbons; i++)
-			ribbons[i].moveRight();
-	}
-
-	public void moveLeft() {
-		for (int i = 0; i < numRibbons; i++)
-			ribbons[i].moveLeft();
-	}
-
-	public void stayStill() {
-		for (int i = 0; i < numRibbons; i++)
-			ribbons[i].stayStill();
-	}
-
-	public void update() {
-		for (int i = 0; i < numRibbons; i++)
-			ribbons[i].update();
+			ribbons[i].update(dir);
 	}
 
 	/*
 	 * The display order is important. Display ribbons from the back to the
 	 * front of the scene.
 	 */
-	public void display(Graphics g)
+	public void display(Graphics2D g)
 	{
 		for (int i = 0; i < numRibbons; i++)
 			ribbons[i].display(g);

@@ -146,15 +146,12 @@ public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatche
 			// move the sprite and ribbons based on the arrow key pressed
 			if (keyCode == KeyEvent.VK_LEFT) {
 				jack.moveLeft();
-				ribsMan.moveRight();
 			} else if (keyCode == KeyEvent.VK_RIGHT) {
 				jack.moveRight();
-				ribsMan.moveLeft();
 			} else if (keyCode == KeyEvent.VK_UP)
 				jack.jump(); // jumping has no effect on the bricks/ribbons
 			else if (keyCode == KeyEvent.VK_DOWN) {
 				jack.stayStill();
-				ribsMan.stayStill();
 			}
 		}
 	}
@@ -244,9 +241,11 @@ public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatche
 			 // stop jack and scenery on collision
 			if (jack.willHitBrick()) {
 				jack.stayStill();
-				ribsMan.stayStill();
 			}
-			ribsMan.update();
+			else
+			{
+				ribsMan.update(jack.getDirection());
+			}
 			bricksMan.update(jack.getWorldPosn());
 			jack.updateSprite();
 			

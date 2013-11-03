@@ -280,5 +280,15 @@ public class JumperSprite extends Sprite {
 		return new Point(world);
 	}
 
+	public int getDirection() {
+		if (!isStill) {
+			if (isFacingRight)
+				return 1;
+			else
+				return -1;
+		}
+		return 0;
+	}
+
 } // end of JumperSprite
 
