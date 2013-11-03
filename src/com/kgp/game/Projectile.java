@@ -13,7 +13,8 @@ package com.kgp.game;
 
 import java.awt.*;
 
-import com.kgp.core.JackPanel;
+import revert.game.JackPanel;
+
 import com.kgp.imaging.ImagesLoader;
 import com.kgp.imaging.Sprite;
 

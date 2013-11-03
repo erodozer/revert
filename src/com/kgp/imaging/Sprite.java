@@ -166,6 +166,14 @@ public class Sprite {
 	public int getYPosn() {
 		return this.position.y;
 	}
+	
+	/**
+	 * The sprite's position
+	 * @return a copy of the point so any alterations do not affect the sprite
+	 */
+	public Point getPosn() {
+		return new Point(this.position);
+	}
 
 	/**
 	 * Forcefully sets the sprite's movement velocity

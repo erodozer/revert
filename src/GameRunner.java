@@ -1,11 +1,13 @@
-import com.kgp.core.JumpingJack;
+import revert.game.JackPanel;
+
+import com.kgp.core.GameFrame;
 
 public class GameRunner {
 
-	public static void main(String args[])
-    { 
-		long period = (long) 1000.0/JumpingJack.DEFAULT_FPS;
-		// System.out.println("fps: " + DEFAULT_FPS + "; period: " + period + " ms");
-		new JumpingJack(period*1000000L);    // ms --> nanosecs 
-    }
+	public static void main(String args[]) {
+		long period = (long) 1000.0 / GameFrame.DEFAULT_FPS;
+		GameFrame g = new GameFrame("Revert", period); // ms --> nanosecs
+		g.setGame(new JackPanel(g, g.period));
+
+	}
 }

@@ -11,7 +11,8 @@ package com.kgp.game;
  reused.
  */
 
-import com.kgp.core.JackPanel;
+import revert.game.JackPanel;
+
 import com.kgp.imaging.ImagesLoader;
 
 public class FireBallSprite extends Projectile {

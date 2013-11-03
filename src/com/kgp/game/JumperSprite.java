@@ -81,10 +81,9 @@ public class JumperSprite extends Sprite {
 		 * Adjust the sprite's y- position so it is standing on the brick at its
 		 * mid x- psoition.
 		 */
-		this.position.y = brickMan.findFloor(getXPosn() + getWidth() / 2)
-				- getHeight();
+		this.position.y = brickMan.findFloor(getWidth() / 2) - getHeight();
 
-		this.world = new Point(getXPosn(), getYPosn());
+		this.world = new Point(0, 0);
 
 		vertMoveMode = NOT_JUMPING;
 		vertStep = brickMan.getBrickHeight() / 2;
@@ -156,14 +155,14 @@ public class JumperSprite extends Sprite {
 
 		int xTest; // for testing the new x- position
 		if (isFacingRight) // moving right
-			xTest = world.x + moveSize;
+			xTest = world.x + moveSize + this.getWidth()/2;
 		else
 			// moving left
-			xTest = world.x - moveSize;
+			xTest = world.x - moveSize ;
 
 		// test a point near the base of the sprite
-		int xMid = xTest + getWidth() / 2;
-		int yMid = world.y + (int) (getHeight() * 0.8); // use current y posn
+		int xMid = xTest;
+		int yMid = world.y - 1; // use current y posn
 
 		return brickMan.insideBrick(xMid, yMid);
 	} // end of willHitBrick()
@@ -182,8 +181,10 @@ public class JumperSprite extends Sprite {
 			else
 				// moving left
 				world.x -= moveSize;
+			world.x %= brickMan.width();
 			if (vertMoveMode == NOT_JUMPING) // if not jumping
 				checkIfFalling(); // may have moved out into empty space
+			
 		}
 
 		// vertical movement has two components: RISING and FALLING
@@ -191,7 +192,10 @@ public class JumperSprite extends Sprite {
 			updateRising();
 		else if (vertMoveMode == FALLING)
 			updateFalling();
-
+		
+		this.position.x = this.world.x;
+		this.position.y = this.world.y - this.getHeight() - brickMan.getBrickHeight();
+		
 		super.updateSprite();
 	} // end of updateSprite()
 
@@ -203,8 +207,7 @@ public class JumperSprite extends Sprite {
 	{
 		// could the sprite move downwards if it wanted to?
 		// test its center x-coord, base y-coord
-		int yTrans = brickMan.checkBrickTop(world.x + (getWidth() / 2), world.y
-				+ getHeight() + vertStep, vertStep);
+		int yTrans = brickMan.checkBrickTop(world.x, world.y + vertStep, vertStep);
 		// System.out.println("checkIfFalling: " + yTrans);
 		if (yTrans != 0) // yes it could
 			vertMoveMode = FALLING; // set it to be in falling mode
@@ -221,13 +224,11 @@ public class JumperSprite extends Sprite {
 			vertMoveMode = FALLING; // at top, now start falling
 			upCount = 0;
 		} else {
-			int yTrans = brickMan.checkBrickBase(world.x + (getWidth() / 2),
-					world.y - vertStep, vertStep);
+			int yTrans = brickMan.checkBrickBase(world.x, world.y - this.getHeight() - vertStep, vertStep);
 			if (yTrans == 0) { // hit the base of a brick
 				vertMoveMode = FALLING; // start falling
 				upCount = 0;
 			} else { // can move upwards another step
-				translate(0, -yTrans);
 				world.y -= yTrans; // update position
 				upCount++;
 			}
@@ -244,14 +245,14 @@ public class JumperSprite extends Sprite {
 	 * instance, when the sprite walks off a cliff.
 	 */
 	{
-		int yTrans = brickMan.checkBrickTop(world.x + (getWidth() / 2), world.y
-				+ getHeight() + vertStep, vertStep);
-		if (yTrans == 0) // hit the top of a brick
+		int yTrans = brickMan.checkBrickTop(world.x, world.y + vertStep, vertStep);
+		if (yTrans == 0){ 
 			finishJumping();
-		else { // can move downwards another step
-			translate(0, yTrans);
-			world.y += yTrans; // update position
 		}
+		else {
+			world.y += yTrans;
+		}
+		System.out.println(world.y);
 	} // end of updateFalling()
 
 	private void finishJumping() {
@@ -273,6 +274,10 @@ public class JumperSprite extends Sprite {
 
 	public int getYWorldPosn() {
 		return this.world.y;
+	}
+
+	public Point getWorldPosn() {
+		return new Point(world);
 	}
 
 } // end of JumperSprite

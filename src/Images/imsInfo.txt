@@ -12,7 +12,7 @@ o jumpRight.gif
 
 
 // scenery images
-o mountains.gif
+o forest2.png
 o houses.gif
 o trees.gif
 

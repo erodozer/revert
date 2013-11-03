@@ -34,9 +34,14 @@ import java.awt.image.*;
 import java.util.*;
 import java.io.*;
 
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
+
+import revert.util.BrickManager;
+import revert.util.BrickRenderer;
+
 import com.kgp.imaging.ImagesLoader;
 
-public class BricksManager {
+public class BricksManager implements BrickManager, BrickRenderer {
 	private final static String BRICKS_DIR = "Levels/";
 	private final static int MAX_BRICKS_LINES = 15;
 	// maximum number of lines (rows) of bricks in the scene
@@ -47,68 +52,72 @@ public class BricksManager {
 	private int pWidth, pHeight; // dimensions of display panel
 	private int width, height; // max dimensions of bricks map
 								// width > pWidth
+	private int realHeight;
+	private int yOffset;
 
 	private int imWidth, imHeight; // dimensions of a brick image
-	private int numCols, numRows;
+
 	// number of bricks in the x- and y- dimensions
+	private int numCols, numRows;
 
 	private int moveSize;
 	// size of the map move (in pixels) in each tick
 	// moveSize == the width of a brick image * MOVE_FACTOR
 	/* The ribbons and 'jack' use the same moveSize value. */
 
-	private boolean isMovingRight; // movement flags
-	private boolean isMovingLeft;
-
-	private int xMapHead;
-	/*
-	 * The x-coord in the panel where the start of the bricks map (its head)
-	 * should be drawn. It can range between -width to width (exclusive), so can
-	 * have a value beyond the confines of the panel (0-pWidth).
-	 * 
-	 * As xMapHead varies, the on-screen map will usually be a combination of
-	 * its tail followed by its head.
-	 * 
-	 * xMapHead plays the same role as xImHead in a map object.
-	 */
-
-	private ArrayList<Brick> bricksList;
-	// stores Brick objects which makes up the brick map
-
-	private ArrayList<Brick>[] columnBricks;
-	// Brick objects saved in column order
-	// (faster to search than bricksList)
+	private int xRange;
+	private int left;
+	private int right;
+	
+	//number of columns that can be visible at one time in the view
+	private int visCols;
+	
+	private int[][] bricks;
 
 	private ImagesLoader imsLoader;
 	private ArrayList<BufferedImage> brickImages = null;
-
-	// holds all the images loaded by imsLoader
 
 	public BricksManager(int w, int h, String fnm, ImagesLoader il) {
 		pWidth = w;
 		pHeight = h;
 		imsLoader = il;
 
-		bricksList = new ArrayList<Brick>();
-		loadBricksFile(fnm);
-		initBricksInfo();
-		createColumns();
+		bricks = loadBricksFile(fnm);
+		
+		for (int i = 0; i < bricks.length; i++)
+		{
+			for (int x = 0; x < bricks[i].length; x++)
+			{
+				if (bricks[i][x] > 0)
+					System.out.print(bricks[i][x]);
+				else
+					System.out.print(" ");
+			}
+			System.out.println();
+		}
+		
+		visCols = w/imWidth;
+		
+		System.out.printf("Map Width in Tiles: %d\nVisible Tiles: %d\n" , numCols, visCols);
+		
+		width = numCols * imWidth;
+		height = Math.max(h, numRows * imHeight);
 
+		System.out.printf("Brick Size: %d %d\n", imWidth, imHeight);
+		
+		realHeight = numRows * imHeight;
+		yOffset = height - realHeight;
+		
 		moveSize = (int) (imWidth * MOVE_FACTOR);
 		if (moveSize == 0) {
 			System.out.println("moveSize cannot be 0, setting it to 1");
 			moveSize = 1;
 		}
-
-		isMovingRight = false; // no movement at start
-		isMovingLeft = false;
-		xMapHead = 0;
-	} // end of BricksManager()
+	}
 
 	// ----------- load the bricks information -------------------
 
-	private void loadBricksFile(String fnm)
-	/*
+	/**
 	 * Load the bricks map from a configuration file, fnm. The map starts with
 	 * an image strip which contains the images referred to in the map. Format:
 	 * s <fnm> <number>
@@ -122,10 +131,13 @@ public class BricksManager {
 	 * The configuration file can contain empty lines and comment lines (those
 	 * starting with //), which are ignored.
 	 */
+	public int[][] loadBricksFile(String fnm)
 	{
 		String imsFNm = BRICKS_DIR + fnm;
 		System.out.println("Reading bricks file: " + imsFNm);
 
+		ArrayList<Brick> bricksList = new ArrayList<Brick>();
+		
 		int numStripImages = -1;
 		int numBricksLines = 0;
 		try {
@@ -141,18 +153,19 @@ public class BricksManager {
 					continue;
 				ch = Character.toLowerCase(line.charAt(0));
 				if (ch == 's') // an images strip
-					numStripImages = getStripImages(line);
+				{
+					brickImages = imsLoader.getStripImages(line);
+					numStripImages = brickImages.size();
+					imWidth = brickImages.get(0).getWidth();
+					imHeight = brickImages.get(0).getHeight();
+				}
 				else { // a bricks map line
 					if (numBricksLines > MAX_BRICKS_LINES)
-						System.out
-								.println("Max reached, skipping bricks line: "
-										+ line);
+						System.out.println("Max reached, skipping bricks line: " + line);
 					else if (numStripImages == -1)
-						System.out
-								.println("No strip image, skipping bricks line: "
-										+ line);
+						System.out.println("No strip image, skipping bricks line: " + line);
 					else {
-						storeBricks(line, numBricksLines, numStripImages);
+						storeBricks(line, numBricksLines, numStripImages, bricksList);
 						numBricksLines++;
 					}
 				}
@@ -162,42 +175,20 @@ public class BricksManager {
 			System.out.println("Error reading file: " + imsFNm);
 			System.exit(1);
 		}
-	} // end of loadBricksFile()
-
-	private int getStripImages(String line)
-	/*
-	 * format: s <fnm> <number>
-	 * 
-	 * The strip images are used to represent the bricks when they are drawn. A
-	 * number in the bricks map is mapped to the image at that position in the
-	 * strip image.
-	 * 
-	 * The strip images are loaded with an ImagesLoader object, and then
-	 * retrieved to the bricksImages[] array.
-	 */
-	{
-		StringTokenizer tokens = new StringTokenizer(line);
-		if (tokens.countTokens() != 3) {
-			System.out.println("Wrong no. of arguments for " + line);
-			return -1;
-		} else {
-			tokens.nextToken(); // skip command label
-			System.out.print("Bricks strip: ");
-
-			String fnm = tokens.nextToken();
-			int number = -1;
-			try {
-				number = Integer.parseInt(tokens.nextToken());
-				imsLoader.loadStripImages(fnm, number); // store strip image
-				brickImages = imsLoader.getImages(getPrefix(fnm));
-				// store all the images in a global array
-			} catch (Exception e) {
-				System.out.println("Number is incorrect for " + line);
-			}
-
-			return number;
+		
+		numRows = numBricksLines;
+		
+		int[][] bricks = new int[numRows][numCols];
+		
+		for (Brick b : bricksList)
+		{
+			bricks[b.y][b.x] = b.type;
 		}
-	} // end of getStripImages()
+		
+		bricksList = null;
+		
+		return bricks;
+	}
 
 	private String getPrefix(String fnm)
 	// extract name before '.' of filename
@@ -208,15 +199,20 @@ public class BricksManager {
 			return fnm;
 		} else
 			return fnm.substring(0, posn);
-	} // end of getPrefix()
+	}
 
-	private void storeBricks(String line, int lineNo, int numImages)
+	private void storeBricks(String line, int lineNo, int numImages, ArrayList<Brick> bricksList)
 	/*
 	 * Read a single bricks line, and create Brick objects. A line contains
 	 * digits and spaces (which are ignored). Each digit becomes a Brick object.
 	 * The collection of Brick objects are stored in the bricksList ArrayList.
 	 */
 	{
+		if (line.length() > numCols)
+		{
+			numCols = line.length();
+		}
+		
 		int imageID;
 		for (int x = 0; x < line.length(); x++) {
 			char ch = line.charAt(x);
@@ -228,7 +224,7 @@ public class BricksManager {
 					System.out.println("Image ID " + imageID + " out of range");
 				else
 					// make a Brick object
-					bricksList.add(new Brick(imageID, x, lineNo));
+					bricksList.add(new Brick(imageID+1, x, lineNo));
 			} else
 				System.out.println("Brick char " + ch + " is not a digit");
 		}
@@ -236,160 +232,48 @@ public class BricksManager {
 
 	// --------------- initialise bricks data structures -----------------
 
-	private void initBricksInfo()
-	/*
-	 * The collection of bricks in bricksList are examined to extract various
-	 * global data, and to check if certain criteria are met (e.g. the maximum
-	 * width of the bricks is greater than the width of the panel (width >=
-	 * pWidth). Also each Brick object is assigned its image.
-	 */
-	{
-		if (brickImages == null) {
-			System.out.println("No bricks images were loaded");
-			System.exit(1);
-		}
-		if (bricksList.size() == 0) {
-			System.out.println("No bricks map were loaded");
-			System.exit(1);
-		}
-
-		// store brick image dimensions (assuming they're all the same)
-		BufferedImage im = (BufferedImage) brickImages.get(0);
-		imWidth = im.getWidth();
-		imHeight = im.getHeight();
-
-		findNumBricks();
-		calcMapDimensions();
-
-		// ignore gaps, pits are allowed sucker >:D
-		// checkForGaps();
-
-		addBrickDetails();
-	} // end of initBricksInfo();
-
-	private void findNumBricks()
-	// find maximum number of bricks along the x-axis and y-axis
-	{
-		Brick b;
-		numCols = 0;
-		numRows = 0;
-		for (int i = 0; i < bricksList.size(); i++) {
-			b = (Brick) bricksList.get(i);
-			if (numCols < b.getMapX())
-				numCols = b.getMapX();
-			if (numRows < b.getMapY())
-				numRows = b.getMapY();
-		}
-		numCols++; // since we want the max no., not the max coord
-		numRows++;
-	} // end of findNumBricks()
-
-	private void calcMapDimensions()
-	// convert max number of bricks into max pixel dimensions
-	{
-		width = imWidth * numCols;
-		height = imHeight * numRows;
-
-		// exit if the width isn't greater than the panel width
-		if (width < pWidth) {
-			System.out.println("Bricks map is less wide than the panel");
-			System.exit(0);
-		}
-	} // end of calcmapDimensions()
-
-	private void checkForGaps()
 	/*
 	 * Check that the bottom map line (numRows-1) has a brick in every x
 	 * position from 0 to numCols-1. This prevents 'jack' from falling down a
 	 * hole at the bottom of the panel.
 	 */
+	private void checkForGaps()
 	{
-		boolean[] hasBrick = new boolean[numCols];
-		for (int j = 0; j < numCols; j++)
-			hasBrick[j] = false;
-
 		Brick b;
-		for (int i = 0; i < bricksList.size(); i++) {
-			b = (Brick) bricksList.get(i);
-			if (b.getMapY() == numRows - 1)
-				hasBrick[b.getMapX()] = true;
-		}
-
-		for (int j = 0; j < numCols; j++)
-			if (!hasBrick[j]) {
-				System.out
-						.println("Gap found in bricks map bottom line at position "
-								+ j);
-				System.exit(0);
+		for (int c = 0; c < bricks[bricks.length-1].length; c++)
+		{
+			int i = bricks[bricks.length-1][c];
+			boolean gap = false;
+			if (i == 0)
+			{
+				gap = true;
+				for (int r = bricks[bricks.length-1][c]; r >= 0 && gap; r--)
+				{
+					if (bricks[r][c] > 0)
+					{
+						gap = false;
+					}
+				}
 			}
-	} // end of checkForGaps()
-
-	private void addBrickDetails()
-	/*
-	 * Add image refs to the Bricks, and calculate their y-coordinates inside
-	 * the brick map.
-	 */
-	{
-		Brick b;
-		BufferedImage im;
-		for (int i = 0; i < bricksList.size(); i++) {
-			b = (Brick) bricksList.get(i);
-			im = (BufferedImage) brickImages.get(b.getImageID());
-			b.setImage(im);
-			b.setLocY(pHeight, numRows);
+			if (gap)
+			{
+				System.out.println("Gap found in bricks map bottom line at position " + c);
+				System.exit(-1);
+			}
 		}
-	} // end of addBrickDetails()
-
-	private void createColumns()
-	// store bricks info by column for faster search/accessing
-	{
-		columnBricks = new ArrayList[numCols];
-		for (int i = 0; i < numCols; i++)
-			columnBricks[i] = new ArrayList<Brick>();
-
-		Brick b;
-		for (int j = 0; j < bricksList.size(); j++) {
-			b = (Brick) bricksList.get(j);
-			columnBricks[b.getMapX()].add(b); // bricks not stored in any order
-		}
-	} // end of createColumns()
-
-	// ---------------------- move the bricks map ---------------
-
-	public void moveRight() {
-		isMovingRight = true;
-		isMovingLeft = false;
-	} // end of moveLeft()
-
-	public void moveLeft() {
-		isMovingRight = false;
-		isMovingLeft = true;
 	}
 
-	public void stayStill() {
-		isMovingRight = false;
-		isMovingLeft = false;
-	}
-
-	public void update()
-	/*
-	 * Increment the xMapHead value depending on the movement flags. It can
-	 * range between -width to width (exclusive), which is the width of the
-	 * image.
-	 */
+	public void update(Point position)
 	{
-		if (isMovingRight)
-			xMapHead = (xMapHead + moveSize) % width;
-		else if (isMovingLeft)
-			xMapHead = (xMapHead - moveSize) % width;
-
-		// System.out.println("xMapHead is " + xMapHead);
-
-	} // end of updateBricks()
+		xRange = position.x;
+		left = (int)((xRange - pWidth/2f) / (float)imWidth);
+		right = (int)Math.ceil((xRange + pWidth/2f) / (float)imWidth);
+		
+		System.out.printf("Vis Range: %d\nLeft/Right: %d %d\n", visCols, left, right);
+	}
 
 	// -------------- draw the bricks ----------------------
 
-	public void display(Graphics g)
 	/*
 	 * The bricks map (bm) is wider than the panel (width >= pWidth) Consider 4
 	 * cases: when xMapHead >= 0, draw the bm tail and bm start, or only the bm
@@ -397,56 +281,10 @@ public class BricksManager {
 	 * 
 	 * xMapHead can range between -width to width (exclusive)
 	 */
+	public void display(Graphics g)
 	{
-		int bCoord = (int) (xMapHead / imWidth) * imWidth;
-		// bCoord is the drawing x-coordinate of the brick containing xMapHead
-		int offset; // offset is the distance between bCoord and xMapHead
-		if (bCoord >= 0)
-			offset = xMapHead - bCoord; // offset is positive
-		else
-			// negative position
-			offset = bCoord - xMapHead; // offset is positive
-		// System.out.println("bCoord: " + bCoord + ", offset: "  offset);
-
-		if ((bCoord >= 0) && (bCoord < pWidth)) {
-			drawBricks(g, 0 - (imWidth - offset), xMapHead, width - bCoord
-					- imWidth); // bm tail
-			drawBricks(g, xMapHead, pWidth, 0); // bm start
-		} else if (bCoord >= pWidth)
-			drawBricks(g, 0 - (imWidth - offset), pWidth, width - bCoord
-					- imWidth); // bm tail
-		else if ((bCoord < 0) && (bCoord >= pWidth - width + imWidth))
-			drawBricks(g, 0 - offset, pWidth, -bCoord); // bm tail
-		else if (bCoord < pWidth - width + imWidth) {
-			drawBricks(g, 0 - offset, width + xMapHead, -bCoord); // bm tail
-			drawBricks(g, width + xMapHead, pWidth, 0); // bm start
-		}
-	} // end of display()
-
-	private void drawBricks(Graphics g, int xStart, int xEnd, int xBrick)
-	/*
-	 * Draw bricks into the JPanel starting at xStart, ending at xEnd. The
-	 * bricks are drawn a column at a time, separated by imWidth pixels.
-	 * 
-	 * The first column of bricks drawn is the one at the xBrick location in the
-	 * bricks map.
-	 */
-	{
-		int xMap = xBrick / imWidth; // get the column position of the brick
-										// in the bricks map
-		// System.out.println("xStart: " + xStart + "; xEnd: " + xEnd);
-		// System.out.println("xBrick: " + xBrick + "; xMap: " + xMap);
-		ArrayList<Brick> column;
-		Brick b;
-		for (int x = xStart; x < xEnd; x += imWidth) {
-			column = columnBricks[xMap]; // get the current column
-			for (int i = 0; i < column.size(); i++) { // draw all bricks
-				b = (Brick) column.get(i);
-				b.display(g, x); // draw brick b at JPanel posn x
-			}
-			xMap++; // examine the next column of bricks
-		}
-	} // end of drawBricks()
+		drawBricks(g, left, right);
+	}
 
 	// ----------------- JumperSprite related methods -------------
 	// various forms of collision detection with the bricks
@@ -455,7 +293,6 @@ public class BricksManager {
 		return imHeight;
 	}
 
-	public int findFloor(int xSprite)
 	/*
 	 * Called at sprite initialisation to find a brick containing the xSprite
 	 * location which is higher up than other bricks containing that same
@@ -470,61 +307,95 @@ public class BricksManager {
 	 * The returned y-location is the 'floor' of the bricks where the sprite
 	 * will be standing initially.
 	 */
+	public int findFloor(int xSprite)
 	{
 		int xMap = (int) (xSprite / imWidth); // x map index
-
-		int locY = pHeight; // starting y position (the largest possible)
-		ArrayList<Brick> column = columnBricks[xMap];
-
-		Brick b;
-		for (int i = 0; i < column.size(); i++) {
-			b = (Brick) column.get(i);
-			if (b.getLocY() < locY)
-				locY = b.getLocY(); // reduce locY (i.e. move up)
+		int locY = (int) 0; // starting y position (the largest possible)
+		
+		int b;
+		for (int i = locY; i < numCols && locY == 0; i++) {
+			b = bricks[i][xMap];
+			if (b > 0)
+				locY = i; // reduce locY (i.e. move up)
 		}
-		return locY;
-	} // end of findFloor()
+		return locY*imHeight + yOffset;
+	}
 
 	public int getMoveSize() {
 		return moveSize;
 	}
 
+	/**
+	 * Check if the world coord is inside a brick. 
+	 */
 	public boolean insideBrick(int xWorld, int yWorld)
-	/* Check if the world coord is inside a brick. */
 	{
 		Point mapCoord = worldToMap(xWorld, yWorld);
-		ArrayList<Brick> column = columnBricks[mapCoord.x];
-
-		Brick b;
-		for (int i = 0; i < column.size(); i++) {
-			b = (Brick) column.get(i);
-			if (mapCoord.y == b.getMapY())
+		if (mapCoord.y > -1 && mapCoord.x > -1)
+			if (bricks[mapCoord.y][mapCoord.x] > 0)
 				return true;
-		}
 		return false;
-	} // end of insideBrick()
-
-	private Point worldToMap(int xWorld, int yWorld)
-	// convert world coord (x,y) to a map index tuple
+	}
+	
+	/**
+	 * Check if the world coord is inside a brick. 
+	 */
+	public boolean insideBrick(Point mapCoord)
 	{
-		// System.out.println("World: " + xWorld + ", " + yWorld);
+		if (mapCoord.y > -1 && mapCoord.x > -1)
+			if (bricks[mapCoord.y][mapCoord.x] > 0)
+				return true;
+		return false;
+	}
 
-		xWorld = xWorld % width; // limit to range (width to -width)
-		if (xWorld < 0) // make positive
-			xWorld += width;
-		int mapX = (int) (xWorld / imWidth); // map x-index
+	/**
+	 * convert world coord (x,y) to a map index tuple
+	 * @param xWorld
+	 * @param yWorld
+	 * @return
+	 */
+	public Point worldToMap(int xWorld, int yWorld)
+	{
+		//System.out.println("World: " + xWorld + ", " + yWorld);
 
-		yWorld = yWorld - (pHeight - height); // relative to map
-		int mapY = (int) (yWorld / imHeight); // map y-index
+		int mapX = (int)(xWorld / (float)imWidth);
+		if (mapX < 0)
+		{
+			mapX += numCols;
+		}
+		else if (mapX >= numCols)
+		{
+			mapX -= numCols;
+		}
 
-		if (yWorld < 0) // above the top of the bricks
-			mapY = mapY - 1; // match to next 'row' up
+		int mapY;
+		if (yWorld < yOffset)
+		{
+			mapY = -1;
+		}
+		else if (yWorld > height)
+		{
+			mapY = numRows - 1;
+		}
+		else
+		{
+			yWorld -= yOffset;
+			mapY = (int)(yWorld/(float)imHeight);
+		}
 
-		// System.out.println("Map: " + mapX + ", " + mapY);
+		//System.out.println("Map: " + mapX + ", " + mapY);
 		return new Point(mapX, mapY);
 	} // end of worldToMap()
 
-	public int checkBrickBase(int xWorld, int yWorld, int step)
+	public Point mapToWorld(Point p)
+	{
+		Point world = new Point();
+		world.x = p.x * imWidth;
+		world.y = p.y * imHeight;
+		world.y += yOffset;
+		return world;
+	}
+	
 	/*
 	 * The sprite is moving upwards. It checks its next position (xWorld,
 	 * yWorld) to see if it will enter a brick from below.
@@ -532,19 +403,19 @@ public class BricksManager {
 	 * If it does, then its step value is reduced to smallStep so it will only
 	 * rise to touch the base of the brick.
 	 */
+	public int checkBrickBase(int xWorld, int yWorld, int step)
 	{
-		if (insideBrick(xWorld, yWorld)) {
-			int yMapWorld = yWorld - (pHeight - height);
-			int mapY = (int) (yMapWorld / imHeight); // map y- index
-			int topOffset = yMapWorld - (mapY * imHeight);
-			int smallStep = step - (imHeight - topOffset);
-			// System.out.println("base smallStep: " + smallStep);
-			return smallStep;
+		Point map = worldToMap(xWorld, yWorld);
+		if (insideBrick(map)) {
+			Point world = mapToWorld(map);
+			world.y += imHeight;
+			int distance = world.y - (yWorld - step);
+			
+			return distance;
 		}
-		return step; // no change
+		return step;
 	} // end of checkBrickBase()
 
-	public int checkBrickTop(int xWorld, int yWorld, int step)
 	/*
 	 * The sprite is moving downwards. It checks its next position (xWorld,
 	 * yWorld) to see if it will enter a brick from above.
@@ -552,16 +423,73 @@ public class BricksManager {
 	 * If it does, then its step value is reduced to smallStep so it will only
 	 * drop enough to touch the top of the brick.
 	 */
+	public int checkBrickTop(int xWorld, int yWorld, int step)
 	{
-		if (insideBrick(xWorld, yWorld)) {
-			int yMapWorld = yWorld - (pHeight - height);
-			int mapY = (int) (yMapWorld / imHeight); // map y- index
-			int topOffset = yMapWorld - (mapY * imHeight);
-			int smallStep = step - topOffset;
-			// System.out.println("top smallStep: " + smallStep);
-			return smallStep;
+		Point map = worldToMap(xWorld, yWorld);
+		if (insideBrick(map)) {
+			Point world = mapToWorld(map);
+			System.out.println("tile loc: " + world.y);
+			int distance = world.y - (yWorld - step);
+			System.out.printf("Step: %d\nTravel: %d\n", step, distance);
+			return distance;
 		}
-		return step; // no change
-	} // end of checkBrickTop()
+		return step;
+	}
+
+	public int width() {
+		return width;
+	}
+
+	public int height() {
+		return height;
+	}
+
+	@Override
+	public void drawBricks(Graphics g, int left, int right) {
+
+		for (int i = left, loc = left, x = left * imWidth + (xRange % imWidth); i <= right; i++, loc++, x += imWidth)
+		{
+			if (loc < 0)
+			{
+				loc = numCols-1-(Math.abs(loc) % numCols);
+			}
+			else if (loc >= numCols)
+			{
+				loc %= numCols;
+			}
+			
+			for (int j = 0; j < numRows; j++)
+			{
+				if (bricks[j][loc]-1 >= 0)
+				{
+					g.drawImage(brickImages.get(bricks[j][loc]-1), x, yOffset + (j-1)*imHeight, null);
+				}
+			}
+		}
+	}
+
+	@Override
+	public int distToFloor(int xWorld, int yWorld) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public Point floor(int xWorld, int yWorld) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	private class Brick
+	{
+		int type, x, y;
+		
+		public Brick(int t, int x, int y)
+		{
+			this.type = t;
+			this.x = x;
+			this.y = y;
+		}
+	}
 
 } // end of BricksManager

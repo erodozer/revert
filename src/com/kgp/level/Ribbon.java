@@ -131,7 +131,7 @@ public class Ribbon
   /* The y-coords of the image always starts at 0 and ends at
      pHeight (the height of the panel), so are hardwired. */
   { g.drawImage(im, scrX1, 0, scrX2, pHeight, 
-                     imX1, 0,  imX2, pHeight, null);
+                     imX1, 0,  imX2, Math.min(im.getHeight(), pHeight), null);
   }
 
 }  // end of Ribbon

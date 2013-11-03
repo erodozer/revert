@@ -290,7 +290,7 @@ public class ImagesLoader
 
   // --------- load image strip -------------------------------
 
-  private void getStripImages(String line)
+  public ArrayList<BufferedImage> getStripImages(String line)
   /* format:
         s <fnm> <number>
   */
@@ -302,9 +302,13 @@ public class ImagesLoader
 
       String fnm = reader.next();
       int number = reader.nextInt();
-      loadStripImages(fnm, number);
+      String name = loadStripImages(fnm, number);
     
       reader.close();
+      
+      if (name != null)
+    	  return this.imagesMap.get(name);
+      return null;
   }  // end of getStripImages()
 
   // --------- load image strip -------------------------------
@@ -317,7 +321,7 @@ public class ImagesLoader
    * s2 fnm row col
    * </br>
    */
-  private void getStrip2DImages(String line)
+  public ArrayList<BufferedImage> getStrip2DImages(String line)
   /*
   */
   {
@@ -329,13 +333,16 @@ public class ImagesLoader
       String fnm = reader.next();
       int rows = reader.nextInt();
       int cols = reader.nextInt();
-      loadStripImages(fnm, rows, cols);	
-    	
+      String name = loadStripImages(fnm, rows, cols);
 
       reader.close();
+      
+      if (name != null)
+    	  return this.imagesMap.get(name);
+      return null;
   }  // end of getStripImages()
 
-  public int loadStripImages(String fnm, int number)
+  public String loadStripImages(String fnm, int number)
   /* Can be called directly, to load a strip file, <fnm>,
      holding <number> images.
   */
@@ -343,14 +350,14 @@ public class ImagesLoader
     String name = getPrefix(fnm);
     if (imagesMap.containsKey(name)) {
       System.out.println( "Error: " + name + "already used");
-      return 0;
+      return null;
     }
     
     // load the images into an array
     BufferedImage[] strip = null;
     strip = loadStripImageArray(fnm, number);
     if (strip == null)
-      return 0;
+      return null;
 
     ArrayList<BufferedImage> imsList = new ArrayList<BufferedImage>();
     int loadCount = 0;
@@ -367,7 +374,7 @@ public class ImagesLoader
     else 
       imagesMap.put(name, imsList);
 
-    return loadCount;
+    return name;
   }  // end of loadStripImages()
 
   /**
@@ -375,9 +382,9 @@ public class ImagesLoader
    * @param fnm - filename
    * @param row - number of rows
    * @param col - number of columns
-   * @return
+   * @return name of the file loaded
    */
-  public int loadStripImages(String fnm, int row, int col)
+  public String loadStripImages(String fnm, int row, int col)
   /* Can be called directly, to load a strip file, <fnm>,
      holding <number> images.
   */
@@ -385,14 +392,14 @@ public class ImagesLoader
     String name = getPrefix(fnm);
     if (imagesMap.containsKey(name)) {
       System.out.println( "Error: " + name + "already used");
-      return 0;
+      return null;
     }
     
     // load the images into an array
     BufferedImage[] strip = null;
     strip = loadStripImageArray(fnm, row, col);
     if (strip == null)
-      return 0;
+      return null;
 
     ArrayList<BufferedImage> imsList = new ArrayList<BufferedImage>();
     int loadCount = 0;
@@ -409,7 +416,7 @@ public class ImagesLoader
     else 
       imagesMap.put(name, imsList);
 
-    return loadCount;
+    return name;
   }  // end of loadStripImages()
 
 
