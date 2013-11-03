@@ -20,7 +20,6 @@ package com.kgp.audio;
 */
 
 
-import java.awt.*;
 import java.util.*;
 import java.io.*;
 
@@ -28,18 +27,18 @@ public class ClipsLoader
 {
   private final static String SOUND_DIR = "Sounds/";
 
-  private HashMap clipsMap; 
+  private HashMap<String, ClipInfo> clipsMap; 
     /* The key is the clip 'name', the object (value) 
        is a ClipInfo object */
 
 
   public ClipsLoader(String soundsFnm)
-  { clipsMap = new HashMap();
+  { clipsMap = new HashMap<String, ClipInfo>();
     loadSoundsFile(soundsFnm);
   }
 
   public ClipsLoader()
-  {  clipsMap = new HashMap();  } 
+  {  clipsMap = new HashMap<String, ClipInfo>();  } 
 
 
 
@@ -99,7 +98,7 @@ public class ClipsLoader
 
   public void close(String name)
   // close the specified clip
-  {  ClipInfo ci = (ClipInfo) clipsMap.get(name);
+  {  ClipInfo ci = clipsMap.get(name);
      if (ci == null)
        System.out.println( "Error: " + name + "not stored");
      else
@@ -110,7 +109,7 @@ public class ClipsLoader
 
   public void play(String name, boolean toLoop)
   // play (perhaps loop) the specified clip
-  {  ClipInfo ci = (ClipInfo) clipsMap.get(name);
+  {  ClipInfo ci = clipsMap.get(name);
      if (ci == null)
        System.out.println( "Error: " + name + "not stored");
      else
@@ -120,7 +119,7 @@ public class ClipsLoader
 
   public void stop(String name)
   // stop the clip, resetting it to the beginning
-  { ClipInfo ci = (ClipInfo) clipsMap.get(name);
+  { ClipInfo ci = clipsMap.get(name);
     if (ci == null)
       System.out.println( "Error: " + name + "not stored");
     else
@@ -129,7 +128,7 @@ public class ClipsLoader
 
 
   public void pause(String name)
-  { ClipInfo ci = (ClipInfo) clipsMap.get(name);
+  { ClipInfo ci = clipsMap.get(name);
     if (ci == null)
       System.out.println( "Error: " + name + "not stored");
     else
@@ -138,7 +137,7 @@ public class ClipsLoader
 
 
   public void resume(String name)
-  { ClipInfo ci = (ClipInfo) clipsMap.get(name);
+  { ClipInfo ci = clipsMap.get(name);
     if (ci == null)
       System.out.println( "Error: " + name + "not stored");
     else
@@ -152,7 +151,7 @@ public class ClipsLoader
   public void setWatcher(String name, SoundsWatcher sw)
   /* Set up a watcher for the clip. It will be notified when
      the clip loops or stops. */
-  { ClipInfo ci = (ClipInfo) clipsMap.get(name);
+  { ClipInfo ci = clipsMap.get(name);
     if (ci == null)
       System.out.println( "Error: " + name + "not stored");
     else

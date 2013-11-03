@@ -27,16 +27,13 @@ public class Sprite {
 	private static final int SIZE = 12;
 
 	// image-related
-	private ImagesLoader imsLoader;
-	private String imageName;
+	protected ImagesLoader imsLoader;
+	protected String imageName;
 	private BufferedImage image;
 	
 	// for playing a loop of images
 	protected ImagesPlayer player;
 	protected boolean isLooping;
-
-	// panel dimensions
-	private int pWidth, pHeight;
 
 	private boolean isActive = true;
 	// a sprite is updated and drawn only when it is active
@@ -120,11 +117,11 @@ public class Sprite {
 	}
 
 	public int getWidth() {
-		return dimensions.x;
+		return this.dimensions.x;
 	}
 
 	public int getHeight() {
-		return dimensions.y;
+		return this.dimensions.y;
 	}
 
 	public int getPWidth() {

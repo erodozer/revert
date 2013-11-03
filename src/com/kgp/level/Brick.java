@@ -20,6 +20,8 @@ package com.kgp.level;
 import java.awt.*;
 import java.awt.image.*;
 
+import com.kgp.imaging.Sprite;
+
 
 
 public class Brick
