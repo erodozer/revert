@@ -65,7 +65,7 @@ public class JumperSprite extends Sprite {
 
 	public JumperSprite(int w, int h, int brickMvSz, BricksManager bm,
 			ImagesLoader imsLd, int p) {
-		super(w / 2, h / 2, w, h, imsLd, "runningRight");
+		super(w / 2, h / 2, w, h, imsLd, "royer01");
 		// standing center screen, facing right
 		moveSize = brickMvSz;
 		// the move size is the same as the bricks ribbon
@@ -81,7 +81,7 @@ public class JumperSprite extends Sprite {
 		 * Adjust the sprite's y- position so it is standing on the brick at its
 		 * mid x- psoition.
 		 */
-		this.position.y = brickMan.findFloor(getWidth() / 2) - getHeight();
+		this.position.y = brickMan.findFloor(0, 0, false) - getHeight();
 
 		this.world = new Point(0, 0);
 
@@ -97,7 +97,7 @@ public class JumperSprite extends Sprite {
 	 * changes its image and status flags.
 	 */
 	{
-		setImage("runningLeft");
+		setImage("royer_walking");
 		loopImage(period, DURATION); // cycle through the images
 		isFacingRight = false;
 		isStill = false;
@@ -109,7 +109,7 @@ public class JumperSprite extends Sprite {
 	 * changes its image and status flags.
 	 */
 	{
-		setImage("runningRight");
+		setImage("royer_walking");
 		loopImage(period, DURATION); // cycle through the images
 		isFacingRight = true;
 		isStill = false;
@@ -121,7 +121,8 @@ public class JumperSprite extends Sprite {
 	 * isStill status flag.
 	 */
 	{
-		stopLooping();
+		setImage("royer01");
+		loopImage(period, DURATION);
 		isStill = true;
 	}
 
@@ -135,10 +136,10 @@ public class JumperSprite extends Sprite {
 			vertMoveMode = RISING;
 			upCount = 0;
 			if (isStill) { // only change image if the sprite is 'still'
-				if (isFacingRight)
-					setImage("jumpRight");
-				else
-					setImage("jumpLeft");
+				//if (isFacingRight)
+				//	setImage("jumpRight");
+				//else
+				//	setImage("jumpLeft");
 			}
 		}
 	} // end of jump()
@@ -181,7 +182,7 @@ public class JumperSprite extends Sprite {
 			else
 				// moving left
 				world.x -= moveSize;
-			world.x %= brickMan.width();
+			world.x %= brickMan.getMapWidth();
 			if (vertMoveMode == NOT_JUMPING) // if not jumping
 				checkIfFalling(); // may have moved out into empty space
 			
@@ -196,6 +197,7 @@ public class JumperSprite extends Sprite {
 		this.position.x = this.world.x;
 		this.position.y = this.world.y - this.getHeight() - brickMan.getBrickHeight();
 		
+		this.flipX = !this.isFacingRight;
 		super.updateSprite();
 	} // end of updateSprite()
 
@@ -260,11 +262,11 @@ public class JumperSprite extends Sprite {
 		upCount = 0;
 
 		if (isStill) { // change to running image, but not looping yet
-			if (isFacingRight)
-				setImage("runningRight");
-			else
-				// facing left
-				setImage("runningLeft");
+			//if (isFacingRight)
+			//	setImage("runningRight");
+			//else
+			//	// facing left
+			//	setImage("runningLeft");
 		}
 	} // end of finishJumping()
 

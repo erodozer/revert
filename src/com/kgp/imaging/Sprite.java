@@ -2,7 +2,7 @@ package com.kgp.imaging;
 
 
 import java.awt.*;
-
+import java.awt.geom.AffineTransform;
 import java.awt.image.*;
 
 /**
@@ -203,7 +203,10 @@ public class Sprite {
 		
 		return myRect;
 	}
-
+	
+	protected AffineTransform trans = AffineTransform.getTranslateInstance(0, 0);
+	protected boolean flipX = false;
+	
 	/**
 	 * Perform standard actions for the sprite on each cycle
 	 */
@@ -218,13 +221,20 @@ public class Sprite {
 				player.updateTick();
 			}
 		}
+		
+		trans.setToTranslation(this.position.x, this.position.y);
+		if (flipX)
+		{
+			trans.translate(this.getWidth(), 0);
+			trans.scale(-1.0, 1.0);
+		}
 	}
 
 	/**
 	 * Draws the sprite to the graphics context
 	 * @param g
 	 */
-	public void drawSprite(Graphics g) {
+	public void drawSprite(Graphics2D g) {
 		if (isActive()) {
 			// if the sprite has no image, draw a yellow circle instead
 			if (image == null) { 
@@ -235,7 +245,7 @@ public class Sprite {
 			else {
 				if (isLooping)
 					image = player.getCurrentImage();
-				g.drawImage(image, this.position.x, this.position.y, null);
+				g.drawImage(image, trans, null);
 			}
 		}
 	}

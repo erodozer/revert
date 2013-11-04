@@ -25,8 +25,8 @@ public class RibbonsManager {
 	 * back' are specified first in ribImages[], and have smaller move factors
 	 * so they will move slower.
 	 */
-	private String ribImages[] = { "forest2" };
-	private double moveFactors[] = { 0.1}; // applied to moveSize
+	private String ribImages[] = { "skyline", "forest3", "grass"};
+	private double moveFactors[] = { 0.0, .25, .75}; // applied to moveSize
 	// a move factor of 0 would make a ribbon stationary
 
 	private Ribbon[] ribbons;

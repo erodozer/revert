@@ -51,7 +51,7 @@ import java.util.ArrayList;
 public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatcher {
 	private static final long serialVersionUID = -588578363027322258L;
 	
-	private static final int PWIDTH = 1280; // size of panel
+	private static final int PWIDTH = 1440; // size of panel
 	private static final int PHEIGHT = 720;
 
 	// image, bricks map, clips loader information files
@@ -265,7 +265,7 @@ public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatche
 
 			projLock = false;
 
-			if (jack.getYWorldPosn() > bricksMan.height()) {
+			if (jack.getYWorldPosn() > bricksMan.getHeight()) {
 				gameOver = true;
 			}
 
