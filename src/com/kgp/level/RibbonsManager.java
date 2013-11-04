@@ -16,6 +16,7 @@ package com.kgp.level;
  */
 
 import java.awt.*;
+import java.util.ArrayList;
 
 import com.kgp.imaging.ImagesLoader;
 
@@ -29,27 +30,34 @@ public class RibbonsManager {
 	private double moveFactors[] = { 0.0, .25, .75}; // applied to moveSize
 	// a move factor of 0 would make a ribbon stationary
 
-	private Ribbon[] ribbons;
-	private int numRibbons;
+	private ArrayList<Ribbon> ribbons;
 	private int moveSize;
 
+	private ImagesLoader imsLd;
+	
+	private int pWidth, pHeight;
+	
 	// standard distance for a ribbon to 'move' each tick
 
 	public RibbonsManager(int w, int h, int brickMvSz, ImagesLoader imsLd) {
 		moveSize = brickMvSz;
 		// the basic move size is the same as the bricks ribbon
 
-		numRibbons = ribImages.length;
-		ribbons = new Ribbon[numRibbons];
-
-		for (int i = 0; i < numRibbons; i++) {
-			ribbons[i] = new Ribbon(w, h, imsLd.getImage(ribImages[i]), (int) (moveFactors[i] * moveSize));
-		}
+		pWidth = w;
+		pHeight = h;
+		this.imsLd = imsLd;
+		
+		ribbons = new ArrayList<Ribbon>();
+	}
+	
+	public void add(String imgName, float mv)
+	{
+		ribbons.add(new Ribbon(pWidth, pHeight, imsLd.getImage(imgName), (int)(mv*moveSize)));
 	}
 
 	public void update(int dir) {
-		for (int i = 0; i < numRibbons; i++)
-			ribbons[i].update(dir);
+		for (int i = 0; i < ribbons.size(); i++)
+			ribbons.get(i).update(dir);
 	}
 
 	/*
@@ -58,8 +66,8 @@ public class RibbonsManager {
 	 */
 	public void display(Graphics2D g)
 	{
-		for (int i = 0; i < numRibbons; i++)
-			ribbons[i].display(g);
+		for (int i = 0; i < ribbons.size(); i++)
+			ribbons.get(i).display(g);
 	}
 
 }

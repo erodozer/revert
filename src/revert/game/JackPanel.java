@@ -69,7 +69,6 @@ public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatche
 
 	private ArrayList<Projectile> projectiles;
 
-	private RibbonsManager ribsMan; // the ribbons manager
 	private BricksManager bricksMan; // the bricks manager
 
 	private long gameStartTime; // when the game started
@@ -93,6 +92,9 @@ public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatche
 
 	private boolean projLock = false;
 	private float zoom = 1.0f;
+
+	private RibbonsManager parallaxBg;
+	private RibbonsManager parallaxFg;
 	
 	public JackPanel(GameFrame parent, long period) {
 		super(parent, period);
@@ -198,8 +200,13 @@ public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatche
 		bricksMan = new BricksManager(PWIDTH, PHEIGHT, BRICKS_INFO, images);
 		int brickMoveSize = bricksMan.getMoveSize();
 
-		ribsMan = new RibbonsManager(PWIDTH, PHEIGHT, brickMoveSize, images);
+		parallaxBg = new RibbonsManager(PWIDTH, PHEIGHT, brickMoveSize, images);
+		parallaxFg = new RibbonsManager(PWIDTH, PHEIGHT, brickMoveSize, images);
 
+		parallaxBg.add("skyline", 0f);
+		parallaxBg.add("forest3", .35f);
+		parallaxFg.add("grass", 1.1f);
+		
 		jack = new JumperSprite(PWIDTH, PHEIGHT, brickMoveSize, bricksMan, images, (int)(period/1000000L));
 
 		projectiles = new ArrayList<Projectile>();
@@ -244,7 +251,8 @@ public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatche
 			}
 			else
 			{
-				ribsMan.update(jack.getDirection());
+				parallaxBg.update(jack.getDirection());
+				parallaxFg.update(jack.getDirection());
 			}
 			bricksMan.update(jack.getWorldPosn());
 			jack.updateSprite();
@@ -297,12 +305,14 @@ public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatche
 		AffineTransform orig = dbg.getTransform();
 		
 		// draw the game elements: order is important
-		ribsMan.display(dbg); // the background ribbons
+		parallaxBg.display(dbg); // the background ribbons
 		
 		dbg.setTransform(camMatrix);
 		bricksMan.display(dbg); // the bricks
 		jack.drawSprite(dbg); // the sprites
 		dbg.setTransform(orig);
+		
+		parallaxFg.display(dbg); // the background ribbons
 		
 		while (projLock);
 		projLock = true;
