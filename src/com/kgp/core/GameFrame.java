@@ -51,8 +51,8 @@ public class GameFrame extends JFrame implements WindowListener, ComponentListen
 	public GameFrame(String title, long period) {
 		super("JumpingJack");
 
-		this.period = period * 1000000L;
-		this.periodInMsec = (int) period;
+		this.period = period;
+		this.periodInMsec = (int) (period/1000000L);
 	}
 
 	public void setGame(GamePanel panel) {

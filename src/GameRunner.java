@@ -6,7 +6,7 @@ public class GameRunner {
 
 	public static void main(String args[]) {
 		long period = (long) 1000.0 / GameFrame.DEFAULT_FPS;
-		GameFrame g = new GameFrame("Revert", period); // ms --> nanosecs
+		GameFrame g = new GameFrame("Revert", period*1000000L); // ms --> nanosecs
 		g.setGame(new JackPanel(g, g.period));
 
 	}

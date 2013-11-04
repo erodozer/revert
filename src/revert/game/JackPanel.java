@@ -200,7 +200,7 @@ public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatche
 
 		ribsMan = new RibbonsManager(PWIDTH, PHEIGHT, brickMoveSize, images);
 
-		jack = new JumperSprite(PWIDTH, PHEIGHT, brickMoveSize, bricksMan, images, (int)period);
+		jack = new JumperSprite(PWIDTH, PHEIGHT, brickMoveSize, bricksMan, images, (int)(period/1000000L));
 
 		projectiles = new ArrayList<Projectile>();
 		this.add(new FireBallSprite(PWIDTH, PHEIGHT, images, this, jack));
