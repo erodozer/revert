@@ -41,7 +41,7 @@ import revert.util.BrickRenderer;
 
 import com.kgp.imaging.ImagesLoader;
 
-public class BricksManager implements BrickManager, BrickRenderer {
+public class BricksManager extends BrickManager  {
 	private final static String BRICKS_DIR = "Levels/";
 	private final static int MAX_BRICKS_LINES = 15;
 	// maximum number of lines (rows) of bricks in the scene
@@ -52,13 +52,8 @@ public class BricksManager implements BrickManager, BrickRenderer {
 	private int pWidth, pHeight; // dimensions of display panel
 	private int width, height; // max dimensions of bricks map
 								// width > pWidth
-	private int realHeight;
-	private int yOffset;
 
 	private int imWidth, imHeight; // dimensions of a brick image
-
-	// number of bricks in the x- and y- dimensions
-	private int numCols, numRows;
 
 	private int moveSize;
 	// size of the map move (in pixels) in each tick
@@ -82,7 +77,7 @@ public class BricksManager implements BrickManager, BrickRenderer {
 		pHeight = h;
 		imsLoader = il;
 
-		bricks = loadBricksFile(fnm);
+		loadBricksFile(fnm);
 		
 		for (int i = 0; i < bricks.length; i++)
 		{
@@ -105,8 +100,7 @@ public class BricksManager implements BrickManager, BrickRenderer {
 
 		System.out.printf("Brick Size: %d %d\n", imWidth, imHeight);
 		
-		realHeight = numRows * imHeight;
-		yOffset = height - realHeight;
+		yOffset = height - this.getMapHeight();
 		
 		moveSize = (int) (imWidth * MOVE_FACTOR);
 		if (moveSize == 0) {
@@ -131,7 +125,7 @@ public class BricksManager implements BrickManager, BrickRenderer {
 	 * The configuration file can contain empty lines and comment lines (those
 	 * starting with //), which are ignored.
 	 */
-	public int[][] loadBricksFile(String fnm)
+	public void loadBricksFile(String fnm)
 	{
 		String imsFNm = BRICKS_DIR + fnm;
 		System.out.println("Reading bricks file: " + imsFNm);
@@ -178,16 +172,19 @@ public class BricksManager implements BrickManager, BrickRenderer {
 		
 		numRows = numBricksLines;
 		
-		int[][] bricks = new int[numRows][numCols];
+		bricks = new int[numRows][numCols];
+		collisionMask = new boolean[numCols][numRows];
 		
 		for (Brick b : bricksList)
 		{
 			bricks[b.y][b.x] = b.type;
+			if (b.type > 0)
+			{
+				collisionMask[b.x][b.y] = true;
+			}
 		}
 		
 		bricksList = null;
-		
-		return bricks;
 	}
 
 	private String getPrefix(String fnm)
@@ -269,56 +266,23 @@ public class BricksManager implements BrickManager, BrickRenderer {
 		left = (int)((xRange - pWidth/2f) / (float)imWidth);
 		right = (int)Math.ceil((xRange + pWidth/2f) / (float)imWidth);
 		
-		System.out.printf("Vis Range: %d\nLeft/Right: %d %d\n", visCols, left, right);
+		//System.out.printf("Vis Range: %d\nLeft/Right: %d %d\n", visCols, left, right);
 	}
 
 	// -------------- draw the bricks ----------------------
 
-	/*
-	 * The bricks map (bm) is wider than the panel (width >= pWidth) Consider 4
-	 * cases: when xMapHead >= 0, draw the bm tail and bm start, or only the bm
-	 * tail. when xMapHead < 0, draw the bm tail, or the bm tail and bm start
-	 * 
-	 * xMapHead can range between -width to width (exclusive)
-	 */
-	public void display(Graphics g)
-	{
-		drawBricks(g, left, right);
-	}
-
 	// ----------------- JumperSprite related methods -------------
 	// various forms of collision detection with the bricks
 
+	@Override
 	public int getBrickHeight() {
 		return imHeight;
 	}
+	
 
-	/*
-	 * Called at sprite initialisation to find a brick containing the xSprite
-	 * location which is higher up than other bricks containing that same
-	 * location. Return the brick's y position.
-	 * 
-	 * xSprite is the same coordinate in the panel and the bricks map since the
-	 * map has not moved yet.
-	 * 
-	 * xSprite is converted to an x-index in the brick map, and this is used to
-	 * search the relevant bricks column for a max y location.
-	 * 
-	 * The returned y-location is the 'floor' of the bricks where the sprite
-	 * will be standing initially.
-	 */
-	public int findFloor(int xSprite)
-	{
-		int xMap = (int) (xSprite / imWidth); // x map index
-		int locY = (int) 0; // starting y position (the largest possible)
-		
-		int b;
-		for (int i = locY; i < numCols && locY == 0; i++) {
-			b = bricks[i][xMap];
-			if (b > 0)
-				locY = i; // reduce locY (i.e. move up)
-		}
-		return locY*imHeight + yOffset;
+	@Override
+	public int getBrickWidth() {
+		return imWidth;
 	}
 
 	public int getMoveSize() {
@@ -348,105 +312,17 @@ public class BricksManager implements BrickManager, BrickRenderer {
 		return false;
 	}
 
-	/**
-	 * convert world coord (x,y) to a map index tuple
-	 * @param xWorld
-	 * @param yWorld
-	 * @return
-	 */
-	public Point worldToMap(int xWorld, int yWorld)
-	{
-		//System.out.println("World: " + xWorld + ", " + yWorld);
-
-		int mapX = (int)(xWorld / (float)imWidth);
-		if (mapX < 0)
-		{
-			mapX += numCols;
-		}
-		else if (mapX >= numCols)
-		{
-			mapX -= numCols;
-		}
-
-		int mapY;
-		if (yWorld < yOffset)
-		{
-			mapY = -1;
-		}
-		else if (yWorld > height)
-		{
-			mapY = numRows - 1;
-		}
-		else
-		{
-			yWorld -= yOffset;
-			mapY = (int)(yWorld/(float)imHeight);
-		}
-
-		//System.out.println("Map: " + mapX + ", " + mapY);
-		return new Point(mapX, mapY);
-	} // end of worldToMap()
-
-	public Point mapToWorld(Point p)
-	{
-		Point world = new Point();
-		world.x = p.x * imWidth;
-		world.y = p.y * imHeight;
-		world.y += yOffset;
-		return world;
-	}
-	
-	/*
-	 * The sprite is moving upwards. It checks its next position (xWorld,
-	 * yWorld) to see if it will enter a brick from below.
-	 * 
-	 * If it does, then its step value is reduced to smallStep so it will only
-	 * rise to touch the base of the brick.
-	 */
-	public int checkBrickBase(int xWorld, int yWorld, int step)
-	{
-		Point map = worldToMap(xWorld, yWorld);
-		if (insideBrick(map)) {
-			Point world = mapToWorld(map);
-			world.y += imHeight;
-			int distance = world.y - (yWorld - step);
-			
-			return distance;
-		}
-		return step;
-	} // end of checkBrickBase()
-
-	/*
-	 * The sprite is moving downwards. It checks its next position (xWorld,
-	 * yWorld) to see if it will enter a brick from above.
-	 * 
-	 * If it does, then its step value is reduced to smallStep so it will only
-	 * drop enough to touch the top of the brick.
-	 */
-	public int checkBrickTop(int xWorld, int yWorld, int step)
-	{
-		Point map = worldToMap(xWorld, yWorld);
-		if (insideBrick(map)) {
-			Point world = mapToWorld(map);
-			System.out.println("tile loc: " + world.y);
-			int distance = world.y - (yWorld - step);
-			System.out.printf("Step: %d\nTravel: %d\n", step, distance);
-			return distance;
-		}
-		return step;
-	}
-
-	public int width() {
+	public int getWidth() {
 		return width;
 	}
 
-	public int height() {
+	@Override
+	public int getHeight() {
 		return height;
 	}
 
 	@Override
-	public void drawBricks(Graphics g, int left, int right) {
-
+	public void display(Graphics2D g) {
 		for (int i = left, loc = left, x = left * imWidth + (xRange % imWidth); i <= right; i++, loc++, x += imWidth)
 		{
 			if (loc < 0)
@@ -465,30 +341,6 @@ public class BricksManager implements BrickManager, BrickRenderer {
 					g.drawImage(brickImages.get(bricks[j][loc]-1), x, yOffset + (j-1)*imHeight, null);
 				}
 			}
-		}
-	}
-
-	@Override
-	public int distToFloor(int xWorld, int yWorld) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public Point floor(int xWorld, int yWorld) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	private class Brick
-	{
-		int type, x, y;
-		
-		public Brick(int t, int x, int y)
-		{
-			this.type = t;
-			this.x = x;
-			this.y = y;
 		}
 	}
 
