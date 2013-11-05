@@ -31,6 +31,7 @@ package revert.game;
  */
 
 import com.kgp.audio.ClipsLoader;
+import com.kgp.core.GameController;
 import com.kgp.core.GameFrame;
 import com.kgp.core.GamePanel;
 import com.kgp.game.FireBallSprite;
@@ -39,6 +40,7 @@ import com.kgp.game.Projectile;
 import com.kgp.imaging.ImagesLoader;
 import com.kgp.imaging.ImagesPlayer;
 import com.kgp.imaging.ImagesPlayerWatcher;
+import com.kgp.imaging.Sprite;
 import com.kgp.level.BricksManager;
 import com.kgp.level.RibbonsManager;
 
@@ -66,7 +68,8 @@ public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatche
 	// number of times jack can be hit by a fireball before the game is over
 
 	private JumperSprite jack; // the sprites
-
+	private Crosshair crosshair;
+	
 	private ArrayList<Projectile> projectiles;
 
 	private BricksManager bricksMan; // the bricks manager
@@ -99,9 +102,6 @@ public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatche
 	public JackPanel(GameFrame parent, long period) {
 		super(parent, period);
 
-		showHelp = true; // show at start-up
-		isPaused = true;
-
 		// set up message font
 		msgsFont = new Font("SansSerif", Font.BOLD, 24);
 		metrics = this.getFontMetrics(msgsFont);
@@ -120,16 +120,15 @@ public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatche
 		if ((keyCode == KeyEvent.VK_ESCAPE) || (keyCode == KeyEvent.VK_Q)
 				|| (keyCode == KeyEvent.VK_END)
 				|| ((keyCode == KeyEvent.VK_C) && e.isControlDown()))
-			running = false;
+			this.stopGame();
 
 		// help controls
 		if (keyCode == KeyEvent.VK_H) {
-			if (showHelp) { // help being shown
-				showHelp = false; // switch off
-				isPaused = false;
-			} else { // help not being shown
-				showHelp = true; // show it
-				isPaused = true; // isPaused may already be true
+			if (this.getState() == GameState.Help) { // help being shown
+				this.setState(GameState.Active);
+			} 
+			else { // help not being shown
+				this.setState(GameState.Help);
 			}
 		}
 		
@@ -141,20 +140,6 @@ public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatche
 		}
 		if (keyCode == KeyEvent.VK_0){
 			zoom = 1.0f;
-		}
-
-		// game-play keys
-		if (!isPaused && !gameOver) {
-			// move the sprite and ribbons based on the arrow key pressed
-			if (keyCode == KeyEvent.VK_LEFT) {
-				jack.moveLeft();
-			} else if (keyCode == KeyEvent.VK_RIGHT) {
-				jack.moveRight();
-			} else if (keyCode == KeyEvent.VK_UP)
-				jack.jump(); // jumping has no effect on the bricks/ribbons
-			else if (keyCode == KeyEvent.VK_DOWN) {
-				jack.stayStill();
-			}
 		}
 	}
 
@@ -208,10 +193,23 @@ public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatche
 		parallaxFg.add("grass", 1.1f);
 		
 		jack = new JumperSprite(PWIDTH, PHEIGHT, brickMoveSize, bricksMan, images, (int)(period/1000000L));
-
+		crosshair = new Crosshair(PWIDTH, PHEIGHT, jack, images);
+		
+		GameController g = new JackController(jack, crosshair, this);
+		this.addKeyListener(g);
+		this.addMouseListener(g);
+		this.addMouseMotionListener(g);
+		
+		this.addKeyListener(new KeyAdapter(){
+			public void keyPressed(KeyEvent e)
+			{
+				processKey(e);
+			}
+		});
+		
 		projectiles = new ArrayList<Projectile>();
 		this.add(new FireBallSprite(PWIDTH, PHEIGHT, images, this, jack));
-
+		
 		// prepare the explosion animation
 		explosionPlayer = new ImagesPlayer("explosion", (int)period, 0.5, false, images);
 		BufferedImage explosionIm = images.getImage("explosion");
@@ -221,17 +219,13 @@ public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatche
 
 		// prepare title/help screen
 		helpIm = images.getImage("title");
+
+		this.setState(GameState.Help);
+		
 	}
 
 	// ------------- game life cycle methods ------------
 	// called by the JFrame's window listener methods
-
-	public void resumeGame()
-	// called when the JFrame is activated / deiconified
-	{
-		if (!showHelp) // CHANGED
-			isPaused = false;
-	}
 
 	// ----------------------------------------------
 
@@ -244,7 +238,7 @@ public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatche
 	}
 
 	protected void gameUpdate() {
-		if (!isPaused && !gameOver) {
+		if (this.getState() == GameState.Active) {
 			 // stop jack and scenery on collision
 			if (jack.willHitBrick()) {
 				jack.stayStill();
@@ -256,6 +250,7 @@ public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatche
 			}
 			bricksMan.update(jack.getWorldPosn());
 			jack.updateSprite();
+			crosshair.updateSprite();
 			
 			while (projLock);
 
@@ -326,13 +321,17 @@ public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatche
 		if (showExplosion) // draw the explosion (in front of jack)
 			dbg.drawImage(explosionPlayer.getCurrentImage(), xExpl, yExpl, null);
 
+		dbg.setTransform(camMatrix);
+		crosshair.drawSprite(dbg);
+		dbg.setTransform(orig);
 		
 		reportStats(dbg);
 
-		if (gameOver)
+		if (this.getState() == GameState.GameOver)
 			gameOverMessage(dbg);
 
-		if (showHelp) // draw the help at the very front (if switched on)
+		// draw the help at the very front (if switched on)
+		if (this.getState() == GameState.Help) 
 			dbg.drawImage(helpIm, (PWIDTH - helpIm.getWidth()) / 2,
 					(PHEIGHT - helpIm.getHeight()) / 2, null);
 	}
@@ -367,5 +366,10 @@ public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatche
 		g.setColor(Color.white);
 		g.setFont(msgsFont);
 		g.drawString(msg, x, y);
+	}
+
+	public AffineTransform getMatrix() {
+		// TODO Auto-generated method stub
+		return camMatrix;
 	}
 } // end of JackPanel class

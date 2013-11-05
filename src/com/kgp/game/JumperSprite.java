@@ -63,6 +63,8 @@ public class JumperSprite extends Sprite {
 	 */
 	private Point world;
 
+	private int mode;
+
 	public JumperSprite(int w, int h, int brickMvSz, BricksManager bm,
 			ImagesLoader imsLd, int p) {
 		super(w / 2, h / 2, w, h, imsLd, "royer01");
@@ -254,7 +256,7 @@ public class JumperSprite extends Sprite {
 		else {
 			world.y += yTrans;
 		}
-		System.out.println(world.y);
+		//System.out.println(world.y);
 	} // end of updateFalling()
 
 	private void finishJumping() {
@@ -282,6 +284,9 @@ public class JumperSprite extends Sprite {
 		return new Point(world);
 	}
 
+	/**
+	 * @return the direction that the player is facing
+	 */
 	public int getDirection() {
 		if (!isStill) {
 			if (isFacingRight)
@@ -290,6 +295,20 @@ public class JumperSprite extends Sprite {
 				return -1;
 		}
 		return 0;
+	}
+
+	/**
+	 * @return the current attack mode of the player
+	 */
+	public int getMode() {
+		return mode;
+	}
+
+	/**
+	 * @param i - the attack mode to set the player to
+	 */
+	public void setMode(int i) {
+		this.mode = i;
 	}
 
 } // end of JumperSprite

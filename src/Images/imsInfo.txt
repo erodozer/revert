@@ -9,7 +9,7 @@ o royer01.png
 s royer_walking.png 8
 o jumpLeft.gif
 o jumpRight.gif
-
+o crosshair.png
 
 // scenery images
 o forest3.png
