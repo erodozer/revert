@@ -31,6 +31,8 @@ package com.kgp.core;
 
 import javax.swing.*;
 
+import revert.game.GameState;
+
 import com.kgp.audio.ClipsLoader;
 import com.kgp.imaging.ImagesLoader;
 import com.kgp.imaging.ImagesPlayerWatcher;
@@ -53,10 +55,12 @@ public abstract class GamePanel extends JPanel implements Runnable,
 	// i.e the games state is updated but not rendered
 
 	private Thread animator; // the thread that performs the animation
-	protected volatile boolean running = false; // used to stop the animation
-												// thread
-	protected volatile boolean isPaused = false;
-
+	private boolean running;
+	
+	
+	protected volatile GameState prevState = GameState.ProcessPaused;
+	protected volatile GameState state = GameState.ProcessPaused;
+	
 	protected long period; // period between drawing in _nanosecs_
 
 	// used at game termination
@@ -78,9 +82,9 @@ public abstract class GamePanel extends JPanel implements Runnable,
 	
 	// provided camera for doing cool effects and following of the character
 	protected Point camera;
-	protected AffineTransform camMatrix;
+	protected volatile AffineTransform camMatrix;
 	
-	private AffineTransform scalerMatrix;
+	private volatile AffineTransform scalerMatrix;
 
 	/**
 	 * 
@@ -98,12 +102,7 @@ public abstract class GamePanel extends JPanel implements Runnable,
 		setFocusable(true);
 		requestFocus(); // the JPanel now has focus, so receives key events
 
-		addKeyListener(new KeyAdapter() {
-			public void keyPressed(KeyEvent e) {
-				processKey(e);
-			}
-		});
-		isPaused = true;
+		state = GameState.Active;
 
 		// set up message font
 		msgsFont = new Font("SansSerif", Font.BOLD, 24);
@@ -112,6 +111,17 @@ public abstract class GamePanel extends JPanel implements Runnable,
 		camera = new Point(0, 0);
 		camMatrix = new AffineTransform();
 		scalerMatrix = new AffineTransform();
+	}
+	
+	public void setState(GameState s)
+	{
+		this.prevState = state;
+		this.state = s;
+	}
+	
+	public GameState getState()
+	{
+		return this.state;
 	}
 
 	/**
@@ -139,7 +149,7 @@ public abstract class GamePanel extends JPanel implements Runnable,
 	 * Initialize and start the thread
 	 */
 	final protected void startGame() {
-		if (animator == null || !running) {
+		if (animator == null || state != GameState.Active) {
 			initGame();
 			animator = new Thread(this);
 			animator.start();
@@ -152,13 +162,13 @@ public abstract class GamePanel extends JPanel implements Runnable,
 	public void resumeGame()
 	// called when the JFrame is activated / deiconified
 	{
-		isPaused = false;
+		this.setState(this.prevState);
 	}
 
 	public void pauseGame()
 	// called when the JFrame is deactivated / iconified
 	{
-		isPaused = true;
+		this.setState(GameState.Paused);
 	}
 
 	public void stopGame()
