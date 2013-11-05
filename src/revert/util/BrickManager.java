@@ -71,7 +71,7 @@ public abstract class BrickManager {
 		{
 			mapY = -1;
 		}
-		else if (yWorld > this.getMapHeight())
+		else if (yWorld > this.getHeight())
 		{
 			mapY = numRows - 1;
 		}
@@ -182,11 +182,13 @@ public abstract class BrickManager {
 	public int checkBrickTop(int xWorld, int yWorld, int step)
 	{
 		Point map = worldToMap(xWorld, yWorld);
+		//System.out.printf("world loc: %d\nmap loc: %d\n", yWorld, map.y);
+		
 		if (insideBrick(map.x, map.y, false)) {
 			Point world = mapToWorld(map);
-			System.out.println("tile loc: " + world.y);
+			//System.out.println("tile loc: " + world.y);
 			int distance = world.y - (yWorld - step);
-			System.out.printf("Step: %d\nTravel: %d\n", step, distance);
+			//System.out.printf("Step: %d\nTravel: %d\n", step, distance);
 			return distance;
 		}
 		return step;
