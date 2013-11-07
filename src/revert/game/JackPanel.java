@@ -240,13 +240,13 @@ public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatche
 	protected void gameUpdate() {
 		if (this.getState() == GameState.Active) {
 			 // stop jack and scenery on collision
+			bricksMan.update(jack.getWorldPosn());
+			jack.updateSprite();
+			crosshair.updateSprite();
 			if (!jack.isStill()) {
 				parallaxBg.update(jack.getDirection());
 				parallaxFg.update(jack.getDirection());
 			}
-			bricksMan.update(jack.getWorldPosn());
-			jack.updateSprite();
-			crosshair.updateSprite();
 			
 			while (projLock);
 
