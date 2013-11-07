@@ -34,10 +34,7 @@ import java.awt.image.*;
 import java.util.*;
 import java.io.*;
 
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
-
 import revert.util.BrickManager;
-import revert.util.BrickRenderer;
 
 import com.kgp.imaging.ImagesLoader;
 
@@ -50,8 +47,8 @@ public class BricksManager extends BrickManager  {
 	// modifies how fast the bricks map moves; smaller is slower
 
 	private int pWidth, pHeight; // dimensions of display panel
-	private int width, height; // max dimensions of bricks map
-								// width > pWidth
+	private int width, height;   // max dimensions of bricks map
+								 // width > pWidth
 
 	private int imWidth, imHeight; // dimensions of a brick image
 
@@ -185,17 +182,8 @@ public class BricksManager extends BrickManager  {
 		}
 		
 		bricksList = null;
-	}
-
-	private String getPrefix(String fnm)
-	// extract name before '.' of filename
-	{
-		int posn;
-		if ((posn = fnm.lastIndexOf(".")) == -1) {
-			System.out.println("No prefix found for filename: " + fnm);
-			return fnm;
-		} else
-			return fnm.substring(0, posn);
+		
+		checkForGaps();
 	}
 
 	private void storeBricks(String line, int lineNo, int numImages, ArrayList<Brick> bricksList)
@@ -236,7 +224,6 @@ public class BricksManager extends BrickManager  {
 	 */
 	private void checkForGaps()
 	{
-		Brick b;
 		for (int c = 0; c < bricks[bricks.length-1].length; c++)
 		{
 			int i = bricks[bricks.length-1][c];
@@ -344,4 +331,4 @@ public class BricksManager extends BrickManager  {
 		}
 	}
 
-} // end of BricksManager
+}
