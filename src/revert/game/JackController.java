@@ -3,6 +3,7 @@ package revert.game;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.awt.geom.Point2D;
 
 import com.kgp.core.GameController;
@@ -46,14 +47,14 @@ public class JackController extends GameController {
 		// game-play keys
 		if (panel.getState() == GameState.Active) {
 			// move the sprite and ribbons based on the arrow key pressed
-			if (keyCode == KeyEvent.VK_LEFT)
+			if (keyCode == KeyEvent.VK_LEFT || keyCode == KeyEvent.VK_A )
 				this.player.moveLeft();
-			else if (keyCode == KeyEvent.VK_RIGHT)
+			else if (keyCode == KeyEvent.VK_RIGHT || keyCode == KeyEvent.VK_D )
 				this.player.moveRight();
-			else if (keyCode == KeyEvent.VK_UP)
+			else if (keyCode == KeyEvent.VK_UP || keyCode == KeyEvent.VK_W )
 				this.player.jump(); // jumping has no effect on the
 									// bricks/ribbons
-			else if (keyCode == KeyEvent.VK_DOWN)
+			else if ((keyCode == KeyEvent.VK_DOWN || keyCode == KeyEvent.VK_S ) && (!this.player.isJumping()))
 				this.player.stayStill();
 		}
 	}
@@ -65,7 +66,7 @@ public class JackController extends GameController {
 		 * Set attack modes
 		 */
 		if (keyCode == KeyEvent.VK_SHIFT) {
-			this.player.setMode(player.getMode() + 1);
+			this.player.nextMode();
 		} 
 		else if (keyCode == KeyEvent.VK_1) {
 			this.player.setMode(1);
@@ -79,4 +80,12 @@ public class JackController extends GameController {
 
 	}
 
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent e) {
+		if (e.getWheelRotation() < 0)
+			this.player.prevMode();
+		else if (e.getWheelRotation() > 0)
+			this.player.nextMode();
+			
+	}
 }
