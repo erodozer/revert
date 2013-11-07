@@ -35,8 +35,8 @@ import com.kgp.core.GameController;
 import com.kgp.core.GameFrame;
 import com.kgp.core.GamePanel;
 import com.kgp.game.FireBallSprite;
-import com.kgp.game.JumperSprite;
 import com.kgp.game.Projectile;
+import com.kgp.game.JumperSprite;
 import com.kgp.imaging.ImagesLoader;
 import com.kgp.imaging.ImagesPlayer;
 import com.kgp.imaging.ImagesPlayerWatcher;
@@ -240,11 +240,7 @@ public class JackPanel extends GamePanel implements Runnable, ImagesPlayerWatche
 	protected void gameUpdate() {
 		if (this.getState() == GameState.Active) {
 			 // stop jack and scenery on collision
-			if (jack.willHitBrick()) {
-				jack.stayStill();
-			}
-			else
-			{
+			if (!jack.isStill()) {
 				parallaxBg.update(jack.getDirection());
 				parallaxFg.update(jack.getDirection());
 			}

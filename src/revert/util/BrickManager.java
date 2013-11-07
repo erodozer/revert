@@ -41,7 +41,7 @@ public abstract class BrickManager {
 			loc = new Point(x, y);
 		}
 		
-		if (loc.x > -1 && loc.y > -1)
+		if (loc.x > -1 && loc.y > -1 && loc.x < numCols && loc.y < numRows)
 			return collisionMask[loc.x][loc.y];
 		return false;
 	}
@@ -162,11 +162,11 @@ public abstract class BrickManager {
 	 */
 	public int checkBrickBase(int xWorld, int yWorld, int step)
 	{
-		Point map = worldToMap(xWorld, yWorld);
-		if (insideBrick(map.x, map.y, false)) {
+		Point map = worldToMap(xWorld, yWorld - step);
+		if (this.brickExists(map)) {
 			Point world = mapToWorld(map);
 			world.y += this.getBrickHeight();
-			int distance = world.y - (yWorld - step);
+			int distance = world.y - yWorld;
 			
 			return distance;
 		}
@@ -181,17 +181,25 @@ public abstract class BrickManager {
 	 */
 	public int checkBrickTop(int xWorld, int yWorld, int step)
 	{
-		Point map = worldToMap(xWorld, yWorld);
-		//System.out.printf("world loc: %d\nmap loc: %d\n", yWorld, map.y);
-		
-		if (insideBrick(map.x, map.y, false)) {
+		Point map = worldToMap(xWorld, yWorld + step);
+		if (this.brickExists(map))
+		{
 			Point world = mapToWorld(map);
-			//System.out.println("tile loc: " + world.y);
-			int distance = world.y - (yWorld - step);
-			//System.out.printf("Step: %d\nTravel: %d\n", step, distance);
-			return distance;
+			int distance = world.y - yWorld;
+			return distance;	
 		}
 		return step;
+	}
+	
+	/**
+	 * @param loc - brick location in the map
+	 * @return boolean indicating if a brick is located within this map
+	 */
+	public boolean brickExists(Point loc) {
+		if (loc.x < 0 || loc.y < 0)
+			return false;
+		
+		return this.collisionMask[loc.x][loc.y];
 	}
 	
 	/**

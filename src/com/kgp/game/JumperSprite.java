@@ -47,7 +47,11 @@ public class JumperSprite extends Sprite {
 
 	private int period; // in ms; the game's animation period
 
-	private boolean isFacingRight, isStill;
+	private boolean isFacingRight,
+					isHit,
+					isStill,
+					isAttacking,
+					isJumping;
 
 	private int vertMoveMode;
 	/* can be NOT_JUMPING, RISING, or FALLING */
@@ -57,16 +61,22 @@ public class JumperSprite extends Sprite {
 	private BricksManager brickMan;
 	private int moveSize; // obtained from BricksManager
 
+	private int normalHeight;
+	private int tileHeight; //this sprite's height in tiles
+	
 	/*
 	 * the current position of the sprite in 'world' coordinates. The x-values
 	 * may be negative. The y-values will be between 0 and pHeight.
 	 */
 	private Point world;
+	/*
+	 * the current position of the sprite in the tilemap coordinates
+	 */
+	private Point map;
 
 	private int mode;
 
-	public JumperSprite(int w, int h, int brickMvSz, BricksManager bm,
-			ImagesLoader imsLd, int p) {
+	public JumperSprite(int w, int h, int brickMvSz, BricksManager bm, ImagesLoader imsLd, int p) {
 		super(w / 2, h / 2, w, h, imsLd, "royer01");
 		// standing center screen, facing right
 		moveSize = brickMvSz;
@@ -86,12 +96,19 @@ public class JumperSprite extends Sprite {
 		this.position.y = brickMan.findFloor(0, 0, false) - getHeight();
 
 		this.world = new Point(0, 0);
+		
+		//set a normal height from the initial standing position
+		//this allows for landing in a somewhat natural looking animation
+		this.normalHeight = this.getHeight();
+		this.tileHeight = this.getHeight() / bm.getBrickHeight();
 
+		System.out.println(this.tileHeight);
+		
 		vertMoveMode = NOT_JUMPING;
 		vertStep = brickMan.getBrickHeight() / 2;
 		// the jump step is half a brick's height
 		upCount = 0;
-	} // end of JumperSprite()
+	}
 
 	public void moveLeft()
 	/*
@@ -128,47 +145,18 @@ public class JumperSprite extends Sprite {
 		isStill = true;
 	}
 
-	public void jump()
 	/*
 	 * The sprite is asked to jump. It sets its vertMoveMode to RISING, and
 	 * changes its image. The y- position adjustment is done in updateSprite().
 	 */
+	public void jump()
 	{
 		if (vertMoveMode == NOT_JUMPING) {
 			vertMoveMode = RISING;
 			upCount = 0;
-			if (isStill) { // only change image if the sprite is 'still'
-				//if (isFacingRight)
-				//	setImage("jumpRight");
-				//else
-				//	setImage("jumpLeft");
-			}
+			this.setImage("royer_jmp");
 		}
-	} // end of jump()
-
-	public boolean willHitBrick()
-	/*
-	 * Test if the next x position is inside a brick Ignore any y motion. This
-	 * method should always be called before updateSprite() makes the actual
-	 * move.
-	 */
-	{
-		if (isStill)
-			return false; // can't hit anything if not moving
-
-		int xTest; // for testing the new x- position
-		if (isFacingRight) // moving right
-			xTest = world.x + moveSize + this.getWidth()/2;
-		else
-			// moving left
-			xTest = world.x - moveSize ;
-
-		// test a point near the base of the sprite
-		int xMid = xTest;
-		int yMid = world.y - 1; // use current y posn
-
-		return brickMan.insideBrick(xMid, yMid);
-	} // end of willHitBrick()
+	}
 
 	public void updateSprite()
 	/*
@@ -179,15 +167,11 @@ public class JumperSprite extends Sprite {
 	 */
 	{
 		if (!isStill) { // moving
-			if (isFacingRight) // moving right
-				world.x += moveSize;
-			else
-				// moving left
-				world.x -= moveSize;
-			world.x %= brickMan.getMapWidth();
 			if (vertMoveMode == NOT_JUMPING) // if not jumping
 				checkIfFalling(); // may have moved out into empty space
-			
+			world.x += this.stepNext();
+			world.x %= brickMan.getMapWidth();
+			this.map = brickMan.worldToMap(world.x, world.y);
 		}
 
 		// vertical movement has two components: RISING and FALLING
@@ -211,7 +195,7 @@ public class JumperSprite extends Sprite {
 	{
 		// could the sprite move downwards if it wanted to?
 		// test its center x-coord, base y-coord
-		int yTrans = brickMan.checkBrickTop(world.x, world.y + vertStep, vertStep);
+		int yTrans = brickMan.checkBrickTop(world.x, world.y, vertStep);
 		// System.out.println("checkIfFalling: " + yTrans);
 		if (yTrans != 0) // yes it could
 			vertMoveMode = FALLING; // set it to be in falling mode
@@ -228,19 +212,18 @@ public class JumperSprite extends Sprite {
 			vertMoveMode = FALLING; // at top, now start falling
 			upCount = 0;
 		} else {
-			int yTrans = brickMan.checkBrickBase(world.x, world.y - this.getHeight() - vertStep, vertStep);
-			if (yTrans == 0) { // hit the base of a brick
+			int yTrans = brickMan.checkBrickBase(world.x, world.y - this.getHeight(), vertStep);
+			world.y -= yTrans; // update position
+			if (yTrans <= 0) { // hit the base of a brick
 				vertMoveMode = FALLING; // start falling
 				upCount = 0;
 			} else { // can move upwards another step
-				world.y -= yTrans; // update position
 				upCount++;
 			}
 		}
 	} // end of updateRising()
 
-	private void updateFalling()
-	/*
+	/**
 	 * Falling will continue until the sprite hits the top of a brick. The game
 	 * only allows a brick ribbon which has a complete floor, so the sprite must
 	 * eventually touch down.
@@ -248,29 +231,70 @@ public class JumperSprite extends Sprite {
 	 * Falling mode can be entered without a corresponding rising sequence, for
 	 * instance, when the sprite walks off a cliff.
 	 */
+	private void updateFalling()
 	{
-		int yTrans = brickMan.checkBrickTop(world.x, world.y + vertStep, vertStep);
-		if (yTrans == 0){ 
+		int yTrans = brickMan.checkBrickTop(world.x, world.y + (this.normalHeight - this.getHeight()), vertStep);
+		world.y += yTrans;
+		if (yTrans < vertStep)
+		{
 			finishJumping();
 		}
-		else {
-			world.y += yTrans;
+	}
+	
+	/**
+	 * Causes Royer to advance up the tilemap if the next tile is only 1 up
+	 * Does not cause Royer to think he's jumping
+	 */
+	private int stepNext()
+	{
+		Point nextBrick;
+		if (this.isFacingRight)
+		{
+			nextBrick = brickMan.worldToMap(world.x + moveSize, world.y - 1);
 		}
-		//System.out.println(world.y);
-	} // end of updateFalling()
+		else
+		{
+			nextBrick = brickMan.worldToMap(world.x - moveSize, world.y - 1);
+		}
+		
+		//if the brick is the same as what we're currently on then we do nothing and just let
+		// royer continue on his way across the brick
+		if (nextBrick.equals(this.map) || !brickMan.brickExists(nextBrick))
+			return (this.isFacingRight) ? moveSize : -moveSize;
+		
+		//if the next brick even exists, we check the brick above it to see if it's empty
+		for (int i = 1; i < this.tileHeight; i++)
+		{
+			nextBrick = new Point(nextBrick.x, nextBrick.y - 1);
+			
+			//if it isn't, then we run into a wall and step
+			if (brickMan.brickExists(nextBrick))
+			{	
+				this.stayStill();
+				return 0;
+			}
+		}
+		
+		world.y -= brickMan.getBrickHeight(); // update position
+		return (this.isFacingRight) ? moveSize : -moveSize;
+	}
 
 	private void finishJumping() {
-		vertMoveMode = NOT_JUMPING;
-		upCount = 0;
+		this.vertMoveMode = NOT_JUMPING;
+		this.upCount = 0;
 
 		if (isStill) { // change to running image, but not looping yet
-			//if (isFacingRight)
-			//	setImage("runningRight");
-			//else
-			//	// facing left
-			//	setImage("runningLeft");
+			if (isFacingRight)
+				setImage("royer01");
+			else
+				// facing left
+				setImage("royer01");
 		}
-	} // end of finishJumping()
+		else {
+			setImage("royer_walking");
+			loopImage(period, DURATION);
+		}
+	}
 
 	public int getXWorldPosn() {
 		return this.world.x;
@@ -311,5 +335,31 @@ public class JumperSprite extends Sprite {
 		this.mode = i;
 	}
 
-} // end of JumperSprite
+	/**
+	 * Sets attack mode to one kind higher
+	 */
+	public void nextMode() {
+		this.mode++;
+		if (this.mode > 2)
+			this.mode = 0;
+	}
+	
+	/**
+	 * Sets attack mode to one kind lower
+	 */
+	public void prevMode() {
+		this.mode--;
+		if (this.mode < 0)
+			this.mode = 2;
+	}
+
+	public boolean isJumping() {
+		return this.vertMoveMode != NOT_JUMPING;
+	}
+	
+	public boolean isStill() {
+		return this.isStill;
+	}
+
+}
 
