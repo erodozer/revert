@@ -4,7 +4,10 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Observable;
+import java.util.Observer;
 
+import com.kgp.game.World.ActorsRemoved;
 import com.kgp.imaging.ImagesLoader;
 import com.kgp.imaging.Sprite;
 
@@ -13,7 +16,7 @@ import com.kgp.imaging.Sprite;
  * 
  * @author nhydock
  */
-public abstract class Actor extends Sprite {
+public abstract class Actor extends Sprite implements Observer{
 
 	public static enum Direction 
 	{
@@ -53,21 +56,19 @@ public abstract class Actor extends Sprite {
 	protected double viewRange;
 	
 	//synchronization lock on actor updating
-	private boolean actorLock = false;
+	protected boolean actorLock = false;
 	
 	//list of actors in range
-	private HashMap<Actor, Boolean> visibility;
+	protected HashMap<Actor, Boolean> visibility;
 	
 	//all actors that this actor can interact with/watch
-	private ArrayList<Actor> actors;
+	protected ArrayList<Actor> actors;
+	protected int hp;
 	
-
-	private int hp;
-	
+	protected World world;
 	
 	public Actor(int x, int y, int w, int h, ImagesLoader imsLd, String name, ArrayList<Actor> actors) {
 		super(x, y, w, h, imsLd, name);
-		
 		this.actors = actors;
 		this.visibility = new HashMap<Actor, Boolean>();
 		for (Actor a : this.actors)
@@ -182,26 +183,6 @@ public abstract class Actor extends Sprite {
 		return ;
 	}
 	
-	public void updateActorList(boolean remove, Actor... actors)
-	{
-		while (actorLock);
-		
-		actorLock = true;
-		
-		if (remove)
-		{
-			for (Actor a : actors)
-			{
-				this.visibility.remove(a);
-			}
-		}
-		else
-		{
-			
-		}
-		
-	}
-	
 	/**
 	 * Have the actor do something once something is within their viewing range
 	 */
@@ -219,4 +200,22 @@ public abstract class Actor extends Sprite {
 		return this.hp > 0;
 	}
 	
+	/**
+	 * Updates on notifications from the world that the actor is observing
+	 * @param o - object that sent the notification
+	 * @param args - type of notification
+	 */
+	@Override
+	public void update(Observable o, Object args)
+	{
+		if (args instanceof ActorsRemoved)
+		{
+			ActorsRemoved a = (ActorsRemoved)args;
+				
+			for (Actor actor : a.actors)
+			{
+				this.visibility.remove(actor);
+			}
+		}
+	}
 }
