@@ -1,15 +1,15 @@
-package com.kgp.game;
+package revert.Entities;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
-import com.kgp.game.World.ActorsRemoved;
-import com.kgp.imaging.ImagesLoader;
 import com.kgp.imaging.Sprite;
+
+import revert.MainScene.World;
+import revert.MainScene.notifications.ActorsRemoved;
+import revert.util.AssetsManager;
 
 /**
  * Generic actor class for sprites that move within the world space and are animated with states
@@ -39,6 +39,9 @@ public abstract class Actor extends Sprite implements Observer{
 	protected boolean isHit;
 	protected boolean isAttacking;
 	
+	//timer for how long the actor is in a state of reacting to being hit
+	protected int hitTimer;
+	
 	//speed at which the sprite moves within the world
 	protected int moveRate;
 	
@@ -47,7 +50,7 @@ public abstract class Actor extends Sprite implements Observer{
 	
 	//vars used in looping images
 	protected int period;
-	protected int duration;
+	protected double duration;
 	
 
 	/**
@@ -67,8 +70,9 @@ public abstract class Actor extends Sprite implements Observer{
 	
 	protected World world;
 	
-	public Actor(int x, int y, int w, int h, ImagesLoader imsLd, String name, ArrayList<Actor> actors) {
-		super(x, y, w, h, imsLd, name);
+	public Actor(World w, String name, ArrayList<Actor> actors) {
+		super(0, 0, w.getWidth(), w.getHeight(), AssetsManager.Images, name);
+		this.world = w;
 		this.actors = actors;
 		this.visibility = new HashMap<Actor, Boolean>();
 		for (Actor a : this.actors)
@@ -78,42 +82,38 @@ public abstract class Actor extends Sprite implements Observer{
 	}
 	
 	/**
-	 * Tells the sprite to start moving to the left
-	 */
-	public void moveLeft()
-	{
-		this.setVelocity(-this.moveRate, this.getYVelocity());
-		this.moving = Movement.Left;
-		this.setImage(getNextImage());
-	}
-	
-	/**
 	 * Get the image that the actor is suppose to switch to dependent on current states
 	 */
 	abstract protected String getNextImage();
 	
-	public void setImage(String name, boolean loop)
+	/**
+	 * Tells the sprite to start moving to the left
+	 */
+	final public void moveLeft()
 	{
-		super.setImage(name);
-		super.loopImage(period, duration);
+		this.setVelocity(-this.moveRate, this.getYVelocity());
+		this.moving = Movement.Left;
+		this.setImage(getNextImage(), true);
 	}
 	
 	/**
 	 * Tells the sprite to start moving to the right
 	 */
-	public void moveRight()
+	final public void moveRight()
 	{
 		this.setVelocity(this.moveRate, this.getYVelocity());
 		this.moving = Movement.Right;
+		this.setImage(getNextImage(), true);
 	}
 	
 	/**
 	 * Stops horizontal movement
 	 */
-	private void stop()
+	final public void stop()
 	{
 		this.setVelocity(0, this.getYVelocity());
 		this.moving = Movement.Still;
+		this.setImage(getNextImage(), true);
 	}
 	
 	/**
@@ -140,6 +140,11 @@ public abstract class Actor extends Sprite implements Observer{
 		return moving == Movement.Still;
 	}
 	
+	public boolean isHit()
+	{
+		return this.isHit;
+	}
+	
 	/**
 	 * Have the actor invoke an attack
 	 */
@@ -148,11 +153,16 @@ public abstract class Actor extends Sprite implements Observer{
 	/**
 	 * @return the direction that the player is facing
 	 */
-	final private Direction getDirection()
+	final public Direction getDirection()
 	{
 		return this.facing;
 	}
 
+	final public Movement getMovement()
+	{
+		return this.moving;
+	}
+	
 	/**
 	 * Updates what the actor sees and have them react to changes
 	 */
