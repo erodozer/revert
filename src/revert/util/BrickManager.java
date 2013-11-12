@@ -71,7 +71,7 @@ public abstract class BrickManager {
 		{
 			mapY = -1;
 		}
-		else if (yWorld > this.getHeight())
+		else if (yWorld > this.getRealHeight())
 		{
 			mapY = numRows - 1;
 		}
@@ -136,22 +136,37 @@ public abstract class BrickManager {
 	 */
 	abstract public int getBrickHeight();
 	
-	abstract public int getHeight();
+	/**
+	 * @return the width of the tile map in tiles
+	 */
+	final public int getWidth() {
+		return numCols;
+	}
+	
+	/**
+	 * @return the height of the tile map in tiles
+	 */
+	final public int getHeight() {
+		return numRows;
+	}
 	
 	/**
 	 * @return the pixel width of the entire map
 	 */
-	public int getMapHeight(){
+	final public int getMapHeight(){
 		return numRows * this.getBrickHeight();
 	}
 	
 	/**
 	 * @return this pixel height of the entire map (only tiles counted, does not include panel salvage)
 	 */
-	public int getMapWidth(){
+	final public int getMapWidth(){
 		return numCols * this.getBrickWidth();
 	}
 	
+	final public int getRealHeight() {
+		return getMapHeight() + yOffset;
+	}
 
 	/**
 	 * Used when the player is jumping.
@@ -182,6 +197,7 @@ public abstract class BrickManager {
 	public int checkBrickTop(int xWorld, int yWorld, int step)
 	{
 		Point map = worldToMap(xWorld, yWorld + step);
+		//System.out.println(map.y);
 		if (this.brickExists(map))
 		{
 			Point world = mapToWorld(map);
