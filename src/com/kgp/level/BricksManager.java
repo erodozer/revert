@@ -47,9 +47,6 @@ public class BricksManager extends BrickManager  {
 	// modifies how fast the bricks map moves; smaller is slower
 
 	private int pWidth, pHeight; // dimensions of display panel
-	private int width, height;   // max dimensions of bricks map
-								 // width > pWidth
-
 	private int imWidth, imHeight; // dimensions of a brick image
 
 	private int moveSize;
@@ -60,11 +57,6 @@ public class BricksManager extends BrickManager  {
 	private int xRange;
 	private int left;
 	private int right;
-	
-	//number of columns that can be visible at one time in the view
-	private int visCols;
-	
-	private int[][] bricks;
 
 	private ImagesLoader imsLoader;
 	private ArrayList<BufferedImage> brickImages = null;
@@ -88,16 +80,7 @@ public class BricksManager extends BrickManager  {
 			System.out.println();
 		}
 		
-		visCols = w/imWidth;
-		
-		System.out.printf("Map Width in Tiles: %d\nVisible Tiles: %d\n" , numCols, visCols);
-		
-		width = numCols * imWidth;
-		height = Math.max(h, numRows * imHeight);
-
-		System.out.printf("Brick Size: %d %d\n", imWidth, imHeight);
-		
-		yOffset = height - this.getMapHeight();
+		yOffset = Math.max(this.getMapHeight(), pHeight) - this.getMapHeight();
 		
 		moveSize = (int) (imWidth * MOVE_FACTOR);
 		if (moveSize == 0) {
@@ -260,13 +243,12 @@ public class BricksManager extends BrickManager  {
 
 	// ----------------- JumperSprite related methods -------------
 	// various forms of collision detection with the bricks
-
+	
 	@Override
 	public int getBrickHeight() {
 		return imHeight;
 	}
 	
-
 	@Override
 	public int getBrickWidth() {
 		return imWidth;
@@ -276,45 +258,13 @@ public class BricksManager extends BrickManager  {
 		return moveSize;
 	}
 
-	/**
-	 * Check if the world coord is inside a brick. 
-	 */
-	public boolean insideBrick(int xWorld, int yWorld)
-	{
-		Point mapCoord = worldToMap(xWorld, yWorld);
-		if (mapCoord.y > -1 && mapCoord.x > -1)
-			if (bricks[mapCoord.y][mapCoord.x] > 0)
-				return true;
-		return false;
-	}
-	
-	/**
-	 * Check if the world coord is inside a brick. 
-	 */
-	public boolean insideBrick(Point mapCoord)
-	{
-		if (mapCoord.y > -1 && mapCoord.x > -1)
-			if (bricks[mapCoord.y][mapCoord.x] > 0)
-				return true;
-		return false;
-	}
-
-	public int getWidth() {
-		return width;
-	}
-
-	@Override
-	public int getHeight() {
-		return height;
-	}
-
 	@Override
 	public void display(Graphics2D g) {
 		for (int i = left, loc = left, x = left * imWidth + (xRange % imWidth); i <= right; i++, loc++, x += imWidth)
 		{
 			if (loc < 0)
 			{
-				loc = numCols-1-(Math.abs(loc) % numCols);
+				loc += numCols;
 			}
 			else if (loc >= numCols)
 			{

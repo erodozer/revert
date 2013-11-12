@@ -20,7 +20,7 @@ package com.kgp.level;
 
 import java.awt.*;
 
-import javax.swing.*;
+import revert.Entities.Actor.Movement;
 
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
@@ -35,11 +35,8 @@ public class Ribbon {
 	private int pWidth, pHeight; // dimensions of display panel
 
 	private int moveSize; // size of the image move (in pixels)
-	private boolean isMovingRight; // movement flags
-	private boolean isMovingLeft;
 
 	private int head;
-	private int tail;
 	
 	AffineTransform self;
 	AffineTransform pre;
@@ -82,15 +79,15 @@ public class Ribbon {
 	 * Increment the xImHead value depending on the movement flags. It can range
 	 * between -width to width (exclusive), which is the width of the image.
 	 */
-	public void update(int dir)
+	public void update(Movement m)
 	{
 
 		//backgrounds move inversely from the player
-		if (dir > 0)
+		if (m == Movement.Right)
 		{
 			head -= moveSize;
 		}
-		else if (dir < 0)
+		else if (m == Movement.Left)
 		{
 			head += moveSize;
 		}

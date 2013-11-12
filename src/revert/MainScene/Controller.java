@@ -1,4 +1,4 @@
-package revert.game;
+package revert.MainScene;
 
 import java.awt.Point;
 import java.awt.event.KeyEvent;
@@ -6,20 +6,24 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.Point2D;
 
+import revert.Entities.Player;
+import revert.util.GameState;
+
 import com.kgp.core.GameController;
-import com.kgp.game.JumperSprite;
+import com.kgp.core.GamePanel;
 
 /**
  * Main controller class for handling the game input that alters the player in the world
  * @author Nicholas Hydock
  *
  */
-public class JackController extends GameController {
+public class Controller extends GameController {
 
-	JumperSprite player;
+	Player player;
 	Crosshair cross;
 	
-	JackPanel panel;
+	GamePanel panel;
+	World world;
 
 	/**
 	 * Creates a game controller that interacts directly with the player
@@ -27,10 +31,11 @@ public class JackController extends GameController {
 	 * @param p
 	 * @param c
 	 */
-	public JackController(JumperSprite p, Crosshair c, JackPanel panel) {
+	public Controller(Player p, Crosshair c, GamePanel panel, World world) {
 		this.player = p;
 		this.cross = c;
 		this.panel = panel;
+		this.world = world;
 	}
 
 	public void mouseMoved(MouseEvent e) {
@@ -40,6 +45,12 @@ public class JackController extends GameController {
 		Point2D p = new Point(x, y);
 		
 		cross.setAngle(p, panel.getMatrix());
+		
+		if (x < panel.getWidth()/2)
+			this.player.faceLeft();
+		else
+			this.player.faceRight();
+		
 	}
 
 	public void keyPressed(KeyEvent e) {
@@ -55,7 +66,7 @@ public class JackController extends GameController {
 				this.player.jump(); // jumping has no effect on the
 									// bricks/ribbons
 			else if ((keyCode == KeyEvent.VK_DOWN || keyCode == KeyEvent.VK_S ) && (!this.player.isJumping()))
-				this.player.stayStill();
+				this.player.stop();
 		}
 	}
 

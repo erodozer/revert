@@ -18,6 +18,8 @@ package com.kgp.level;
 import java.awt.*;
 import java.util.ArrayList;
 
+import revert.Entities.Actor.Movement;
+
 import com.kgp.imaging.ImagesLoader;
 
 public class RibbonsManager {
@@ -26,9 +28,6 @@ public class RibbonsManager {
 	 * back' are specified first in ribImages[], and have smaller move factors
 	 * so they will move slower.
 	 */
-	private String ribImages[] = { "skyline", "forest3", "grass"};
-	private double moveFactors[] = { 0.0, .25, .75}; // applied to moveSize
-	// a move factor of 0 would make a ribbon stationary
 
 	private ArrayList<Ribbon> ribbons;
 	private int moveSize;
@@ -55,9 +54,9 @@ public class RibbonsManager {
 		ribbons.add(new Ribbon(pWidth, pHeight, imsLd.getImage(imgName), (int)(mv*moveSize)));
 	}
 
-	public void update(int dir) {
+	public void update(Movement m) {
 		for (int i = 0; i < ribbons.size(); i++)
-			ribbons.get(i).update(dir);
+			ribbons.get(i).update(m);
 	}
 
 	/*

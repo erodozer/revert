@@ -31,7 +31,7 @@ package com.kgp.core;
 
 import javax.swing.*;
 
-import revert.game.GameState;
+import revert.util.GameState;
 
 import com.kgp.audio.ClipsLoader;
 import com.kgp.imaging.ImagesLoader;
@@ -74,8 +74,6 @@ public abstract class GamePanel extends JPanel implements Runnable,
 	private Graphics dbg;
 	private Image dbImage = null;
 
-	protected ImagesLoader images;
-	protected ClipsLoader sfx;
 	private long gameStartTime;
 
 	protected GameFrame parent;
@@ -284,5 +282,11 @@ public abstract class GamePanel extends JPanel implements Runnable,
 		this.scalerMatrix.setToScale(d.width/(float)this.getPreferredSize().width, d.height/(float)this.getPreferredSize().height);
 	}
 
+	/**
+	 * @return the camera matrix of the panel
+	 */
+	public AffineTransform getMatrix() {
+		return camMatrix;
+	}
 
 }

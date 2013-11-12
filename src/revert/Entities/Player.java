@@ -1,4 +1,4 @@
-package com.kgp.game;
+package revert.Entities;
 
 // JumperSprite.java
 // Andrew Davison, April 2005, ad@fivedots.coe.psu.ac.th
@@ -27,12 +27,15 @@ package com.kgp.game;
  */
 
 import java.awt.*;
+import java.util.ArrayList;
+
+import revert.MainScene.World;
 
 import com.kgp.imaging.ImagesLoader;
 import com.kgp.imaging.Sprite;
 import com.kgp.level.BricksManager;
 
-public class JumperSprite extends Sprite {
+public class Player extends Actor {
 	private static double DURATION = 0.5; // secs
 	// total time to cycle through all the images
 
@@ -47,10 +50,7 @@ public class JumperSprite extends Sprite {
 
 	private int period; // in ms; the game's animation period
 
-	private boolean isFacingRight,
-					isHit,
-					isStill,
-					isAttacking,
+	private boolean isAttacking,
 					isJumping;
 
 	private int vertMoveMode;
@@ -59,90 +59,48 @@ public class JumperSprite extends Sprite {
 	private int upCount;
 
 	private BricksManager brickMan;
-	private int moveSize; // obtained from BricksManager
 
 	private int normalHeight;
 	private int tileHeight; //this sprite's height in tiles
 	
-	/*
-	 * the current position of the sprite in 'world' coordinates. The x-values
-	 * may be negative. The y-values will be between 0 and pHeight.
-	 */
-	private Point world;
 	/*
 	 * the current position of the sprite in the tilemap coordinates
 	 */
 	private Point map;
 
 	private int mode;
+	
+	private int worldY;
 
-	public JumperSprite(int w, int h, int brickMvSz, BricksManager bm, ImagesLoader imsLd, int p) {
-		super(w / 2, h / 2, w, h, imsLd, "royer01");
+	public Player(World w, ImagesLoader imsLd) {
+		super(w, "royer01", new ArrayList());
+		
+		this.brickMan = w.getLevel();
+				
 		// standing center screen, facing right
-		moveSize = brickMvSz;
+		this.moveRate = brickMan.getMoveSize();
 		// the move size is the same as the bricks ribbon
 
-		brickMan = bm;
-		period = p;
 		setVelocity(0, 0); // no movement
-
-		isFacingRight = true;
-		isStill = true;
-
+		
+		this.period = world.getPeriod();
+		this.duration = DURATION;
+		
 		/*
 		 * Adjust the sprite's y- position so it is standing on the brick at its
 		 * mid x- psoition.
 		 */
 		this.position.y = brickMan.findFloor(0, 0, false) - getHeight();
-
-		this.world = new Point(0, 0);
 		
 		//set a normal height from the initial standing position
 		//this allows for landing in a somewhat natural looking animation
 		this.normalHeight = this.getHeight();
-		this.tileHeight = this.getHeight() / bm.getBrickHeight();
+		this.tileHeight = this.getHeight() / w.getLevel().getBrickHeight();
 
-		System.out.println(this.tileHeight);
-		
 		vertMoveMode = NOT_JUMPING;
 		vertStep = brickMan.getBrickHeight() / 2;
 		// the jump step is half a brick's height
 		upCount = 0;
-	}
-
-	public void moveLeft()
-	/*
-	 * Request that the sprite move to the left. It doesn't actually move, but
-	 * changes its image and status flags.
-	 */
-	{
-		setImage("royer_walking");
-		loopImage(period, DURATION); // cycle through the images
-		isFacingRight = false;
-		isStill = false;
-	}
-
-	public void moveRight()
-	/*
-	 * Request that the sprite move to the right. It doesn't actually move, but
-	 * changes its image and status flags.
-	 */
-	{
-		setImage("royer_walking");
-		loopImage(period, DURATION); // cycle through the images
-		isFacingRight = true;
-		isStill = false;
-	}
-
-	public void stayStill()
-	/*
-	 * Request that the sprite stops. It stops the image animation and sets the
-	 * isStill status flag.
-	 */
-	{
-		setImage("royer01");
-		loopImage(period, DURATION);
-		isStill = true;
 	}
 
 	/*
@@ -166,12 +124,11 @@ public class JumperSprite extends Sprite {
 	 * should only be called after collsion checking with willHitBrick()
 	 */
 	{
-		if (!isStill) { // moving
+		if (!isStill()) { // moving
 			if (vertMoveMode == NOT_JUMPING) // if not jumping
 				checkIfFalling(); // may have moved out into empty space
-			world.x += this.stepNext();
-			world.x %= brickMan.getMapWidth();
-			this.map = brickMan.worldToMap(world.x, world.y);
+			
+			this.stepNext();
 		}
 
 		// vertical movement has two components: RISING and FALLING
@@ -180,11 +137,22 @@ public class JumperSprite extends Sprite {
 		else if (vertMoveMode == FALLING)
 			updateFalling();
 		
-		this.position.x = this.world.x;
-		this.position.y = this.world.y - this.getHeight() - brickMan.getBrickHeight();
+		this.position.y = this.worldY - this.getHeight() - brickMan.getBrickHeight();
 		
-		this.flipX = !this.isFacingRight;
+		this.flipX = !(facing == Direction.Right);
 		super.updateSprite();
+		
+		if (this.getXPosn() > world.getWidth())
+		{
+			this.setPosition(this.getXPosn() - world.getWidth(), this.getYPosn());
+		}
+		else if (this.getXPosn() < 0)
+		{
+			this.setPosition(this.getXPosn() + world.getWidth(), this.getYPosn());
+		}
+		
+		this.map = brickMan.worldToMap(this.getXPosn(), this.getYPosn());
+		
 	} // end of updateSprite()
 
 	private void checkIfFalling()
@@ -195,7 +163,7 @@ public class JumperSprite extends Sprite {
 	{
 		// could the sprite move downwards if it wanted to?
 		// test its center x-coord, base y-coord
-		int yTrans = brickMan.checkBrickTop(world.x, world.y, vertStep);
+		int yTrans = brickMan.checkBrickTop(this.getXPosn(), this.worldY, vertStep);
 		// System.out.println("checkIfFalling: " + yTrans);
 		if (yTrans != 0) // yes it could
 			vertMoveMode = FALLING; // set it to be in falling mode
@@ -212,8 +180,8 @@ public class JumperSprite extends Sprite {
 			vertMoveMode = FALLING; // at top, now start falling
 			upCount = 0;
 		} else {
-			int yTrans = brickMan.checkBrickBase(world.x, world.y - this.getHeight(), vertStep);
-			world.y -= yTrans; // update position
+			int yTrans = brickMan.checkBrickBase(this.getXPosn(), worldY - this.getHeight(), vertStep);
+			worldY -= yTrans; // update position
 			if (yTrans <= 0) { // hit the base of a brick
 				vertMoveMode = FALLING; // start falling
 				upCount = 0;
@@ -233,8 +201,8 @@ public class JumperSprite extends Sprite {
 	 */
 	private void updateFalling()
 	{
-		int yTrans = brickMan.checkBrickTop(world.x, world.y + (this.normalHeight - this.getHeight()), vertStep);
-		world.y += yTrans;
+		int yTrans = brickMan.checkBrickTop(this.getXPosn(), worldY + (this.normalHeight - this.getHeight()), vertStep);
+		worldY += yTrans;
 		if (yTrans < vertStep)
 		{
 			finishJumping();
@@ -245,22 +213,15 @@ public class JumperSprite extends Sprite {
 	 * Causes Royer to advance up the tilemap if the next tile is only 1 up
 	 * Does not cause Royer to think he's jumping
 	 */
-	private int stepNext()
+	private void stepNext()
 	{
 		Point nextBrick;
-		if (this.isFacingRight)
-		{
-			nextBrick = brickMan.worldToMap(world.x + moveSize, world.y - 1);
-		}
-		else
-		{
-			nextBrick = brickMan.worldToMap(world.x - moveSize, world.y - 1);
-		}
+		nextBrick = brickMan.worldToMap(this.getXPosn() + this.getXVelocity(), worldY - 1);
 		
 		//if the brick is the same as what we're currently on then we do nothing and just let
 		// royer continue on his way across the brick
 		if (nextBrick.equals(this.map) || !brickMan.brickExists(nextBrick))
-			return (this.isFacingRight) ? moveSize : -moveSize;
+			return;
 		
 		//if the next brick even exists, we check the brick above it to see if it's empty
 		for (int i = 1; i < this.tileHeight; i++)
@@ -270,55 +231,19 @@ public class JumperSprite extends Sprite {
 			//if it isn't, then we run into a wall and step
 			if (brickMan.brickExists(nextBrick))
 			{	
-				this.stayStill();
-				return 0;
+				this.stop();
+				return;
 			}
 		}
 		
-		world.y -= brickMan.getBrickHeight(); // update position
-		return (this.isFacingRight) ? moveSize : -moveSize;
+		worldY -= brickMan.getBrickHeight(); // update position
 	}
 
 	private void finishJumping() {
 		this.vertMoveMode = NOT_JUMPING;
 		this.upCount = 0;
-
-		if (isStill) { // change to running image, but not looping yet
-			if (isFacingRight)
-				setImage("royer01");
-			else
-				// facing left
-				setImage("royer01");
-		}
-		else {
-			setImage("royer_walking");
-			loopImage(period, DURATION);
-		}
-	}
-
-	public int getXWorldPosn() {
-		return this.world.x;
-	}
-
-	public int getYWorldPosn() {
-		return this.world.y;
-	}
-
-	public Point getWorldPosn() {
-		return new Point(world);
-	}
-
-	/**
-	 * @return the direction that the player is facing
-	 */
-	public int getDirection() {
-		if (!isStill) {
-			if (isFacingRight)
-				return 1;
-			else
-				return -1;
-		}
-		return 0;
+		
+		setImage(getNextImage());
 	}
 
 	/**
@@ -356,9 +281,37 @@ public class JumperSprite extends Sprite {
 	public boolean isJumping() {
 		return this.vertMoveMode != NOT_JUMPING;
 	}
-	
-	public boolean isStill() {
-		return this.isStill;
+
+	@Override
+	protected String getNextImage() {
+		if (isJumping)
+		{
+			return "royer_jmp";
+		}
+		else if (moving != Movement.Still)
+		{
+			return "royer_walking";
+		}
+		
+		return "royer01";
+	}
+
+	@Override
+	public void attack() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void reactOnInView(Actor a) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void reactOnOutOfView(Actor a) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

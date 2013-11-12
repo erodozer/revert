@@ -1,4 +1,4 @@
-package revert.game;
+package revert.MainScene;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;

@@ -1,4 +1,4 @@
-package revert.game;
+package revert.util;
 
 public enum GameState {
 
