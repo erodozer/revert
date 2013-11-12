@@ -48,19 +48,28 @@ public class Sprite {
 	 * Real position of the sprite in the world
 	 */
 	protected Point position;
+	
+	protected float angle;
+	
 	/**
 	 *  image dimensions
 	 */
-	protected Point dimensions;
+	protected Dimension dimensions;
 	
-	protected Point pDimensions;
+	protected Dimension pDimensions;
 
+	protected AffineTransform trans = AffineTransform.getTranslateInstance(0, 0);
+	protected boolean flipX = false;
+	
+	protected int period;
+	protected double duration;
+	
 	public Sprite(int x, int y, int w, int h, ImagesLoader imsLd, String name) {
 		this.position = new Point(x, y);
 
 		this.velocity = new Point(XSTEP, YSTEP);
 
-		this.pDimensions = new Point(w, h);
+		this.pDimensions = new Dimension(w, h);
 
 		this.imsLoader = imsLd;
 		
@@ -78,16 +87,22 @@ public class Sprite {
 		image = imsLoader.getImage(imageName);
 		if (image == null) {
 			System.out.println("No sprite image for " + imageName);
-			dimensions = new Point(SIZE, SIZE);
+			dimensions = new Dimension(SIZE, SIZE);
 		} else {
-			dimensions = new Point(image.getWidth(), image.getHeight());
+			dimensions = new Dimension(image.getWidth(), image.getHeight());
 		}
 		//create bounding box
-		this.myRect = new Rectangle(0, 0, dimensions.x, dimensions.y);
+		this.myRect = new Rectangle(0, 0, dimensions.width, dimensions.height);
 		
 		// no image loop playing
 		player = null;
 		isLooping = false;
+	}
+	
+	public void setImage(String name, boolean loop)
+	{
+		this.setImage(name);
+		this.loopImage(period, duration);
 	}
 
 	/**
@@ -117,19 +132,19 @@ public class Sprite {
 	}
 
 	public int getWidth() {
-		return this.dimensions.x;
+		return this.dimensions.width;
 	}
 
 	public int getHeight() {
-		return this.dimensions.y;
+		return this.dimensions.height;
 	}
 
 	public int getPWidth() {
-		return this.pDimensions.x;
+		return this.pDimensions.width;
 	}
 
 	public int getPHeight() {
-		return this.pDimensions.y;
+		return this.pDimensions.height;
 	}
 
 	public boolean isActive() {
@@ -204,9 +219,6 @@ public class Sprite {
 		return myRect;
 	}
 	
-	protected AffineTransform trans = AffineTransform.getTranslateInstance(0, 0);
-	protected boolean flipX = false;
-	
 	/**
 	 * Perform standard actions for the sprite on each cycle
 	 */
@@ -223,11 +235,17 @@ public class Sprite {
 		}
 		
 		trans.setToTranslation(this.position.x, this.position.y);
+		trans.rotate(this.angle);
 		if (flipX)
 		{
 			trans.translate(this.getWidth(), 0);
 			trans.scale(-1.0, 1.0);
 		}
+	}
+	
+	public ImagesLoader getImageLoader()
+	{
+		return this.imsLoader;
 	}
 
 	/**
