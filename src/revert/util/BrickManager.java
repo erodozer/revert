@@ -25,6 +25,8 @@ public abstract class BrickManager {
 	
 	protected int yOffset;
 	
+	protected Point[] spawnPoints;
+	
 	/**
 	 * Checks if a world coordinate is inside a brick
 	 * @param xWorld
@@ -223,4 +225,9 @@ public abstract class BrickManager {
 	 * @param g - graphics context
 	 */
 	public abstract void display(Graphics2D g);
+	
+	final public Point[] getSpawnPoints()
+	{
+		return spawnPoints;
+	}
 }

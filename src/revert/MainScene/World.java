@@ -120,16 +120,30 @@ public class World extends Observable{
 	 */
 	public ArrayList<Enemy> genEnemies(int[][] waveData)
 	{
-		ArrayList<Enemy> e = new ArrayList<Enemy>();
+		ArrayList<Enemy> list = new ArrayList<Enemy>();
 		
 		// TODO generate the enemies
+		for (int i = 0; i < waveData.length; i++)
+		{
+			int[] data = waveData[i];
+			Enemy e = enemyFactory.generateEnemy(data[2]);
+			e.setPosition(data[0], data[1]);
+			list.add(e);
+		}
 		
-		return e;
+		return list;
 	}
 	
+	
+	/**
+	 * Sets the enemies for the level
+	 */
 	public void startWave()
 	{
 		// TODO implement wave startup
+		this.enemies = genEnemies(enemyFactory.createWave(15));
+		currentWave++;
+		waves--;
 	}
 
 	/**
@@ -146,8 +160,7 @@ public class World extends Observable{
 	 */
 	public void setLevel(BricksManager bricksMan) {
 		this.level = bricksMan;
-		
-		Point[] spawnPoints = new Point[10];
+		this.enemyFactory = new EnemyFactory(this, bricksMan.getSpawnPoints());
 	}
 	
 	public BricksManager getLevel()

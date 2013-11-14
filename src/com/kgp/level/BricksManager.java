@@ -80,6 +80,16 @@ public class BricksManager extends BrickManager  {
 			System.out.println();
 		}
 		
+		//generate random spawn points because we don't have spawn locations defined in classic style maps
+		spawnPoints = new Point[5];
+		for (int i = 0; i < 5; i++)
+		{
+			int x = (int)(Math.random()*this.getWidth());
+			int y = (int)(Math.random()*this.getHeight());
+			Point p = new Point(x, y);
+			spawnPoints[i] = p;
+		}
+		
 		yOffset = Math.max(this.getMapHeight(), pHeight) - this.getMapHeight();
 		
 		moveSize = (int) (imWidth * MOVE_FACTOR);
