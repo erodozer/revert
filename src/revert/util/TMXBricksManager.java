@@ -1,6 +1,6 @@
 package revert.util;
 
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +17,7 @@ import org.xml.sax.SAXException;
  * Parses a CSV style Tiled Map XML File into a collision mask for levels
  * @author Nicholas Hydock
  */
-public class TMXBricksManager implements BrickManager, BrickRenderer {
+public class TMXBricksManager extends BrickManager {
 
 	private static String TMX_DIR = "assets/levels/";
 	
@@ -25,16 +25,9 @@ public class TMXBricksManager implements BrickManager, BrickRenderer {
 	private int stepY = 32;
 
 	/**
-	 * Mask showing the impassability of the tile map.
-	 * Read as 
-	 * 	col x row
-	 * 
-	 * Passible tiles are marked with 1 (false)
-	 * Impassible are 2 (true)
+	 * Parses the TMX file into BrickManager data
+	 * @param filename
 	 */
-	Boolean[][] collisionMask;
-
-	@Override
 	public void loadBricksFile(String filename) {
 		try
 		{
@@ -43,7 +36,8 @@ public class TMXBricksManager implements BrickManager, BrickRenderer {
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			Document doc = dBuilder.parse(fXmlFile);
 	
-			loadBricksData(doc.createElement("map"));
+			loadBricksData(doc.getElementById("map"));
+			loadSpawnPoints(doc.getElementById("shapes"));
 		}
 		catch (IOException e) 
 	    { 	
@@ -61,6 +55,26 @@ public class TMXBricksManager implements BrickManager, BrickRenderer {
 	}
 	
 	/**
+	 * Loads the spawn points in the map by looking at the points in a single polygon
+	 * in the map.
+	 * @param shape - DOM node holding the data for the spawn points
+	 */
+	private void loadSpawnPoints(Element shape) {
+	
+		String[] points = shape.getAttribute("points").split("/[ ,]+/");
+		
+		spawnPoints = new Point[points.length/2];
+		for (int i = 0, n = 0; i < points.length; i += 2, n++)
+		{
+			int x, y;
+			x = Integer.parseInt(points[i]);
+			y = Integer.parseInt(points[i+1]);
+			Point p = new Point(x, y);
+			spawnPoints[n] = p;
+		}
+	}
+
+	/**
 	 * Parse out the data from the nodes in the TMX file
 	 * @param xmlNode
 	 */
@@ -69,7 +83,7 @@ public class TMXBricksManager implements BrickManager, BrickRenderer {
 		int width = Integer.parseInt(xmlNode.getAttribute("width"));
 		int height = Integer.parseInt(xmlNode.getAttribute("height"));
 		
-		collisionMask = new Boolean[height][width];
+		collisionMask = new boolean[width][height];
 		
 		Element tileset = (Element)xmlNode.getElementsByTagName("tileset").item(0);
 		Element tiles = (Element)xmlNode.getElementsByTagName("layer").item(0).getFirstChild();
@@ -83,50 +97,27 @@ public class TMXBricksManager implements BrickManager, BrickRenderer {
 		{
 			for (;c < width; c++, i++)
 			{
-				collisionMask[c][r] = (Integer.parseInt(tData[i]) == 2) ? true : false;
+				boolean brick = (Integer.parseInt(tData[i]) == 2) ? true : false;;
+				collisionMask[c][r] = brick;
+				bricks[c][r] = (brick) ? 1 : 0;
 			}
 		}
 	}
 
 	@Override
-	public boolean insideBrick(int xWorld, int yWorld) {
-		return collisionMask[xWorld][yWorld];
-	}
-	
-	public Point worldToMap(int xWorld, int yWorld) {
-		return new Point(xWorld*stepX, yWorld*stepY);
-	}
-
-	@Override
-	public void drawBricks(Graphics g, int xStart, int xEnd, int xBrick) {
+	public void display(Graphics2D g) {
 		// Ignore
 		// TMX files are just being used for collision, do not draw with them
 	}
 
 	@Override
-	public void display(Graphics g) {
-		// Ignore
-		// TMX files are just being used for collision, do not draw with them
+	public int getBrickWidth() {
+		return stepX;
 	}
 
 	@Override
-	public Point floor(int xWorld, int yWorld) {
-		int y = yWorld;
-		
-		while (!collisionMask[xWorld][y])
-			y++;
-		
-		return new Point(xWorld, y);
-	}
-
-	@Override
-	public int distToFloor(int xWorld, int yWorld) {
-		int y = yWorld;
-		
-		while (!collisionMask[xWorld][y])
-			y++;
-		
-		return y-yWorld;
+	public int getBrickHeight() {
+		return stepY;
 	}
 	
 	
