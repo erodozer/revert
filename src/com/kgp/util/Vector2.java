@@ -1,6 +1,4 @@
-package revert.util;
-
-import java.awt.Point;
+package com.kgp.util;
 
 /**
  * Simple class for handling Vector math of vectors with a length of 2.
@@ -9,19 +7,19 @@ import java.awt.Point;
  */
 public class Vector2 {
 
-	public float a;
-	public float b;
+	public float x;
+	public float y;
 	
 	public Vector2(float a, float b)
 	{
-		this.a = a;
-		this.b = b;
+		this.x = a;
+		this.y = b;
 	}
 	
 	public Vector2()
 	{
-		this.a = 0;
-		this.b = 0;
+		this.x = 0;
+		this.y = 0;
 	}
 	
 	/**
@@ -30,8 +28,8 @@ public class Vector2 {
 	 */
 	public void mult(Vector2 v)
 	{
-		a = a*v.a + a*v.b;
-		b = b*v.a + b*v.b;
+		x = x*v.x + x*v.y;
+		y = y*v.x + y*v.y;
 	}
 	
 	/**
@@ -40,8 +38,8 @@ public class Vector2 {
 	 */
 	public void mult(float s)
 	{
-		a *= s;
-		b *= s;
+		x *= s;
+		y *= s;
 	}
 	
 	/**
@@ -50,8 +48,8 @@ public class Vector2 {
 	 */
 	public void add(Vector2 v)
 	{
-		a -= v.a;
-		b -= v.b;
+		x -= v.x;
+		y -= v.y;
 	}
 	
 	/**
@@ -60,8 +58,8 @@ public class Vector2 {
 	 */
 	public void cpy(Vector2 v)
 	{
-		a = v.a;
-		b = v.b;
+		x = v.x;
+		y = v.y;
 	}
 	
 	/**
@@ -70,14 +68,14 @@ public class Vector2 {
 	 */
 	public void sub(Vector2 v)
 	{
-		a -= v.a;
-		b -= v.b;
+		x -= v.x;
+		y -= v.y;
 	}
 	
 	public void translate(float f, float g)
 	{
-		a += f;
-		b += g;
+		x += f;
+		y += g;
 	}
 	
 	/**
@@ -88,8 +86,8 @@ public class Vector2 {
 	{
 		Vector2 v = new Vector2();
 		float l = length();
-		v.a = a / l;
-		v.b = b / l;
+		v.x = x / l;
+		v.y = y / l;
 		return v;
 	}
 	
@@ -102,8 +100,8 @@ public class Vector2 {
 	{
 		Vector2 v2 = new Vector2();
 		float l = distance(v2);
-		v2.a = a / l;
-		v2.b = b / l;
+		v2.x = x / l;
+		v2.y = y / l;
 		return v2;
 	}
 	
@@ -114,7 +112,7 @@ public class Vector2 {
 	 */
 	public float dot(Vector2 v)
 	{
-		return a * v.a + b * v.b;
+		return x * v.x + y * v.y;
 	}
 	
 	/**
@@ -123,12 +121,12 @@ public class Vector2 {
 	 */
 	public float length()
 	{
-		return (float)Math.sqrt((a * a) + (b * b)); 
+		return (float)Math.sqrt((x * x) + (y * y)); 
 	}
 	
 	public float angle()
 	{
-		return (float)Math.atan2(a, b);
+		return (float)Math.atan2(x, y);
 	}
 	
 	/**
@@ -138,6 +136,11 @@ public class Vector2 {
 	 */
 	public float distance(Vector2 v)
 	{
-		return (float)Math.sqrt((v.a-a)*(v.a-a) + (v.b-b)*(v.b-b));
+		return (float)Math.sqrt((v.x-x)*(v.x-x) + (v.y-y)*(v.y-y));
+	}
+
+	public void cpy(float x, float y) {
+		this.x = x;
+		this.y = y;
 	}
 }

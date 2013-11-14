@@ -50,11 +50,9 @@ public abstract class BrickManager {
 	
 	/**
 	 * convert world coord (x,y) to a map index tuple
-	 * @param xWorld
-	 * @param yWorld
 	 * @return
 	 */
-	public Point worldToMap(int xWorld, int yWorld)
+	public Point worldToMap(float xWorld, float yWorld)
 	{
 		//System.out.println("World: " + xWorld + ", " + yWorld);
 
@@ -177,13 +175,13 @@ public abstract class BrickManager {
 	 * calculate the distance been them and the bottom of the brick so they can 
 	 * bounce their head off properly.
 	 */
-	public int checkBrickBase(int xWorld, int yWorld, int step)
+	public int checkBrickBase(float xWorld, float yWorld, int step)
 	{
 		Point map = worldToMap(xWorld, yWorld - step);
 		if (this.brickExists(map)) {
 			Point world = mapToWorld(map);
 			world.y += this.getBrickHeight();
-			int distance = world.y - yWorld;
+			int distance = (int)(world.y - yWorld);
 			
 			return distance;
 		}
@@ -196,14 +194,14 @@ public abstract class BrickManager {
 	 * Checks to see if their next step will be within a brick, and if it is
 	 * calculate the distance been them and the top of the brick so they can land properly.
 	 */
-	public int checkBrickTop(int xWorld, int yWorld, int step)
+	public int checkBrickTop(float xWorld, float yWorld, int step)
 	{
 		Point map = worldToMap(xWorld, yWorld + step);
 		//System.out.println(map.y);
 		if (this.brickExists(map))
 		{
 			Point world = mapToWorld(map);
-			int distance = world.y - yWorld;
+			int distance = (int)(world.y - yWorld);
 			return distance;	
 		}
 		return step;

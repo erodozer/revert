@@ -29,14 +29,19 @@ package com.kgp.level;
  is no brick below it. It tests this using insideBrick() also.
  */
 
-import java.awt.*;
-import java.awt.image.*;
-import java.util.*;
-import java.io.*;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 import revert.util.BrickManager;
 
 import com.kgp.imaging.ImagesLoader;
+import com.kgp.util.Vector2;
 
 public class BricksManager extends BrickManager  {
 	private final static String BRICKS_DIR = "Levels/";
@@ -240,9 +245,9 @@ public class BricksManager extends BrickManager  {
 		}
 	}
 
-	public void update(Point position)
+	public void update(Vector2 loc)
 	{
-		xRange = position.x;
+		xRange = (int)loc.x;
 		left = (int)((xRange - pWidth/2f) / (float)imWidth);
 		right = (int)Math.ceil((xRange + pWidth/2f) / (float)imWidth);
 		

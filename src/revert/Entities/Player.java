@@ -26,17 +26,16 @@ package revert.Entities;
  to the BricksManager object.
  */
 
-import java.awt.*;
+import java.awt.Point;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import revert.MainScene.World;
-import revert.util.Vector2;
 
 import com.kgp.imaging.ImagesLoader;
-import com.kgp.imaging.Sprite;
 import com.kgp.level.BricksManager;
+import com.kgp.util.Vector2;
 
 public class Player extends Actor {
 	private static double DURATION = 0.5; // secs
@@ -58,7 +57,6 @@ public class Player extends Actor {
 
 	private BricksManager brickMan;
 
-	private int normalHeight;
 	private int tileHeight; //this sprite's height in tiles
 	
 	/*
@@ -98,7 +96,6 @@ public class Player extends Actor {
 		
 		//set a normal height from the initial standing position
 		//this allows for landing in a somewhat natural looking animation
-		this.normalHeight = this.getHeight();
 		this.tileHeight = this.getHeight() / w.getLevel().getBrickHeight();
 
 		vertMoveMode = NOT_JUMPING;
@@ -314,15 +311,15 @@ public class Player extends Actor {
 	 */
 	public void lookAt(Point2D target, AffineTransform m)
 	{
-		Point2D p = m.transform(position, null);
-		aim.a = (float) target.getX();
-		aim.b = (float) target.getY();
+		Point2D p = m.transform(new Point((int)position.x, (int)position.y), null);
+		aim.x = (float) target.getX();
+		aim.y = (float) target.getY();
 		
 		aim.translate((float)-p.getX(), (float)-p.getY());
 		aim = aim.normalize();
 		aim.mult(80);
 		
-		flipX = (aim.a < 0);
+		flipX = (aim.x < 0);
 	}
 	
 	public Vector2 getAim()

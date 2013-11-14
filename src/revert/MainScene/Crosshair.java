@@ -1,8 +1,5 @@
 package revert.MainScene;
 
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
-
 import revert.Entities.Player;
 
 import com.kgp.imaging.ImagesLoader;
@@ -19,11 +16,6 @@ public class Crosshair extends Sprite {
 	 * Sprite to lock the crosshair relative to
 	 */
 	private Player parent;
-	
-	/**
-	 * Angle in relation to the parent sprite that the crosshair is rotated to
-	 */
-	private float angle;
 	
 	/**
 	 * Creates a crosshair linked to a sprite
@@ -46,9 +38,9 @@ public class Crosshair extends Sprite {
 	 */
 	public void updateSprite()
 	{
-		this.position.x = (int)(this.parent.getXPosn() + this.parent.getAim().a);
-		this.position.y = (int)(this.parent.getYPosn() + this.parent.getAim().b);
-		this.angle = (int)this.parent.getAim().angle();
+		this.position.x = (int)(this.parent.getXPosn() + this.parent.getAim().x);
+		this.position.y = (int)(this.parent.getYPosn() + this.parent.getAim().y);
+		//this.angle = (int)this.parent.getAim().angle();
 		super.updateSprite();
 	}
 	

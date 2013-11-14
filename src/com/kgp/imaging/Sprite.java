@@ -1,9 +1,14 @@
 package com.kgp.imaging;
 
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
-import java.awt.image.*;
+import java.awt.image.BufferedImage;
+
+import com.kgp.util.Vector2;
 
 /**
  *  Sprite.java
@@ -43,11 +48,11 @@ public class Sprite {
 	/**
 	 * Amount the sprite will move per update cycle
 	 */
-	protected Point velocity;
+	protected Vector2 velocity;
 	/**
 	 * Real position of the sprite in the world
 	 */
-	protected Point position;
+	protected Vector2 position;
 	
 	protected float angle;
 	
@@ -64,10 +69,10 @@ public class Sprite {
 	protected int period;
 	protected double duration;
 	
-	public Sprite(int x, int y, int w, int h, ImagesLoader imsLd, String name) {
-		this.position = new Point(x, y);
+	public Sprite(float x, float y, int w, int h, ImagesLoader imsLd, String name) {
+		this.position = new Vector2(x, y);
 
-		this.velocity = new Point(XSTEP, YSTEP);
+		this.velocity = new Vector2(XSTEP, YSTEP);
 
 		this.pDimensions = new Dimension(w, h);
 
@@ -160,12 +165,10 @@ public class Sprite {
 
 	/**
 	 * Forcefully sets the actual position of the sprite
-	 * @param x
-	 * @param y
 	 */
-	public void setPosition(int x, int y) {
-		this.position.x = x;
-		this.position.y = y;
+	public void setPosition(float f, float g) {
+		this.position.x = f;
+		this.position.y = g;
 	}
 
 	/**
@@ -177,20 +180,19 @@ public class Sprite {
 		this.position.translate(xDist, yDist);
 	}
 
-	public int getXPosn() {
+	public float getXPosn() {
 		return this.position.x;
 	}
 
-	public int getYPosn() {
+	public float getYPosn() {
 		return this.position.y;
 	}
 	
 	/**
 	 * The sprite's position
-	 * @return a copy of the point so any alterations do not affect the sprite
 	 */
-	public Point getPosn() {
-		return new Point(this.position);
+	public Vector2 getPosn() {
+		return this.position;
 	}
 
 	/**
@@ -198,16 +200,16 @@ public class Sprite {
 	 * @param x - horizontal shift value
 	 * @param y - vertical shift value
 	 */
-	public void setVelocity(int dx, int dy) {
+	public void setVelocity(float dx, float dy) {
 		this.velocity.x = dx;
 		this.velocity.y = dy;
 	}
 
-	public int getXVelocity() {
+	public float getXVelocity() {
 		return this.velocity.x;
 	}
 
-	public int getYVelocity() {
+	public float getYVelocity() {
 		return this.velocity.y;
 	}
 
@@ -216,8 +218,8 @@ public class Sprite {
 	 */
 	public Rectangle getMyRectangle() {
 		//set the rectangle's position only when requested
-		myRect.x = this.position.x;
-		myRect.y = this.position.y;
+		myRect.x = (int) this.position.x;
+		myRect.y = (int) this.position.y;
 		
 		return myRect;
 	}
@@ -260,7 +262,7 @@ public class Sprite {
 			// if the sprite has no image, draw a yellow circle instead
 			if (image == null) { 
 				g.setColor(Color.yellow);
-				g.fillOval(this.position.x, this.position.y, SIZE, SIZE);
+				g.fillOval((int)this.position.x, (int)this.position.y, SIZE, SIZE);
 				g.setColor(Color.black);
 			} 
 			else {

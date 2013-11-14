@@ -1,5 +1,19 @@
 package revert.MainScene;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+
+import revert.Entities.Player;
+import revert.util.AssetsManager;
+import revert.util.GameState;
+
 import com.kgp.core.GameController;
 import com.kgp.core.GameFrame;
 import com.kgp.core.GamePanel;
@@ -7,15 +21,6 @@ import com.kgp.imaging.ImagesLoader;
 import com.kgp.imaging.ImagesPlayerWatcher;
 import com.kgp.level.BricksManager;
 import com.kgp.level.RibbonsManager;
-
-import java.awt.geom.AffineTransform;
-import java.awt.image.*;
-import java.awt.event.*;
-import java.awt.*;
-
-import revert.Entities.Player;
-import revert.util.AssetsManager;
-import revert.util.GameState;
 
 /**
  * JackPanel.java Andrew Davison, April 2005, ad@fivedots.coe.psu.ac.th
@@ -66,7 +71,6 @@ public class Scene extends GamePanel implements Runnable, ImagesPlayerWatcher {
 	private int score = 0;
 
 	// to display the title/help screen
-	private boolean showHelp;
 	private BufferedImage helpIm;
 
 	private int numHits = 0; // the number of times 'jack' has been hit
@@ -177,25 +181,18 @@ public class Scene extends GamePanel implements Runnable, ImagesPlayerWatcher {
 				parallaxBg.update(jack.getMovement());
 				parallaxFg.update(jack.getMovement());
 			}
+			// transform a camera that follows the player around
+			camera.cpy(jack.getXPosn(), jack.getYPosn());
+			camMatrix.setToTranslation(-camera.x, -camera.y);
+			camMatrix.translate(0, PHEIGHT / 2);
+			camMatrix.translate(PWIDTH / 2, 0);
+			camMatrix.scale(zoom, zoom);
 		}
 	}
 
 	protected void draw(Graphics2D dbg) {
 
-		// transform a camera that follows the player around
-		camera.move(jack.getXPosn(), jack.getYPosn());
-		// if (camera.y - PHEIGHT / 2 > 0 && camera.y + PHEIGHT/2 <
-		// bricksMan.height())
-		// {
-		camMatrix.setToTranslation(-camera.x, -camera.y);
-		camMatrix.translate(0, PHEIGHT / 2);
-		// }
-		// else
-		// {
-		// camMatrix.setToTranslation(-camera.x, 0);
-		// }
-		camMatrix.translate(PWIDTH / 2, 0);
-		camMatrix.scale(zoom, zoom);
+		
 
 		// draw a white background
 		dbg.setColor(Color.white);

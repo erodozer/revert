@@ -29,17 +29,23 @@ package com.kgp.core;
  events are caught.
  */
 
-import javax.swing.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
+import java.awt.geom.AffineTransform;
+
+import javax.swing.JPanel;
 
 import revert.util.GameState;
 
-import com.kgp.audio.ClipsLoader;
-import com.kgp.imaging.ImagesLoader;
 import com.kgp.imaging.ImagesPlayerWatcher;
-
-import java.awt.event.*;
-import java.awt.geom.AffineTransform;
-import java.awt.*;
+import com.kgp.util.Vector2;
 
 public abstract class GamePanel extends JPanel implements Runnable,
 		ImagesPlayerWatcher {
@@ -79,7 +85,7 @@ public abstract class GamePanel extends JPanel implements Runnable,
 	protected GameFrame parent;
 	
 	// provided camera for doing cool effects and following of the character
-	protected Point camera;
+	protected Vector2 camera;
 	protected volatile AffineTransform camMatrix;
 	
 	private volatile AffineTransform scalerMatrix;
@@ -106,7 +112,7 @@ public abstract class GamePanel extends JPanel implements Runnable,
 		msgsFont = new Font("SansSerif", Font.BOLD, 24);
 		metrics = this.getFontMetrics(msgsFont);
 		
-		camera = new Point(0, 0);
+		camera = new Vector2();
 		camMatrix = new AffineTransform();
 		scalerMatrix = new AffineTransform();
 	}
