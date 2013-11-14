@@ -27,9 +27,12 @@ package revert.Entities;
  */
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import revert.MainScene.World;
+import revert.util.Vector2;
 
 import com.kgp.imaging.ImagesLoader;
 import com.kgp.imaging.Sprite;
@@ -63,6 +66,11 @@ public class Player extends Actor {
 	 */
 	private Point map;
 
+	/*
+	 * the current point that the player is aiming at
+	 */
+	private Vector2 aim;
+	
 	private int mode;
 	
 	private int worldY;
@@ -86,6 +94,7 @@ public class Player extends Actor {
 		 * mid x- psoition.
 		 */
 		this.position.y = brickMan.findFloor(0, 0, false) - getHeight();
+		this.aim = new Vector2(this.position.x + 10, this.position.y);
 		
 		//set a normal height from the initial standing position
 		//this allows for landing in a somewhat natural looking animation
@@ -297,6 +306,28 @@ public class Player extends Actor {
 	public void attack() {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	/**
+	 * Have the player look towards a point in the world
+	 * @param p
+	 */
+	public void lookAt(Point2D target, AffineTransform m)
+	{
+		Point2D p = m.transform(position, null);
+		aim.a = (float) target.getX();
+		aim.b = (float) target.getY();
+		
+		aim.translate((float)-p.getX(), (float)-p.getY());
+		aim = aim.normalize();
+		aim.mult(80);
+		
+		flipX = (aim.a < 0);
+	}
+	
+	public Vector2 getAim()
+	{
+		return aim;
 	}
 
 	@Override

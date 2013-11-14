@@ -42,15 +42,8 @@ public class Controller extends GameController {
 		int x = e.getX();
 		int y = e.getY();
 		
-		Point2D p = new Point(x, y);
-		
-		cross.setAngle(p, panel.getMatrix());
-		
-		if (x < panel.getWidth()/2)
-			this.player.faceLeft();
-		else
-			this.player.faceRight();
-		
+		Point p = new Point(x, y);
+		this.player.lookAt(p, panel.getMatrix());
 	}
 
 	public void keyPressed(KeyEvent e) {

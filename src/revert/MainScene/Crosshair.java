@@ -3,6 +3,8 @@ package revert.MainScene;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
+import revert.Entities.Player;
+
 import com.kgp.imaging.ImagesLoader;
 import com.kgp.imaging.Sprite;
 
@@ -16,7 +18,7 @@ public class Crosshair extends Sprite {
 	/**
 	 * Sprite to lock the crosshair relative to
 	 */
-	private Sprite parent;
+	private Player parent;
 	
 	/**
 	 * Angle in relation to the parent sprite that the crosshair is rotated to
@@ -30,16 +32,13 @@ public class Crosshair extends Sprite {
 	 * @param s - sprite to link to
 	 * @param imsLd - image asset loader
 	 */
-	public Crosshair(int w, int h, Sprite s, ImagesLoader imsLd) {
+	public Crosshair(int w, int h, Player s, ImagesLoader imsLd) {
 		super(s.getXPosn(), s.getYPosn(), w, h, imsLd, "crosshair");
 		
 		this.parent = s;
 
 		this.velocity.x = 0;
 		this.velocity.y = 0;
-		
-		this.position.x = (int)(this.parent.getXPosn() + Math.cos(angle) * DIST);
-		this.position.y = (int)(this.parent.getYPosn() + Math.sin(angle) * DIST);
 	}
 	
 	/**
@@ -47,26 +46,10 @@ public class Crosshair extends Sprite {
 	 */
 	public void updateSprite()
 	{
-		this.position.x = (int)(this.parent.getXPosn() + Math.sin(angle) * DIST);
-		this.position.y = (int)(this.parent.getYPosn() + Math.cos(angle) * DIST);
-		
+		this.position.x = (int)(this.parent.getXPosn() + this.parent.getAim().a);
+		this.position.y = (int)(this.parent.getYPosn() + this.parent.getAim().b);
+		this.angle = (int)this.parent.getAim().angle();
 		super.updateSprite();
-	}
-
-	/**
-	 * Sets the position of the crosshair along the vector to the specified point
-	 * @param x
-	 * @param y
-	 */
-	public void setAngle(Point2D mouse, AffineTransform matrix)
-	{
-		Point2D loc = matrix.transform(parent.getPosn(), null);
-	
-		//find the angle between the vectors
-		double yDst = mouse.getY() - loc.getY();
-		double xDst = mouse.getX() - loc.getX();
-		
-		this.angle = (float)Math.atan2(xDst, yDst);
 	}
 	
 }
