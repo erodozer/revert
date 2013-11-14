@@ -60,6 +60,9 @@ public class World extends Observable{
 		this.bullets = new ArrayList<Bullet>();
 	}
 	
+	/**
+	 * Perform update operations on the objects in the world
+	 */
 	public void update()
 	{
 		ActorsRemoved action = new ActorsRemoved();
@@ -103,7 +106,6 @@ public class World extends Observable{
 		/*
 		if (enemies.size() < 0 && currentWave < waves)
 		{
-			this.enemies = genEnemies(this.enemyFactory.createWave(10));
 			this.startWave();
 		}
 		*/
@@ -130,16 +132,22 @@ public class World extends Observable{
 		// TODO implement wave startup
 	}
 
+	/**
+	 * Sets the user controlled player entity belonging to this world instance
+	 * @param player
+	 */
 	public void setPlayer(Player player) {
 		this.player = player;
 	}
 
+	/**
+	 * Sets the brick level of the world
+	 * @param bricksMan
+	 */
 	public void setLevel(BricksManager bricksMan) {
 		this.level = bricksMan;
 		
 		Point[] spawnPoints = new Point[10];
-		
-		this.enemyFactory = new EnemyFactory(this, spawnPoints);
 	}
 	
 	public BricksManager getLevel()
@@ -155,12 +163,18 @@ public class World extends Observable{
 		this.waves = 5;
 	}
 
+	/**
+	 * @return the world's pixel width (same as the level's)
+	 */
 	public int getHeight() {
-		return this.level.getHeight();
+		return this.level.getMapHeight();
 	}
 	
+	/**
+	 * @return the world's pixel height (same as the level's)
+	 */
 	public int getWidth() {
-		return this.level.getWidth();
+		return this.level.getMapWidth();
 	}
 
 	/**
@@ -197,6 +211,9 @@ public class World extends Observable{
 		}
 	}
 
+	/**
+	 * @return game update rate
+	 */
 	public int getPeriod() {
 		return period;
 	}

@@ -48,11 +48,6 @@ public class Player extends Actor {
 	private static final int MAX_UP_STEPS = 8;
 	// max number of steps to take when rising upwards in a jump
 
-	private int period; // in ms; the game's animation period
-
-	private boolean isAttacking,
-					isJumping;
-
 	private int vertMoveMode;
 	/* can be NOT_JUMPING, RISING, or FALLING */
 	private int vertStep; // distance to move vertically in one step
@@ -112,7 +107,7 @@ public class Player extends Actor {
 		if (vertMoveMode == NOT_JUMPING) {
 			vertMoveMode = RISING;
 			upCount = 0;
-			this.setImage("royer_jmp");
+			setImage(getNextImage(), false);
 		}
 	}
 
@@ -166,7 +161,9 @@ public class Player extends Actor {
 		int yTrans = brickMan.checkBrickTop(this.getXPosn(), this.worldY, vertStep);
 		// System.out.println("checkIfFalling: " + yTrans);
 		if (yTrans != 0) // yes it could
+		{
 			vertMoveMode = FALLING; // set it to be in falling mode
+		}
 	} // end of checkIfFalling()
 
 	private void updateRising()
@@ -201,7 +198,7 @@ public class Player extends Actor {
 	 */
 	private void updateFalling()
 	{
-		int yTrans = brickMan.checkBrickTop(this.getXPosn(), worldY + (this.normalHeight - this.getHeight()), vertStep);
+		int yTrans = brickMan.checkBrickTop(this.getXPosn(), worldY, vertStep);
 		worldY += yTrans;
 		if (yTrans < vertStep)
 		{
@@ -243,7 +240,7 @@ public class Player extends Actor {
 		this.vertMoveMode = NOT_JUMPING;
 		this.upCount = 0;
 		
-		setImage(getNextImage());
+		setImage(getNextImage(), true);
 	}
 
 	/**
@@ -284,11 +281,11 @@ public class Player extends Actor {
 
 	@Override
 	protected String getNextImage() {
-		if (isJumping)
+		if (isJumping())
 		{
 			return "royer_jmp";
 		}
-		else if (moving != Movement.Still)
+		else if (!isStill())
 		{
 			return "royer_walking";
 		}
