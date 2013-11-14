@@ -102,7 +102,10 @@ public class Sprite {
 	public void setImage(String name, boolean loop)
 	{
 		this.setImage(name);
-		this.loopImage(period, duration);
+		if (loop)
+		{
+			this.loopImage(period, duration);
+		}
 	}
 
 	/**
@@ -230,7 +233,7 @@ public class Sprite {
 			// update the animation
 			if (isLooping)
 			{
-				player.updateTick();
+				this.player.updateTick();
 			}
 		}
 		

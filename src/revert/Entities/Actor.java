@@ -47,11 +47,6 @@ public abstract class Actor extends Sprite implements Observer{
 	
 	//list of names used to associate as a spritesheet for the character
 	protected String spritesheet;
-	
-	//vars used in looping images
-	protected int period;
-	protected double duration;
-	
 
 	/**
 	 * Distance away that the actor can see another
