@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
-import com.kgp.imaging.Sprite;
-
 import revert.MainScene.World;
 import revert.MainScene.notifications.ActorsRemoved;
 import revert.util.AssetsManager;
+
+import com.kgp.imaging.Sprite;
 
 /**
  * Generic actor class for sprites that move within the world space and are animated with states

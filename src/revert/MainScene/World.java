@@ -1,14 +1,16 @@
 package revert.MainScene;
 
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Observable;
 
-import revert.Entities.*;
+import revert.Entities.Actor;
+import revert.Entities.Bullet;
+import revert.Entities.Enemy;
+import revert.Entities.EnemyFactory;
+import revert.Entities.Player;
 import revert.MainScene.notifications.ActorsRemoved;
 
-import com.kgp.core.GamePanel;
 import com.kgp.level.BricksManager;
 
 /**

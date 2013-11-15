@@ -15,7 +15,7 @@ package com.kgp.level;
 
  */
 
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 
 import revert.Entities.Actor.Movement;

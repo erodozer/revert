@@ -32,7 +32,7 @@ package com.kgp.imaging;
 
 */
 
-import java.awt.image.*;
+import java.awt.image.BufferedImage;
 
 
 public class ImagesPlayer

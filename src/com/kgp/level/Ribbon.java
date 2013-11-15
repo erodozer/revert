@@ -18,12 +18,11 @@ package com.kgp.level;
  A collection of ribbons are managed by a RibbonsManager object.
  */
 
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 
 import revert.Entities.Actor.Movement;
-
-import java.awt.geom.AffineTransform;
-import java.awt.image.*;
 
 public class Ribbon {
 	private BufferedImage im;

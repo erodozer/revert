@@ -32,14 +32,21 @@ package com.kgp.core;
  Sprite class discussed in chapter 6.
  */
 
-import javax.swing.*;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+
+import javax.swing.JFrame;
 
 import com.kgp.audio.MidisLoader;
 
-import java.awt.*;
-import java.awt.event.*;
-
 public class GameFrame extends JFrame implements WindowListener, ComponentListener {
+	private static final long serialVersionUID = 8839701706801702692L;
+
 	public static int DEFAULT_FPS = 30; // 40 is too fast!
 
 	private GamePanel game; // where the game is drawn
