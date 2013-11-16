@@ -69,20 +69,24 @@ public class World extends Observable{
 	{
 		ActorsRemoved action = new ActorsRemoved();
 		
-		for (Actor a : allActors)
+		for (int i = 0, n = allActors.size(); i < n;)
 		{
+			Actor a = allActors.get(i);
 			if (!a.isAlive())
 			{
 				if (a instanceof Enemy)
 				{
-					enemies.remove(a);
+					enemies.remove(i);
+					allActors.remove(a);
 					action.actors.add(a);
 					this.setChanged();
+					n--;
 				}
 			}
 			else
 			{
 				a.updateSprite();
+				i++;
 			}
 		}
 		
@@ -102,7 +106,12 @@ public class World extends Observable{
 					e.hit(b);
 				}
 			}
-			
+			if ((b.getXPosn() > player.getPosn().x + player.getPWidth()/2) ||
+			   (b.getXPosn() < player.getPosn().x - player.getPWidth()/2) ||
+			   (b.getYPosn() > player.getPosn().y + player.getPHeight()/2) ||
+			   (b.getYPosn() < player.getPosn().y - player.getPHeight()/2)){
+				
+			}
 		}
 		
 		/*
@@ -144,6 +153,7 @@ public class World extends Observable{
 	{
 		// TODO implement wave startup
 		this.enemies = genEnemies(enemyFactory.createWave(15));
+		this.allActors.addAll(this.enemies);
 		currentWave++;
 		waves--;
 	}
@@ -232,5 +242,13 @@ public class World extends Observable{
 	public int getPeriod() {
 		return period;
 	}
+
+	public void add(Bullet b) {
+		this.bullets.add(b);
+	}
 	
+	public void add(Enemy e) {
+		this.enemies.add(e);
+		this.allActors.add(e);
+	}
 }
