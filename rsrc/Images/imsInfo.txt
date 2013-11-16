@@ -8,15 +8,9 @@ o title.gif
 o royer01.png
 o royer_jmp.png
 s royer_walking.png 8
-o jumpLeft.gif
-o jumpRight.gif
 o crosshair.png
 
 // scenery images
 o forest3.png
 o skyline.png
 o grass.png
-
-// fireball and its explosion
-o fireball.gif
-s explosion.gif 5
