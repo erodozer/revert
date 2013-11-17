@@ -7,8 +7,8 @@ import java.util.Observer;
 
 import revert.MainScene.World;
 import revert.MainScene.notifications.ActorsRemoved;
-import revert.util.AssetsManager;
 
+import com.kgp.core.AssetsManager;
 import com.kgp.imaging.Sprite;
 
 /**
@@ -114,7 +114,7 @@ public abstract class Actor extends Sprite implements Observer{
 	/**
 	 * Turns the actor left
 	 */
-	public void faceLeft()
+	final public void faceLeft()
 	{
 		this.facing = Direction.Left;
 	}
@@ -122,7 +122,7 @@ public abstract class Actor extends Sprite implements Observer{
 	/**
 	 * Turns the actor right
 	 */
-	public void faceRight()
+	final public void faceRight()
 	{
 		this.facing = Direction.Right;
 	}
