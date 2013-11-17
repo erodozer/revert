@@ -42,13 +42,10 @@ import java.awt.geom.AffineTransform;
 
 import javax.swing.JPanel;
 
-import revert.util.GameState;
-
 import com.kgp.imaging.ImagesPlayerWatcher;
 import com.kgp.util.Vector2;
 
-public abstract class GamePanel extends JPanel implements Runnable,
-		ImagesPlayerWatcher {
+public abstract class GamePanel extends JPanel implements Runnable {
 	private static final long serialVersionUID = -3619653557275641227L;
 
 	private static final int NO_DELAYS_PER_YIELD = 16;
@@ -62,12 +59,9 @@ public abstract class GamePanel extends JPanel implements Runnable,
 
 	private Thread animator; // the thread that performs the animation
 	private boolean running;
-	
-	
+
 	protected volatile GameState prevState = GameState.ProcessPaused;
 	protected volatile GameState state = GameState.ProcessPaused;
-	
-	protected long period; // period between drawing in _nanosecs_
 
 	// used at game termination
 	protected volatile boolean gameOver = false;
@@ -83,12 +77,10 @@ public abstract class GamePanel extends JPanel implements Runnable,
 	private long gameStartTime;
 
 	protected GameFrame parent;
-	
+
 	// provided camera for doing cool effects and following of the character
-	protected Vector2 camera;
+	protected volatile Vector2 camera;
 	protected volatile AffineTransform camMatrix;
-	
-	private volatile AffineTransform scalerMatrix;
 
 	/**
 	 * 
@@ -96,9 +88,8 @@ public abstract class GamePanel extends JPanel implements Runnable,
 	 * @param period
 	 *            - period in MSec
 	 */
-	public GamePanel(GameFrame parent, long period) {
+	public GamePanel(GameFrame parent) {
 		this.parent = parent;
-		this.period = period;
 
 		setDoubleBuffered(false);
 		setBackground(Color.white);
@@ -111,20 +102,17 @@ public abstract class GamePanel extends JPanel implements Runnable,
 		// set up message font
 		msgsFont = new Font("SansSerif", Font.BOLD, 24);
 		metrics = this.getFontMetrics(msgsFont);
-		
+
 		camera = new Vector2();
 		camMatrix = new AffineTransform();
-		scalerMatrix = new AffineTransform();
 	}
-	
-	public void setState(GameState s)
-	{
+
+	public void setState(GameState s) {
 		this.prevState = state;
 		this.state = s;
 	}
-	
-	public GameState getState()
-	{
+
+	public GameState getState() {
 		return this.state;
 	}
 
@@ -132,14 +120,6 @@ public abstract class GamePanel extends JPanel implements Runnable,
 	 * Initialize all game resources
 	 */
 	abstract protected void initGame();
-
-	/**
-	 * Key input handler for this panel
-	 * 
-	 * @param e
-	 *            - Key Event
-	 */
-	abstract protected void processKey(KeyEvent e);
 
 	/**
 	 * Wait for the JPanel to be added to the JFrame before starting
@@ -203,7 +183,7 @@ public abstract class GamePanel extends JPanel implements Runnable,
 
 			afterTime = System.nanoTime();
 			timeDiff = afterTime - beforeTime;
-			sleepTime = (period - timeDiff) - overSleepTime;
+			sleepTime = (Game.period - timeDiff) - overSleepTime;
 
 			if (sleepTime > 0) { // some time left in this cycle
 				try {
@@ -229,8 +209,8 @@ public abstract class GamePanel extends JPanel implements Runnable,
 			 * required FPS.
 			 */
 			int skips = 0;
-			while ((excess > period) && (skips < MAX_FRAME_SKIPS)) {
-				excess -= period;
+			while ((excess > Game.period) && (skips < MAX_FRAME_SKIPS)) {
+				excess -= Game.period;
 				gameUpdate(); // update state but don't render
 				skips++;
 			}
@@ -252,7 +232,8 @@ public abstract class GamePanel extends JPanel implements Runnable,
 
 	final protected void gameRender() {
 		if (dbImage == null) {
-			dbImage = createImage(this.getPreferredSize().width, this.getPreferredSize().height);
+			dbImage = createImage(this.getPreferredSize().width,
+					this.getPreferredSize().height);
 			if (dbImage == null) {
 				System.out.println("dbImage is null");
 				return;
@@ -260,19 +241,18 @@ public abstract class GamePanel extends JPanel implements Runnable,
 				dbg = dbImage.getGraphics();
 		}
 
-		draw((Graphics2D)dbg);
+		draw((Graphics2D) dbg);
 	}
-	
+
 	/**
 	 * Draw's this panel's graphics buffer to the display
 	 */
 	final protected void paintScreen() {
 		Graphics2D g;
 		try {
-			g = (Graphics2D)this.getGraphics();
-			if ((g != null) && (dbImage != null))
-			{
-				g.drawImage(dbImage, scalerMatrix, null);
+			g = (Graphics2D) this.getGraphics();
+			if ((g != null) && (dbImage != null)) {
+				g.drawImage(dbImage, 0, 0, this.getWidth(), this.getHeight(), 0, 0, this.getPreferredSize().width, this.getPreferredSize().height, this);
 			}
 			// Sync the display on some systems.
 			// (on Linux, this fixes event queue problems)
@@ -281,11 +261,6 @@ public abstract class GamePanel extends JPanel implements Runnable,
 		} catch (Exception e) {
 			System.out.println("Graphics context error: " + e);
 		}
-	}
-	
-	public void setSize(Dimension d)
-	{
-		this.scalerMatrix.setToScale(d.width/(float)this.getPreferredSize().width, d.height/(float)this.getPreferredSize().height);
 	}
 
 	/**

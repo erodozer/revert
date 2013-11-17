@@ -44,7 +44,7 @@ import javax.swing.JFrame;
 
 import com.kgp.audio.MidisLoader;
 
-public class GameFrame extends JFrame implements WindowListener, ComponentListener {
+public class GameFrame extends JFrame implements WindowListener {
 	private static final long serialVersionUID = 8839701706801702692L;
 
 	public static int DEFAULT_FPS = 30; // 40 is too fast!
@@ -52,14 +52,11 @@ public class GameFrame extends JFrame implements WindowListener, ComponentListen
 	private GamePanel game; // where the game is drawn
 	private MidisLoader midisLoader;
 
-	public long period;
-	public int periodInMsec;
-
 	public GameFrame(String title, long period) {
 		super("JumpingJack");
 
-		this.period = period;
-		this.periodInMsec = (int) (period/1000000L);
+		Game.period = period;
+		Game.periodInMSec = (int)(period/1000000L);
 	}
 
 	public void setGame(GamePanel panel) {
@@ -70,12 +67,11 @@ public class GameFrame extends JFrame implements WindowListener, ComponentListen
 
 		Container c = getContentPane(); // default BorderLayout used
 		game = panel;
-		c.add(game, "Center");
+		c.add(game);
 
 		addWindowListener(this);
-		addComponentListener(this);
 		pack();
-		//setResizable(false);
+		setResizable(false);
 
 		Dimension res = Toolkit.getDefaultToolkit().getScreenSize();
 
@@ -114,28 +110,6 @@ public class GameFrame extends JFrame implements WindowListener, ComponentListen
 	public void windowOpened(WindowEvent e) {
 	}
 
-	@Override
-	public void componentHidden(ComponentEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void componentMoved(ComponentEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void componentResized(ComponentEvent arg0) {
-		game.setSize(this.getSize());
-	}
-
-	@Override
-	public void componentShown(ComponentEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
 
 } // end of JumpingJack class
 
