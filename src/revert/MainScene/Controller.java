@@ -7,13 +7,14 @@ import java.awt.event.MouseWheelEvent;
 
 import revert.Entities.BulletFactory;
 import revert.Entities.Player;
+import revert.Entities.Actor.Movement;
 import revert.MainScene.notifications.PlayerAttackNotification;
+import revert.MainScene.notifications.PlayerModeNotification;
+import revert.MainScene.notifications.PlayerMovementNotification;
 
 import com.kgp.core.GameController;
 import com.kgp.core.GamePanel;
 import com.kgp.core.GameState;
-import com.kgp.core.InputNotification;
-import com.kgp.core.InputNotification.Type;
 
 /**
  * Main controller class for handling the game input that alters the player in the world
@@ -53,46 +54,77 @@ public class Controller extends GameController {
 		int keyCode = e.getKeyCode();
 		// game-play keys
 		if (panel.getState() == GameState.Active) {
+			PlayerMovementNotification note = null;
 			// move the sprite and ribbons based on the arrow key pressed
 			if (keyCode == KeyEvent.VK_LEFT || keyCode == KeyEvent.VK_A )
-				this.player.moveLeft();
+			{
+				note = new PlayerMovementNotification(Movement.Left);
+				setChanged();
+			}
 			else if (keyCode == KeyEvent.VK_RIGHT || keyCode == KeyEvent.VK_D )
-				this.player.moveRight();
+			{
+				note = new PlayerMovementNotification(Movement.Right);
+				setChanged();
+			}
 			else if (keyCode == KeyEvent.VK_UP || keyCode == KeyEvent.VK_W )
-				this.player.jump(); // jumping has no effect on the
-									// bricks/ribbons
+			{
+				note = new PlayerMovementNotification(true);
+				setChanged();
+			}
 			else if ((keyCode == KeyEvent.VK_DOWN || keyCode == KeyEvent.VK_S ) && (!this.player.isJumping()))
-				this.player.stop();
+			{
+				note = new PlayerMovementNotification(Movement.Still);
+				setChanged();
+			}
+			
+			this.notifyObservers(note);
 		}
 	}
 
 	public void keyReleased(KeyEvent e) {
 		int keyCode = e.getKeyCode();
 		
+		PlayerModeNotification note = null;
+		
 		/*
 		 * Set attack modes
 		 */
 		if (keyCode == KeyEvent.VK_SHIFT) {
-			this.player.nextMode();
+			note = new PlayerModeNotification(true);
+			setChanged();
 		} 
 		else if (keyCode == KeyEvent.VK_1) {
-			this.player.setMode(1);
+			note = new PlayerModeNotification(1);
+			setChanged();
 		} 
 		else if (keyCode == KeyEvent.VK_2) {
-			this.player.setMode(2);
+			note = new PlayerModeNotification(2);
+			setChanged();
 		} 
 		else if (keyCode == KeyEvent.VK_3) {
-			this.player.setMode(3);
+			note = new PlayerModeNotification(3);
+			setChanged();
 		}
 
+		this.notifyObservers(note);
 	}
 
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
+		//scroll through attack modes
+		PlayerModeNotification note = null;
 		if (e.getWheelRotation() < 0)
-			this.player.prevMode();
+		{
+			note = new PlayerModeNotification(false);
+			setChanged();
+		}
 		else if (e.getWheelRotation() > 0)
-			this.player.nextMode();
+		{
+			note = new PlayerModeNotification(true);
+			setChanged();
+		}
+		this.notifyObservers(note);
+
 	}
 	
 	public void mouseReleased(MouseEvent e){

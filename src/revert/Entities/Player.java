@@ -27,7 +27,6 @@ package revert.Entities;
  */
 
 import java.awt.Point;
-import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -35,10 +34,9 @@ import java.util.Observable;
 
 import revert.MainScene.Controller;
 import revert.MainScene.World;
+import revert.MainScene.notifications.PlayerModeNotification;
+import revert.MainScene.notifications.PlayerMovementNotification;
 
-import com.kgp.core.Game;
-import com.kgp.core.InputNotification;
-import com.kgp.core.InputNotification.Type;
 import com.kgp.imaging.ImagesLoader;
 import com.kgp.level.BricksManager;
 import com.kgp.util.Vector2;
@@ -270,14 +268,14 @@ public class Player extends Actor {
 	/**
 	 * @param i - the attack mode to set the player to
 	 */
-	public void setMode(int i) {
+	private void setMode(int i) {
 		this.mode = i;
 	}
 
 	/**
 	 * Sets attack mode to one kind higher
 	 */
-	public void nextMode() {
+	private void nextMode() {
 		this.mode++;
 		if (this.mode > 2)
 			this.mode = 0;
@@ -286,7 +284,7 @@ public class Player extends Actor {
 	/**
 	 * Sets attack mode to one kind lower
 	 */
-	public void prevMode() {
+	private void prevMode() {
 		this.mode--;
 		if (this.mode < 0)
 			this.mode = 2;
@@ -362,6 +360,54 @@ public class Player extends Actor {
 	protected void reactOnOutOfView(Actor a) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	/**
+	 * Update on notifications
+	 */
+	public void update(Observable o, Object args)
+	{
+		super.update(o, args);
+		if (o instanceof Controller)
+		{
+			//handle movement commands
+			if (args instanceof PlayerMovementNotification)
+			{
+				PlayerMovementNotification note = (PlayerMovementNotification) args;
+				
+				if (note.jump)
+				{
+					jump();
+				}
+				else
+				{
+					if (note.movement == Movement.Left)
+						moveLeft();
+					else if (note.movement == Movement.Right)
+						moveRight();
+					else
+						stop();
+				}
+			}
+			//set attack mode
+			else if (args instanceof PlayerModeNotification)
+			{
+				PlayerModeNotification note = (PlayerModeNotification) args;
+				
+				if (note.next)
+				{
+					nextMode();
+				}
+				else if (note.prev)
+				{
+					prevMode();
+				}
+				else
+				{
+					setMode(note.mode);
+				}
+			}
+		}
 	}
 	
 }
