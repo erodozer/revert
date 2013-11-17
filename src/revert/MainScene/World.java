@@ -274,7 +274,6 @@ public class World extends Observable implements Observer{
 				if (player.hasAmmo())
 				{
 					this.add(bulletFactory.spawnBullet());
-					this.player.attack();
 				}
 			}
 		}

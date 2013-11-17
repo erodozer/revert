@@ -34,6 +34,7 @@ import java.util.Observable;
 
 import revert.MainScene.Controller;
 import revert.MainScene.World;
+import revert.MainScene.notifications.PlayerAttackNotification;
 import revert.MainScene.notifications.PlayerModeNotification;
 import revert.MainScene.notifications.PlayerMovementNotification;
 
@@ -42,8 +43,7 @@ import com.kgp.level.BricksManager;
 import com.kgp.util.Vector2;
 
 public class Player extends Actor {
-	private static double DURATION = 0.5; // secs
-	// total time to cycle through all the images
+	private static final float DURATION = 0.5f; // secs
 
 	private static final int NOT_JUMPING = 0;
 	private static final int RISING = 1;
@@ -323,6 +323,10 @@ public class Player extends Actor {
 		setImage(getNextImage(), false);
 	}
 	
+	private void reload() {
+		
+	}
+	
 	/**
 	 * Check if player can attack
 	 * @return boolean
@@ -408,6 +412,17 @@ public class Player extends Actor {
 				else
 				{
 					setMode(note.mode);
+				}
+			}
+			else if (args instanceof PlayerAttackNotification)
+			{
+				if (hasAmmo())
+				{
+					attack();
+				}
+				else
+				{
+					reload();
 				}
 			}
 		}
