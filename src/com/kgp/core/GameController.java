@@ -7,13 +7,14 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.util.Observable;
 
 /**
  * Generic Adapater for Handling the interfacing of Key and Mouse interactions
  * @author Nicholas Hydock
  *
  */
-public class GameController implements KeyListener, MouseMotionListener, MouseListener, MouseWheelListener {
+public class GameController extends Observable implements KeyListener, MouseMotionListener, MouseListener, MouseWheelListener {
 
 	@Override
 	public void mouseClicked(MouseEvent arg0) {

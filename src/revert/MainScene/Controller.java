@@ -5,11 +5,15 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 
+import revert.Entities.BulletFactory;
 import revert.Entities.Player;
+import revert.MainScene.notifications.PlayerAttackNotification;
 
 import com.kgp.core.GameController;
 import com.kgp.core.GamePanel;
 import com.kgp.core.GameState;
+import com.kgp.core.InputNotification;
+import com.kgp.core.InputNotification.Type;
 
 /**
  * Main controller class for handling the game input that alters the player in the world
@@ -89,6 +93,14 @@ public class Controller extends GameController {
 			this.player.prevMode();
 		else if (e.getWheelRotation() > 0)
 			this.player.nextMode();
-			
+	}
+	
+	public void mouseReleased(MouseEvent e){
+		if (e.getButton() == MouseEvent.BUTTON1)
+		{
+			//mouse clicked to fire a bullet
+			this.setChanged();
+			this.notifyObservers(new PlayerAttackNotification());
+		}
 	}
 }
