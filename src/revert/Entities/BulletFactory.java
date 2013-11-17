@@ -12,10 +12,9 @@ public class BulletFactory {
 	public BulletFactory(World world, Player p)
 	{
 		this.parent = p;
-		this.world = world;
 	}
 	
-	public void spawnBullet()
+	public Bullet spawnBullet()
 	{
 		Bullet b = new Bullet(world, parent.getMode());
 		Vector2 v = new Vector2();
@@ -29,7 +28,7 @@ public class BulletFactory {
 		v.mult(20);
 		b.setVelocity(v.x, v.y);
 		
-		world.add(b);
+		return b;
 	}
 	
 }

@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.util.Observable;
 
 import com.kgp.core.Game;
 import com.kgp.util.Vector2;
@@ -24,7 +25,7 @@ import com.kgp.util.Vector2;
  *  
  *  @author Andrew Davison, April 2005, ad@fivedots.coe.psu.ac.th
  */
-public class Sprite {
+public class Sprite extends Observable {
 	// default step sizes (how far to move in each update)
 	private static final int XSTEP = 5;
 	private static final int YSTEP = 5;

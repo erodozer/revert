@@ -27,13 +27,18 @@ package revert.Entities;
  */
 
 import java.awt.Point;
+import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Observable;
 
+import revert.MainScene.Controller;
 import revert.MainScene.World;
 
 import com.kgp.core.Game;
+import com.kgp.core.InputNotification;
+import com.kgp.core.InputNotification.Type;
 import com.kgp.imaging.ImagesLoader;
 import com.kgp.level.BricksManager;
 import com.kgp.util.Vector2;
@@ -72,7 +77,12 @@ public class Player extends Actor {
 	
 	private int mode;
 	
+	//general timer used for mode switching/response
+	private int timer;
+	
 	private int worldY;
+
+	private int ammo;
 
 	public Player(World w, ImagesLoader imsLd) {
 		super(w, "royer01", new ArrayList());
@@ -300,10 +310,24 @@ public class Player extends Actor {
 		return "royer01";
 	}
 
+	/**
+	 * Respond to firing a bullet
+	 */
 	@Override
 	public void attack() {
-		// TODO Auto-generated method stub
-		
+		ammo--;
+		timer = 100;
+		isAttacking = true;
+		stop();
+		setImage(getNextImage(), false);
+	}
+	
+	/**
+	 * Check if player can attack
+	 * @return boolean
+	 */
+	public boolean hasAmmo() {
+		return ammo > 0;
 	}
 	
 	/**
@@ -339,6 +363,6 @@ public class Player extends Actor {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
 }
 

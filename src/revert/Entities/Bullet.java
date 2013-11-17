@@ -1,8 +1,8 @@
 package revert.Entities;
 
 import revert.MainScene.World;
-import revert.util.AssetsManager;
 
+import com.kgp.core.AssetsManager;
 import com.kgp.imaging.ImagesLoader;
 import com.kgp.imaging.Sprite;
 

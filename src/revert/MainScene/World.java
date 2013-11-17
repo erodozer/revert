@@ -3,13 +3,16 @@ package revert.MainScene;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.Observable;
+import java.util.Observer;
 
 import revert.Entities.Actor;
 import revert.Entities.Bullet;
+import revert.Entities.BulletFactory;
 import revert.Entities.Enemy;
 import revert.Entities.EnemyFactory;
 import revert.Entities.Player;
 import revert.MainScene.notifications.ActorsRemoved;
+import revert.MainScene.notifications.PlayerAttackNotification;
 import revert.MainScene.notifications.WorldNotification;
 
 import com.kgp.core.Game;
@@ -20,7 +23,7 @@ import com.kgp.level.BricksManager;
  * @author nhydock
  *
  */
-public class World extends Observable{
+public class World extends Observable implements Observer{
 
 	private static int HIT_BONUS = 10;
 	private static int KILL_BONUS = 100;
@@ -55,7 +58,8 @@ public class World extends Observable{
 	private BricksManager level;
 
 	private EnemyFactory enemyFactory;
-
+	private BulletFactory bulletFactory;
+	
 	private int score;
 	private int time;
 	private int hp;
@@ -176,6 +180,7 @@ public class World extends Observable{
 	 */
 	public void setPlayer(Player player) {
 		this.player = player;
+		this.bulletFactory = new BulletFactory(this, player);
 	}
 
 	/**
@@ -255,5 +260,23 @@ public class World extends Observable{
 	public void add(Enemy e) {
 		this.enemies.add(e);
 		this.allActors.add(e);
+	}
+
+	/**
+	 * Handle notifications from the controller
+	 */
+	@Override
+	public void update(Observable o, Object args) {
+		if (o instanceof Controller)
+		{
+			if (args instanceof PlayerAttackNotification)
+			{
+				if (player.hasAmmo())
+				{
+					this.add(bulletFactory.spawnBullet());
+					this.player.attack();
+				}
+			}
+		}
 	}
 }

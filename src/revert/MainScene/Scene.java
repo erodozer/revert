@@ -143,6 +143,8 @@ public class Scene extends GamePanel implements Runnable, ImagesPlayerWatcher {
 		this.addKeyListener(g);
 		this.addMouseListener(g);
 		this.addMouseMotionListener(g);
+		
+		g.addObserver(jack);
 
 		this.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
@@ -150,7 +152,9 @@ public class Scene extends GamePanel implements Runnable, ImagesPlayerWatcher {
 			}
 		});
 
-		hud = new HUD(jack, world, new Dimension(PWIDTH, PHEIGHT));
+		hud = new HUD(new Dimension(PWIDTH, PHEIGHT));
+		world.addObserver(hud);
+		jack.addObserver(hud);
 		
 		// prepare title/help screen
 		helpIm = images.getImage("title");
