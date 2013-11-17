@@ -57,23 +57,11 @@ public class Scene extends GamePanel implements Runnable, ImagesPlayerWatcher {
 	// image, bricks map, clips loader information files
 	private static final String BRICKS_INFO = "bricksInfo.txt";
 
-	private static final int MAX_HITS = 50;
-	// number of times jack can be hit by a fireball before the game is over
-
 	private Player jack; // the sprites
 	private Crosshair crosshair;
 
-	private long gameStartTime; // when the game started
-	private int timeSpentInGame;
-
-	// used at game termination
-	private volatile boolean gameOver = false;
-	private int score = 0;
-
 	// to display the title/help screen
 	private BufferedImage helpIm;
-
-	private int numHits = 0; // the number of times 'jack' has been hit
 
 	private float zoom = 1.0f;
 
@@ -82,6 +70,9 @@ public class Scene extends GamePanel implements Runnable, ImagesPlayerWatcher {
 
 	World world;
 
+	//display of in-game stats
+	HUD hud;
+	
 	public Scene(GameFrame parent) {
 		super(parent);
 
@@ -147,7 +138,7 @@ public class Scene extends GamePanel implements Runnable, ImagesPlayerWatcher {
 		this.world.setPlayer(jack);
 
 		crosshair = new Crosshair(PWIDTH, PHEIGHT, jack, images);
-
+		
 		GameController g = new Controller(jack, crosshair, this, world);
 		this.addKeyListener(g);
 		this.addMouseListener(g);
@@ -159,6 +150,8 @@ public class Scene extends GamePanel implements Runnable, ImagesPlayerWatcher {
 			}
 		});
 
+		hud = new HUD(jack, world, new Dimension(PWIDTH, PHEIGHT));
+		
 		// prepare title/help screen
 		helpIm = images.getImage("title");
 
@@ -192,8 +185,6 @@ public class Scene extends GamePanel implements Runnable, ImagesPlayerWatcher {
 
 	protected void draw(Graphics2D dbg) {
 
-		
-
 		// draw a white background
 		dbg.setColor(Color.white);
 		dbg.fillRect(0, 0, PWIDTH, PHEIGHT);
@@ -213,47 +204,12 @@ public class Scene extends GamePanel implements Runnable, ImagesPlayerWatcher {
 		crosshair.drawSprite(dbg);
 		dbg.setTransform(orig);
 
-		reportStats(dbg);
-
-		if (this.getState() == GameState.GameOver)
-			gameOverMessage(dbg);
+		hud.display(dbg);
 
 		// draw the help at the very front (if switched on)
 		if (this.getState() == GameState.Help)
 			dbg.drawImage(helpIm, (PWIDTH - helpIm.getWidth()) / 2,
 					(PHEIGHT - helpIm.getHeight()) / 2, null);
-	}
-
-	/**
-	 * Report the number of hits, and time spent playing
-	 * 
-	 * @param g
-	 */
-	private void reportStats(Graphics g) {
-		if (!gameOver) // stop incrementing the timer once the game is over
-			timeSpentInGame = (int) ((System.nanoTime() - gameStartTime) / 1000000000L); // ns
-																							// -->
-																							// secs
-		g.setColor(Color.red);
-		g.setFont(msgsFont);
-		g.drawString("Hits: " + numHits + "/" + MAX_HITS, 15, 25);
-		g.drawString("Time: " + timeSpentInGame + " secs", 15, 50);
-		g.setColor(Color.black);
-	}
-
-	/**
-	 * Center the game-over message in the panel.
-	 * 
-	 * @param g
-	 */
-	private void gameOverMessage(Graphics g) {
-		String msg = "Game Over. Your score: " + score;
-
-		int x = (PWIDTH - metrics.stringWidth(msg)) / 2;
-		int y = (PHEIGHT - metrics.getHeight()) / 2;
-		g.setColor(Color.white);
-		g.setFont(msgsFont);
-		g.drawString(msg, x, y);
 	}
 
 	@Override
