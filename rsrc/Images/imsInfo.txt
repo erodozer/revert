@@ -14,3 +14,6 @@ o crosshair.png
 o forest3.png
 o skyline.png
 o grass.png
+
+// fonts
+o bmfont.png

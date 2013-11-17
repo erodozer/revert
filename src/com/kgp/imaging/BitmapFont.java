@@ -9,6 +9,9 @@ import java.util.Scanner;
 /**
  * Allows the use of pngs/bmp/gif/whatever image files you want as a way of rendering strings
  * 
+ * Please realize the when drawing a string, the string is positioned by its baseline, not the
+ * top left coordinate of each glyph
+ * 
  * @author Nicholas Hydock
  */
 public class BitmapFont {
@@ -39,7 +42,9 @@ public class BitmapFont {
 	 */
 	private void parseGlyphs(String glyphFile)
 	{
-		InputStream data = this.getClass().getClassLoader().getResourceAsStream(FONTDIR+glyphFile+".font");
+		InputStream data = this.getClass().getClassLoader().getResourceAsStream(FONTDIR+glyphFile+".fnt");
+		
+		this.glyphs = new HashMap<Character, Glyph>();
 		
 		Scanner reader = new Scanner(data);
 		
@@ -49,25 +54,121 @@ public class BitmapFont {
 		//second line specifies so general values
 		this.lineHeight = reader.nextInt();
 	
+		System.out.println(lineHeight);
+		
 		while (reader.hasNextLine())
 		{
-			String line = reader.nextLine();
-		
-			Scanner lineParser = new Scanner(line);
-			
-			char character = (char)lineParser.nextInt();
-			int x = lineParser.nextInt();
-			int y = lineParser.nextInt();
-			int w = lineParser.nextInt();
-			int h = lineParser.nextInt();
-			int base = lineParser.nextInt();
+			char character = (char)reader.nextInt();
+			int x = reader.nextInt();
+			int y = reader.nextInt();
+			int w = reader.nextInt();
+			int h = reader.nextInt();
+			int base = reader.nextInt();
 			
 			this.glyphs.put(character, new Glyph(x, y, w, h, base, src));
-			
-			lineParser.close();
 		}
 		
 		reader.close();
+	}
+	
+	/**
+	 * Find the width in pixels of a string if rendered using this font
+	 * @param str
+	 */
+	public void stringWidth(String str)
+	{
+		int max = 0;
+		
+		for (int i = 0, width = 0; i < str.length(); i++)
+		{
+			Character c = str.charAt(i);
+			if (c == '\n' || c == '\r')
+			{
+				if (max < width)
+				{
+					max = width;
+					width = 0;
+				}
+			}
+			else if (c == ' ')
+			{
+				width += 10;
+			}
+			else
+			{
+				Glyph glyph = glyphs.get(c);
+				if (glyph != null)
+				{
+					width += glyph.w;
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Draws a string using the Bitmap font's set of glyphs
+	 * @param g
+	 * @param str
+	 * @param x
+	 * @param y
+	 * @param a - Alignment determining which side to anchor to
+	 */
+	public void drawString(Graphics2D g, String str, int x, int y, Alignment a)
+	{
+		if (a == Alignment.Center)
+		{
+		}
+		else if (a == Alignment.Right)
+		{
+			for (int i = str.length()-1, locX = x, locY = y; i >= 0; i-- )
+			{
+				Character c = str.charAt(i);
+				if (c == '\n' || c == '\r')
+				{
+					locY -= lineHeight;
+					locX = x;
+				}
+				else if (c == ' ')
+				{
+					locX -= 10;
+				}
+				else
+				{
+					Glyph glyph = glyphs.get(c);
+					if (glyph != null)
+					{
+						g.drawImage(glyph.img, locX - glyph.w, locY - glyph.topHeight, null);
+						locX -= glyph.w;
+					}
+				}
+			}
+		}
+		else
+		{
+			for (int i = 0, locX = x, locY = y; i < str.length(); i++ )
+			{
+				Character c = str.charAt(i);
+				if (c == '\n' || c == '\r')
+				{
+					locY += lineHeight;
+					locX = x;
+				}
+				else if (c == ' ')
+				{
+					locX += 10;
+				}
+				else
+				{
+					Glyph glyph = glyphs.get(c);
+					if (glyph != null)
+					{
+						g.drawImage(glyph.img, locX, locY - glyph.topHeight, null);
+						locX += glyph.w;
+					}
+				}
+			}
+		}
+		
 	}
 	
 	/**
@@ -79,28 +180,7 @@ public class BitmapFont {
 	 */
 	public void drawString(Graphics2D g, String str, int x, int y)
 	{
-		for (int i = 0, locX = 0, locY = y; i < str.length(); i++ )
-		{
-			Character c = str.charAt(i);
-			if (c == '\n' || c == '\r')
-			{
-				locY += lineHeight;
-				locX = x;
-			}
-			else if (c == ' ')
-			{
-				locX += 10;
-			}
-			else
-			{
-				Glyph glyph = glyphs.get(c);
-				if (glyph != null)
-				{
-					g.drawImage(glyph.img, locX, locY - glyph.topHeight, null);
-					locX += glyph.w;
-				}
-			}
-		}
+		this.drawString(g, str, x, y, Alignment.Left);
 	}
 	
 	/**
@@ -120,8 +200,17 @@ public class BitmapFont {
 			this.img = src.getSubimage(x, y, w, h);
 			this.w = w + 2;  //add salvage to the right for the next character that follows
 			this.h = h;
-			this.topHeight = h - baseline;
+			this.topHeight = h - (h-baseline);
 		}
 	}
 	
+	public static enum Alignment {
+		Left,
+		Right,
+		Center;
+	}
+
+	public int getLineHeight() {
+		return lineHeight;
+	}
 }
