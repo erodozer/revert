@@ -51,12 +51,9 @@ public class World extends Observable{
 	private BricksManager level;
 
 	private EnemyFactory enemyFactory;
-	
-	private int period;
 
-	public World(int p)
+	public World()
 	{
-		this.period = p;
 		this.enemies = new ArrayList<Enemy>();
 		this.allActors = new ArrayList<Actor>();
 		this.bullets = new ArrayList<Bullet>();
@@ -234,13 +231,6 @@ public class World extends Observable{
 		{
 			b.drawSprite(g);
 		}
-	}
-
-	/**
-	 * @return game update rate
-	 */
-	public int getPeriod() {
-		return period;
 	}
 
 	public void add(Bullet b) {

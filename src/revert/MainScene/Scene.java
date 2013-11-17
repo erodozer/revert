@@ -11,12 +11,12 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 import revert.Entities.Player;
-import revert.util.AssetsManager;
-import revert.util.GameState;
 
+import com.kgp.core.AssetsManager;
 import com.kgp.core.GameController;
 import com.kgp.core.GameFrame;
 import com.kgp.core.GamePanel;
+import com.kgp.core.GameState;
 import com.kgp.imaging.ImagesLoader;
 import com.kgp.imaging.ImagesPlayerWatcher;
 import com.kgp.level.BricksManager;
@@ -82,8 +82,8 @@ public class Scene extends GamePanel implements Runnable, ImagesPlayerWatcher {
 
 	World world;
 
-	public Scene(GameFrame parent, long period) {
-		super(parent, period);
+	public Scene(GameFrame parent) {
+		super(parent);
 
 		// set up message font
 		msgsFont = new Font("SansSerif", Font.BOLD, 24);
@@ -133,7 +133,7 @@ public class Scene extends GamePanel implements Runnable, ImagesPlayerWatcher {
 		BricksManager bricksMan = new BricksManager(PWIDTH, PHEIGHT,
 				BRICKS_INFO, images);
 		int brickMoveSize = bricksMan.getMoveSize();
-		this.world = new World((int) (this.period / 1000000L));
+		this.world = new World();
 		this.world.setLevel(bricksMan);
 
 		parallaxBg = new RibbonsManager(PWIDTH, PHEIGHT, brickMoveSize, images);
@@ -182,7 +182,7 @@ public class Scene extends GamePanel implements Runnable, ImagesPlayerWatcher {
 				parallaxFg.update(jack.getMovement());
 			}
 			// transform a camera that follows the player around
-			camera.cpy(jack.getXPosn(), jack.getYPosn());
+			camera.cpy(jack.getPosn());
 			camMatrix.setToTranslation(-camera.x, -camera.y);
 			camMatrix.translate(0, PHEIGHT / 2);
 			camMatrix.translate(PWIDTH / 2, 0);

@@ -33,6 +33,7 @@ import java.util.ArrayList;
 
 import revert.MainScene.World;
 
+import com.kgp.core.Game;
 import com.kgp.imaging.ImagesLoader;
 import com.kgp.level.BricksManager;
 import com.kgp.util.Vector2;
@@ -84,7 +85,6 @@ public class Player extends Actor {
 
 		setVelocity(0, 0); // no movement
 		
-		this.period = world.getPeriod();
 		this.duration = DURATION;
 		
 		/*
@@ -98,6 +98,8 @@ public class Player extends Actor {
 		//this allows for landing in a somewhat natural looking animation
 		this.tileHeight = this.getHeight() / w.getLevel().getBrickHeight();
 
+		this.moving = Movement.Still;
+		
 		vertMoveMode = NOT_JUMPING;
 		vertStep = brickMan.getBrickHeight() / 2;
 		// the jump step is half a brick's height
@@ -140,7 +142,6 @@ public class Player extends Actor {
 		
 		this.position.y = this.worldY - this.getHeight() - brickMan.getBrickHeight();
 		
-		this.flipX = !(facing == Direction.Right);
 		super.updateSprite();
 		
 		if (this.getXPosn() > world.getWidth())

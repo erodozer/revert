@@ -6,10 +6,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 
 import revert.Entities.Player;
-import revert.util.GameState;
 
 import com.kgp.core.GameController;
 import com.kgp.core.GamePanel;
+import com.kgp.core.GameState;
 
 /**
  * Main controller class for handling the game input that alters the player in the world

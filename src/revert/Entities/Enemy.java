@@ -2,6 +2,8 @@ package revert.Entities;
 
 import java.util.ArrayList;
 
+import com.kgp.core.Game;
+
 import revert.AI.EnemyAi;
 import revert.MainScene.World;
 
@@ -69,7 +71,7 @@ public class Enemy extends Actor {
 		//count down the aggro timer to leave agro mode
 		if (!aggro && aggroTimer > 0)
 		{
-			aggroTimer -= period;
+			aggroTimer -= Game.getPeriodInMSec();
 		}
 		
 		if (aggro)
