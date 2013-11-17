@@ -10,7 +10,9 @@ import revert.Entities.Enemy;
 import revert.Entities.EnemyFactory;
 import revert.Entities.Player;
 import revert.MainScene.notifications.ActorsRemoved;
+import revert.MainScene.notifications.WorldNotification;
 
+import com.kgp.core.Game;
 import com.kgp.level.BricksManager;
 
 /**
@@ -20,6 +22,9 @@ import com.kgp.level.BricksManager;
  */
 public class World extends Observable{
 
+	private static int HIT_BONUS = 10;
+	private static int KILL_BONUS = 100;
+	
 	/**
 	 * The playable entity in the world
 	 */
@@ -45,13 +50,16 @@ public class World extends Observable{
 	 * Projectiles sent by the player
 	 */
 	ArrayList<Bullet> bullets;
-	
 
 	//tiles of the level
 	private BricksManager level;
 
 	private EnemyFactory enemyFactory;
 
+	private int score;
+	private int time;
+	private int hp;
+	
 	public World()
 	{
 		this.enemies = new ArrayList<Enemy>();
@@ -78,6 +86,7 @@ public class World extends Observable{
 					action.actors.add(a);
 					this.setChanged();
 					n--;
+					score += KILL_BONUS;
 				}
 			}
 			else
@@ -101,6 +110,7 @@ public class World extends Observable{
 				if (b.getPosn().distance(e.getPosn()) < 10)
 				{
 					e.hit(b);
+					score += HIT_BONUS;
 				}
 			}
 			if ((b.getXPosn() > player.getPosn().x + player.getPWidth()/2) ||
@@ -119,6 +129,11 @@ public class World extends Observable{
 		*/
 		
 		this.level.update(this.player.getPosn());
+		
+		this.time += Game.getPeriodInMSec();
+		
+		this.setChanged();
+		this.notifyObservers(new WorldNotification(score, time));
 	}
 	
 	/**
