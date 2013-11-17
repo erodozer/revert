@@ -1,4 +1,4 @@
-package revert.util;
+package com.kgp.core;
 
 public enum GameState {
 
