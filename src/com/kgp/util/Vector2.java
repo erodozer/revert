@@ -3,10 +3,18 @@ package com.kgp.util;
 /**
  * Simple class for handling Vector math of vectors with a length of 2.
  * 
+ * Not the most capable vector class, but it's slim and powerful enough
+ *   to be sufficent for most 2D games.
+ * 
  * @author Nicholas Hydock
  */
 public class Vector2 {
 
+	/**
+	 * Basic Zero vector
+	 */
+	public static final Vector2 ZERO = new Vector2();
+	
 	public float x;
 	public float y;
 	
@@ -53,6 +61,17 @@ public class Vector2 {
 	}
 	
 	/**
+	 * Creates a copy of this vector
+	 */
+	public Vector2 clone()
+	{
+		Vector2 v = new Vector2();
+		v.x = x;
+		v.y = y;
+		return v;
+	}
+	
+	/**
 	 * Copy another vector's values to this one
 	 * @param v
 	 */
@@ -72,6 +91,11 @@ public class Vector2 {
 		y -= v.y;
 	}
 	
+	/**
+	 * Shifts this vector's values over
+	 * @param f
+	 * @param g
+	 */
 	public void translate(float f, float g)
 	{
 		x += f;
@@ -92,16 +116,16 @@ public class Vector2 {
 	}
 	
 	/**
-	 * Get the normalized vector that spans from this vector to another vector
+	 * Get the vector between two points
 	 * @param v
 	 * @return
 	 */
-	public Vector2 normalize(Vector2 v)
+	public Vector2 to(Vector2 v)
 	{
 		Vector2 v2 = new Vector2();
-		float l = distance(v2);
-		v2.x = x / l;
-		v2.y = y / l;
+		v2.x = v.x - x;
+		v2.y = v.y - y;
+		
 		return v2;
 	}
 	
@@ -124,9 +148,13 @@ public class Vector2 {
 		return (float)Math.sqrt((x * x) + (y * y)); 
 	}
 	
+	/**
+	 * Get the angle of this vector cast from 0,0
+	 * @return float
+	 */
 	public float angle()
 	{
-		return (float)Math.atan2(x, y);
+		return (float)Math.atan2(y, x);
 	}
 	
 	/**
@@ -139,8 +167,18 @@ public class Vector2 {
 		return (float)Math.sqrt((v.x-x)*(v.x-x) + (v.y-y)*(v.y-y));
 	}
 
-	public void cpy(float x, float y) {
+	/**
+	 * Sets both values of this vector at once
+	 * @param x
+	 * @param y
+	 */
+	public void set(float x, float y) {
 		this.x = x;
 		this.y = y;
+	}
+	
+	public String toString()
+	{
+		return String.format("X: %f Y: %f\n", x, y);
 	}
 }
