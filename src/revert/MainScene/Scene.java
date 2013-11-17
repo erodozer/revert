@@ -23,32 +23,32 @@ import com.kgp.level.BricksManager;
 import com.kgp.level.RibbonsManager;
 
 /**
- * JackPanel.java Andrew Davison, April 2005, ad@fivedots.coe.psu.ac.th
+ * Based heavily on Andrew Davison's JackPanel, this scene is the core manager
+ * for the game.  It extends the abstracted GamePanel, and can be switched out with
+ * other game panels for different experiences.
  * 
- * The game's drawing surface. Uses active rendering to a JPanel with the help
- * of Java 3D's timer.
+ * In this game, Revert, you play as Royer, as detective in the early 1800s, who
+ * after having worked on a case for 8 years, has started to see things changing 
+ * with the world.  Upon talking with others, it appears he may be the only one who 
+ * has a memory of how things used to be.
  * 
- * Set up the background and sprites, and update and draw them every period
- * nanosecs.
+ * Creatures of the shadows start to rise up and terrorize him wherever he goes
+ * as the world begins to devolve into a state of madness.  Some chase him and attack him
+ * while others just bother him with their existance.  The shadow-beings take
+ * a toll on his willpower, so he does what he can to eradicate them.
  * 
- * The background is a series of ribbons (wraparound images that move), and a
- * bricks ribbon which the JumpingSprite (called 'jack') runs and jumps along.
+ * As he cleanses the world of these creatures, everything starts to revert back
+ * to normal, and people's memories return.
  * 
- * 'Jack' doesn't actually move horizontally, but the movement of the background
- * gives the illusion that it is.
+ * In his struggles he has come to realize that the creatures are weak to 3 different
+ * kinds of attacks, all corresponding to their personality.  He has crafted
+ * a full arsenal of ammo for him to use when necessary.  Use this knowledge and power
+ * and restore the world to its rightful state once more.
  * 
- * There is a fireball sprite which tries to hit jack. It shoots out
- * horizontally from the right hand edge of the panel. After MAX_HITS hits, the
- * game is over. Each hit is accompanied by an animated explosion and sound
- * effect.
- * 
- * The game begins with a simple introductory screen, which doubles as a help
- * window during the course of play. When the help is shown, the game pauses.
- * 
- * The game is controlled only from the keyboard, no mouse events are caught.
+ * @author nhydock
  **/
 
-public class Scene extends GamePanel implements Runnable, ImagesPlayerWatcher {
+public class Scene extends GamePanel {
 	private static final long serialVersionUID = -588578363027322258L;
 
 	private static final int PWIDTH = 1280; // size of panel
@@ -57,7 +57,7 @@ public class Scene extends GamePanel implements Runnable, ImagesPlayerWatcher {
 	// image, bricks map, clips loader information files
 	private static final String BRICKS_INFO = "bricksInfo.txt";
 
-	private Player jack; // the sprites
+	private Player player; // the sprites
 	private Crosshair crosshair;
 
 	// to display the title/help screen
@@ -134,17 +134,17 @@ public class Scene extends GamePanel implements Runnable, ImagesPlayerWatcher {
 		parallaxBg.add("forest3", .35f);
 		parallaxFg.add("grass", 1.1f);
 
-		jack = new Player(this.world, images);
-		this.world.setPlayer(jack);
+		player = new Player(this.world, images);
+		this.world.setPlayer(player);
 
-		crosshair = new Crosshair(PWIDTH, PHEIGHT, jack, images);
+		crosshair = new Crosshair(PWIDTH, PHEIGHT, player, images);
 		
-		GameController g = new Controller(jack, crosshair, this, world);
+		GameController g = new Controller(player, crosshair, this, world);
 		this.addKeyListener(g);
 		this.addMouseListener(g);
 		this.addMouseMotionListener(g);
 		
-		g.addObserver(jack);
+		g.addObserver(player);
 
 		this.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
@@ -154,7 +154,7 @@ public class Scene extends GamePanel implements Runnable, ImagesPlayerWatcher {
 
 		hud = new HUD(new Dimension(PWIDTH, PHEIGHT));
 		world.addObserver(hud);
-		jack.addObserver(hud);
+		player.addObserver(hud);
 		
 		// prepare title/help screen
 		helpIm = images.getImage("title");
@@ -172,14 +172,14 @@ public class Scene extends GamePanel implements Runnable, ImagesPlayerWatcher {
 		if (this.getState() == GameState.Active) {
 			// stop jack and scenery on collision
 			world.update();
-			jack.updateSprite();
+			player.updateSprite();
 			crosshair.updateSprite();
-			if (!jack.isStill()) {
-				parallaxBg.update(jack.getMovement());
-				parallaxFg.update(jack.getMovement());
+			if (!player.isStill()) {
+				parallaxBg.update(player.getMovement());
+				parallaxFg.update(player.getMovement());
 			}
 			// transform a camera that follows the player around
-			camera.cpy(jack.getPosn());
+			camera.cpy(player.getPosn());
 			camMatrix.setToTranslation(-camera.x, -camera.y);
 			camMatrix.translate(0, PHEIGHT / 2);
 			camMatrix.translate(PWIDTH / 2, 0);
@@ -214,12 +214,6 @@ public class Scene extends GamePanel implements Runnable, ImagesPlayerWatcher {
 		if (this.getState() == GameState.Help)
 			dbg.drawImage(helpIm, (PWIDTH - helpIm.getWidth()) / 2,
 					(PHEIGHT - helpIm.getHeight()) / 2, null);
-	}
-
-	@Override
-	public void sequenceEnded(String imageName) {
-		// TODO Auto-generated method stub
-
 	}
 
 } // end of JackPanel class
