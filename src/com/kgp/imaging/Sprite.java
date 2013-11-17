@@ -71,7 +71,7 @@ public class Sprite extends Observable {
 	protected AffineTransform trans = AffineTransform.getTranslateInstance(0, 0);
 	protected boolean flipX = false;
 	
-	protected double duration;
+	protected float duration;
 	
 	public Sprite(float x, float y, int w, int h, ImagesLoader imsLd, String name) {
 		this.position = new Vector2();
@@ -130,11 +130,10 @@ public class Sprite extends Observable {
 	 * @param seqDuration
 	 *            - The total time for the loop to play the sequence
 	 */
-	public void loopImage(double seqDuration) {
+	public void loopImage(float seqDuration) {
 		if (imsLoader.numImages(imageName) > 1) {
 			player = null; // to encourage garbage collection of previous player
-			player = new ImagesPlayer(imageName, Game.getPeriodInMSec(), seqDuration, true,
-					imsLoader);
+			player = new ImagesPlayer(imageName, Game.getDeltaTime(), seqDuration, true, imsLoader);
 			isLooping = true;
 		} else {
 			System.out.println(imageName + " is not a sequence of images");

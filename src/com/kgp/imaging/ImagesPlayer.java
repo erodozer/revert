@@ -4,167 +4,206 @@ package com.kgp.imaging;
 // Andrew Davison, April 2005, ad@fivedots.coe.psu.ac.th
 
 /* ImagesPLayer is aimed at displaying the sequence of images
-   making up a 'n', 's', or 'g' image file, as loaded by
-   ImagesLoader.
+ making up a 'n', 's', or 'g' image file, as loaded by
+ ImagesLoader.
 
-   The ImagesPlayer constructor is supplied with the
-   intended duration for showing the entire sequence
-   (seqDuration). This is used to calculate showPeriod,
-   the amount of time each image should be shown before
-   the next image is displayed.
+ The ImagesPlayer constructor is supplied with the
+ intended duration for showing the entire sequence
+ (seqDuration). This is used to calculate showPeriod,
+ the amount of time each image should be shown before
+ the next image is displayed.
 
-   The animation period (animPeriod) input argument states
-   how often the ImagesPlayer's updateTick() method will be
-   called. The intention is that updateTick() will be called periodically
-   from the update() method in the top-level animation framework.
+ The animation period (animPeriod) input argument states
+ how often the ImagesPlayer's updateTick() method will be
+ called. The intention is that updateTick() will be called periodically
+ from the update() method in the top-level animation framework.
 
-   The current animation time is calculated when updateTick()
-   is called, and used to calculate imPosition, imPosition
-   specifies which image should be returned when getCurrentImage() 
-   is called.
+ The current animation time is calculated when updateTick()
+ is called, and used to calculate imPosition, imPosition
+ specifies which image should be returned when getCurrentImage() 
+ is called.
 
-   The ImagesPlayer can be set to cycle, stop, resume, or restart
-   at a given image position.
+ The ImagesPlayer can be set to cycle, stop, resume, or restart
+ at a given image position.
 
-   When the sequence finishes, a callback, sequenceEnded(), can
-   be invoked in a specified object implementing the 
-   ImagesPlayerWatcher interface.
+ When the sequence finishes, a callback, sequenceEnded(), can
+ be invoked in a specified object implementing the 
+ ImagesPlayerWatcher interface.
 
-*/
+ */
 
 import java.awt.image.BufferedImage;
+import java.util.Observable;
 
+public class ImagesPlayer extends Observable {
+	private String imName;
+	private boolean loop, done;
+	private ImagesLoader imsLoader;
 
-public class ImagesPlayer
-{
-  private String imName;
-  private boolean isRepeating, ticksIgnored;
-  private ImagesLoader imsLoader;
+	// period used by animation loop (in ms)
+	private float period;
+	private float periodPerFrame;
+	private float elapsedTime;
+	private float seqDuration;
 
-  private int animPeriod;
-         // period used by animation loop (in ms)
-  private long animTotalTime;
+	private int numImages;
+	private int imPosition; // position of current displayable image
 
-  private int showPeriod;     
-         // period the current image is shown (in ms)
-  private double seqDuration;   
-         // total duration of the entire image sequence (in secs)
+	/**
+	 * Create an animation player
+	 * 
+	 * @param nm
+	 *            - name of the image group
+	 * @param period
+	 *            - avg rate of change of the game (in sec)
+	 * @param duration
+	 *            - length of time it should take to play the entire animation
+	 *            (in sec)
+	 * @param loop
+	 *            - tell if the image should loop or play once
+	 * @param il
+	 *            - asset managed loader of images
+	 */
+	public ImagesPlayer(String nm, float period, float duration, boolean loop,
+			ImagesLoader il) {
+		imName = nm;
+		seqDuration = duration;
+		this.loop = loop;
+		this.period = period;
+		imsLoader = il;
 
-  private int numImages;
-  private int imPosition;     // position of current displayable image
+		if (seqDuration < 0.5f) {
+			System.out.println("Warning: minimum sequence duration is 0.5 sec.");
+			seqDuration = 0.5f;
+		}
 
-  private ImagesPlayerWatcher watcher = null;
+		if (!imsLoader.isLoaded(imName)) {
+			System.out.println(imName + " is not known by the ImagesLoader");
+			numImages = 0;
+			imPosition = -1;
+			done = true;
+		} else {
+			numImages = imsLoader.numImages(imName);
+			imPosition = 0;
+			done = false;
+			periodPerFrame = seqDuration / (float) numImages;
+			elapsedTime = 0;
+		}
+	}
 
+	/**
+	 * Update's the image player
+	 * <p/>
+	 * We assume this is called with every update cycle of the game
+	 */
+	public void updateTick() {
+		if (!done) {
+			// update the timer
+			elapsedTime += period;
+			System.out.println(elapsedTime);
+			if (elapsedTime > periodPerFrame) {
+				imPosition += (int) (elapsedTime / periodPerFrame);
+				elapsedTime %= periodPerFrame;
 
-  public ImagesPlayer(String nm, int ap, double d, 
-                                boolean isr, ImagesLoader il) 
-  {
-    imName = nm;
-    animPeriod = ap; 
-    seqDuration = d;
-    isRepeating = isr;
-    imsLoader = il;
+				if (imPosition >= numImages) {
+					// loop back
+					if (loop) {
+						imPosition %= numImages;
+					}
+					// stop image if past end and not looping
+					else {
+						// force the imPosition to be of the last image
+						imPosition = numImages - 1;
+						done = true;
+						// notify any watchers that it's done
+						this.setChanged();
+						this.notifyObservers(new SequenceEndNotification());
+					}
+				}
+			}
+		}
+	}
 
-    animTotalTime = 0L;
+	/**
+	 * Gets the image of the currently visible frame
+	 * @return BufferedImage
+	 */
+	public BufferedImage getCurrentImage() {
+		if (numImages != 0)
+			return imsLoader.getImage(imName, imPosition);
+		else
+			return null;
+	}
 
-    if (seqDuration < 0.5) {
-      System.out.println("Warning: minimum sequence duration is 0.5 sec.");
-      seqDuration = 0.5;
-    }
+	/**
+	 * Gets the image set index of the currently visible frame
+	 * @return int
+	 */
+	public int getCurrentPosition() {
+		return imPosition;
+	}
 
-    if (!imsLoader.isLoaded(imName)) {
-      System.out.println(imName + " is not known by the ImagesLoader");
-      numImages = 0;
-      imPosition = -1;
-      ticksIgnored = true;
-    }
-    else {
-      numImages = imsLoader.numImages(imName);
-      imPosition = 0;
-      ticksIgnored = false;
-      showPeriod = (int) (1000 * seqDuration / numImages);
-    }
-  } // end of ImagesPlayer()
+	/**
+	 * Forcably end the animation so it no longer updates
+	 */
+	public void stop() {
+		done = true;
+		;
+	}
 
+	/**
+	 * Get if the animation has been stopped
+	 * @return boolean
+	 */
+	public boolean isStopped() {
+		return done;
+	}
 
+	/**
+	 * Get if the animation is at its end
+	 * 
+	 * @return boolean
+	 */
+	public boolean atSequenceEnd() {
+		return ((imPosition == numImages - 1) && done);
+	}
 
-  public void updateTick()
-  /* We assume that this method is called every animPeriod ms */
-  {
-    if (!ticksIgnored) {
-      // update total animation time, modulo the animation sequence duration
-      animTotalTime = (animTotalTime + animPeriod) % (long)(1000 * seqDuration);
+	/**
+	 * Restart the animation to a specified frame
+	 * 
+	 * @param imPosn
+	 */
+	public void restartAt(int imPosn) {
+		if (numImages != 0) {
+			if ((imPosn < 0) || (imPosn > numImages - 1)) {
+				System.err.println("Out of range restart, starting at 0");
+				imPosn = 0;
+			}
 
-      // calculate current displayable image position
-      imPosition = (int) (animTotalTime / showPeriod);   // in range 0 to num-1
-      if ((imPosition == numImages-1) && (!isRepeating)) {  // at end of sequence
-        ticksIgnored = true;   // stop at this image
-        if (watcher != null)
-          watcher.sequenceEnded(imName);   // call callback
-      }
-    }
-  }  // end of updateTick()
+			imPosition = imPosn;
+			elapsedTime = 0;
+			done = false;
+		}
+	}
 
+	/**
+	 * Continue the animation from where it stopped
+	 */
+	public void resume() {
+		if (numImages != 0) {
+			if (imPosition < numImages) {
+				done = false;
+			}
+		}
+	}
 
+	/**
+	 * Notification to send out to observers that the animation has ended
+	 * 
+	 * @author nhydock
+	 * 
+	 */
+	public static class SequenceEndNotification {
+	}
 
-  public BufferedImage getCurrentImage()
-  { if (numImages != 0)
-      return imsLoader.getImage(imName, imPosition); 
-    else
-      return null; 
-  } // end of getCurrentImage()
-
-
-  public int getCurrentPosition()
-  {  return imPosition;  }
-
-
-
-  public void setWatcher(ImagesPlayerWatcher w)
-  {  watcher = w;  }
-   
-
-  public void stop()
-  /* updateTick() calls will no longer update the
-     total animation time or imPosition. */
-  {  ticksIgnored = true;  }
-
-
-  public boolean isStopped()
-  {  return ticksIgnored;  }
-
-
-  public boolean atSequenceEnd()
-  // are we at the last image and not cycling through them?
-  {  return ((imPosition == numImages-1) && (!isRepeating));  }
-
-
-
-  public void restartAt(int imPosn)
-  /* Start showing the images again, starting with image number
-     imPosn. This requires a resetting of the animation time as 
-     well. */
-  {
-    if (numImages != 0) {
-      if ((imPosn < 0) || (imPosn > numImages-1)) {
-        System.out.println("Out of range restart, starting at 0");
-        imPosn = 0;
-      }
-
-      imPosition = imPosn;
-      // calculate a suitable animation time
-      animTotalTime = (long) imPosition * showPeriod;
-      ticksIgnored = false;
-    }
-  }  // end of restartAt()
-
-
-  public void resume()
-  // start at previous image position
-  { 
-    if (numImages != 0)
-      ticksIgnored = false;
-  } 
-
-
-} // end of ImagesPlayer class
+}

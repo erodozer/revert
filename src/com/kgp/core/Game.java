@@ -20,7 +20,11 @@ public class Game {
 	{
 		Game.period = period;
 		Game.periodMs = (int)(period/1000000L);
-		Game.deltaTime = 1000f/(float)(periodMs);
+		Game.deltaTime = periodMs/1000f;
+		
+		System.out.println(period);
+		System.out.println(periodMs);
+		System.out.println(deltaTime);
 	}
 	
 	/**
