@@ -30,19 +30,16 @@ package com.kgp.core;
  */
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
-import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 
 import javax.swing.JPanel;
 
-import com.kgp.imaging.ImagesPlayerWatcher;
 import com.kgp.util.Vector2;
 
 public abstract class GamePanel extends JPanel implements Runnable {
@@ -83,10 +80,8 @@ public abstract class GamePanel extends JPanel implements Runnable {
 	protected volatile AffineTransform camMatrix;
 
 	/**
-	 * 
+	 * Create game content to be inserted into a frame
 	 * @param parent
-	 * @param period
-	 *            - period in MSec
 	 */
 	public GamePanel(GameFrame parent) {
 		this.parent = parent;
@@ -140,31 +135,40 @@ public abstract class GamePanel extends JPanel implements Runnable {
 		}
 	}
 
-	// ------------- game life cycle methods ------------
-	// called by the JFrame's window listener methods
-
+	/**
+	 * Resumes the game from being paused
+	 * <p/>
+	 * Called when the JFrame is activated / deiconified
+	 */
 	public void resumeGame()
-	// called when the JFrame is activated / deiconified
 	{
 		this.setState(this.prevState);
 	}
 
+	/**
+	 * Pauses the game from running
+	 * <p/>
+	 * Called when the JFrame is deactivated / iconified
+	 */
 	public void pauseGame()
-	// called when the JFrame is deactivated / iconified
 	{
 		this.setState(GameState.Paused);
 	}
 
+	/**
+	 * End the game when the JFrame is closing
+	 */
 	public void stopGame()
-	// called when the JFrame is closing
 	{
 		running = false;
 	}
 
 	// ----------------------------------------------
 
+	/**
+	 * Game thread runner
+	 */
 	final public void run()
-	/* The frames of the animation are drawn inside the while loop. */
 	{
 		long beforeTime, afterTime, timeDiff, sleepTime;
 		long overSleepTime = 0L;
@@ -230,6 +234,11 @@ public abstract class GamePanel extends JPanel implements Runnable {
 	 */
 	abstract protected void draw(Graphics2D g);
 
+	/**
+	 * Performs the rendering of the game to a buffer.
+	 * <p/>
+	 * Ensures that the game has a buffer to render to
+	 */
 	final protected void gameRender() {
 		if (dbImage == null) {
 			dbImage = createImage(this.getPreferredSize().width,

@@ -1,42 +1,8 @@
 package com.kgp.core;
 
-// JumpingJack.java
-// Andrew Davison, April 2005, ad@fivedots.coe.psu.ac.th
-
-/* A side-scroller showing how to implement background
- movement, bricks, and a jumping sprite (called 'jack)
- who can run, jump, and collide with bricks.
-
- Fireball shoot out from the rhs of the panel, and 
- will explode if they hit jack.
-
- The background is composed of multiple ribbons
- (wraparound images) which move at different rates 
- depending on how 'far back' they are in
- the scene. This effect is called parallax scrolling.
-
- -----
- Pausing/Resuming/Quiting are controlled via the frame's window
- listener methods.
-
- Active rendering is used to update the JPanel. See WormP for
- another example, with additional statistics generation.
-
- Using Java 3D's timer: J3DTimer.getValue()
- *  nanosecs rather than millisecs for the period
-
- The MidisLoader, ClipsLoader, ImagesLoader, and ImagesPlayer
- classes are used for music, images, and animation.
-
- The jumping and fireball sprites are subclasses of the 
- Sprite class discussed in chapter 6.
- */
-
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
@@ -44,26 +10,37 @@ import javax.swing.JFrame;
 
 import com.kgp.audio.MidisLoader;
 
+/**
+ * Generic game frame that provides a container for a game.
+ * 
+ * Based on an abstracted version of Andrew Davison's JumpingJack game
+ * 
+ * @author nhydock
+ * @author Andrew Davison, April 2005, ad@fivedots.coe.psu.ac.th
+ * 
+ */
 public class GameFrame extends JFrame implements WindowListener {
 	private static final long serialVersionUID = 8839701706801702692L;
 
-	public static int DEFAULT_FPS = 30; // 40 is too fast!
+	public static int DEFAULT_FPS = 60; // 40 is too fast!
 
 	private GamePanel game; // where the game is drawn
 	private MidisLoader midisLoader;
 
-	public GameFrame(String title, long period) {
-		super("JumpingJack");
+	public GameFrame(String title)
+	{
+		this(title, DEFAULT_FPS);
+	}
+	
+	public GameFrame(String title, int fps) {
+		super(title);
 
-		Game.period = period;
-		Game.periodInMSec = (int)(period/1000000L);
+		Game.setPeriod((long) (1000.0 / fps)*1000000L);
 	}
 
 	public void setGame(GamePanel panel) {
 		// load the background MIDI sequence
 		midisLoader = new MidisLoader();
-		//midisLoader.load("jjf", "jumping_jack_flash.mid");
-		//midisLoader.play("jjf", true); // repeatedly play it
 
 		Container c = getContentPane(); // default BorderLayout used
 		game = panel;
@@ -75,8 +52,9 @@ public class GameFrame extends JFrame implements WindowListener {
 
 		Dimension res = Toolkit.getDefaultToolkit().getScreenSize();
 
-		this.setLocation(res.width/2 - this.getWidth() / 2,
-				res.height/2 - this.getHeight() / 2);
+		//center the window on screen
+		this.setLocation(res.width / 2 - this.getWidth() / 2, res.height / 2
+				- this.getHeight() / 2);
 
 		setVisible(true);
 	}
@@ -109,7 +87,6 @@ public class GameFrame extends JFrame implements WindowListener {
 
 	public void windowOpened(WindowEvent e) {
 	}
-
 
 } // end of JumpingJack class
 
