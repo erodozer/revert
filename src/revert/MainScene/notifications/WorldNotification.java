@@ -16,7 +16,8 @@ public class WorldNotification {
 	public WorldNotification(final int score, final int time)
 	{
 		this.score = String.format(SCORE_FMT, score);
-		this.time = String.format(TIME_FMT, time);
+		//make sure to convert time from ms to sec
+		this.time = String.format(TIME_FMT, (int)(time/1000));
 	}
 	
 }
