@@ -11,19 +11,18 @@ public class BulletFactory {
 	
 	public BulletFactory(World world, Player p)
 	{
+		this.world = world;
 		this.parent = p;
 	}
 	
 	public Bullet spawnBullet()
 	{
 		Bullet b = new Bullet(world, parent.getMode());
-		Vector2 v = new Vector2();
-		v.cpy(parent.getPosn());
+		Vector2 v = parent.getPosn().clone();
 		v.add(parent.getAim());
 		b.setPosition(v.x, v.y);
 		
-		v = new Vector2();
-		v.cpy(parent.getAim());
+		v = parent.getAim().clone();
 		v.normalize();
 		v.mult(20);
 		b.setVelocity(v.x, v.y);

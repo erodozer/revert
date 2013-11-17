@@ -144,6 +144,7 @@ public class Scene extends GamePanel {
 		this.addMouseListener(g);
 		this.addMouseMotionListener(g);
 		
+		g.addObserver(world);
 		g.addObserver(player);
 
 		this.addKeyListener(new KeyAdapter() {

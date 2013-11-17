@@ -80,6 +80,7 @@ public class Player extends Actor {
 	
 	private int worldY;
 
+	private static final int FULLAMMO = 6;
 	private int ammo;
 
 	public Player(World w, ImagesLoader imsLd) {
@@ -112,6 +113,8 @@ public class Player extends Actor {
 		vertStep = brickMan.getBrickHeight() / 2;
 		// the jump step is half a brick's height
 		upCount = 0;
+		
+		this.ammo = FULLAMMO;
 	}
 
 	/*

@@ -4,11 +4,12 @@
 // title/help screen
 o title.gif
 
-// jack's images
+// player's images
 o royer01.png
 o royer_jmp.png
 s royer_walking.png 8
 o crosshair.png
+o bullet.png
 
 // scenery images
 o forest3.png
@@ -17,3 +18,4 @@ o grass.png
 
 // fonts
 o bmfont.png
+
