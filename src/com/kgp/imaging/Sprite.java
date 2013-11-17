@@ -8,6 +8,7 @@ import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
+import com.kgp.core.Game;
 import com.kgp.util.Vector2;
 
 /**
@@ -54,6 +55,9 @@ public class Sprite {
 	 */
 	protected Vector2 position;
 	
+	/**
+	 * Orientation of the sprite
+	 */
 	protected float angle;
 	
 	/**
@@ -66,20 +70,20 @@ public class Sprite {
 	protected AffineTransform trans = AffineTransform.getTranslateInstance(0, 0);
 	protected boolean flipX = false;
 	
-	protected int period;
 	protected double duration;
 	
 	public Sprite(float x, float y, int w, int h, ImagesLoader imsLd, String name) {
-		this.position = new Vector2(x, y);
-
-		this.velocity = new Vector2(XSTEP, YSTEP);
+		this.position = new Vector2();
+		this.velocity = new Vector2();
 
 		this.pDimensions = new Dimension(w, h);
 
 		this.imsLoader = imsLd;
 		
 		// the sprite's default image is 'name'
-		setImage(name); 
+		setImage(name);
+		setPosition(x, y);
+		setVelocity(w, h);
 	}
 
 	/**
@@ -98,18 +102,22 @@ public class Sprite {
 		}
 		//create bounding box
 		this.myRect = new Rectangle(0, 0, dimensions.width, dimensions.height);
-		
 		// no image loop playing
 		player = null;
 		isLooping = false;
 	}
 	
+	/**
+	 * assign the image to the sprite and make it loop if specified
+	 * @param name
+	 * @param loop
+	 */
 	public void setImage(String name, boolean loop)
 	{
 		this.setImage(name);
 		if (loop)
 		{
-			this.loopImage(period, duration);
+			this.loopImage(duration);
 		}
 	}
 
@@ -121,10 +129,10 @@ public class Sprite {
 	 * @param seqDuration
 	 *            - The total time for the loop to play the sequence
 	 */
-	public void loopImage(int animPeriod, double seqDuration) {
+	public void loopImage(double seqDuration) {
 		if (imsLoader.numImages(imageName) > 1) {
 			player = null; // to encourage garbage collection of previous player
-			player = new ImagesPlayer(imageName, animPeriod, seqDuration, true,
+			player = new ImagesPlayer(imageName, Game.getPeriodInMSec(), seqDuration, true,
 					imsLoader);
 			isLooping = true;
 		} else {
@@ -214,6 +222,14 @@ public class Sprite {
 	}
 
 	/**
+	 * get the angle at which this sprite is rotated
+	 * @return float
+	 */
+	public float getOrientation() {
+		return this.angle;
+	}
+	
+	/**
 	 * @return the bounding box of the sprite
 	 */
 	public Rectangle getMyRectangle() {
@@ -240,17 +256,12 @@ public class Sprite {
 		}
 		
 		trans.setToTranslation(this.position.x, this.position.y);
-		trans.rotate(this.angle);
+		trans.rotate(this.angle, this.getWidth()/2, this.getHeight()/2);
 		if (flipX)
 		{
 			trans.translate(this.getWidth(), 0);
 			trans.scale(-1.0, 1.0);
 		}
-	}
-	
-	public ImagesLoader getImageLoader()
-	{
-		return this.imsLoader;
 	}
 
 	/**
