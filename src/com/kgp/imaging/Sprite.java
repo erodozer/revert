@@ -40,7 +40,6 @@ public class Sprite extends Observable {
 	
 	// for playing a loop of images
 	protected ImagesPlayer player;
-	protected boolean isLooping;
 
 	private boolean isActive = true;
 	// a sprite is updated and drawn only when it is active
@@ -105,7 +104,6 @@ public class Sprite extends Observable {
 		this.myRect = new Rectangle(0, 0, dimensions.width, dimensions.height);
 		// no image loop playing
 		player = null;
-		isLooping = false;
 	}
 	
 	/**
@@ -134,17 +132,14 @@ public class Sprite extends Observable {
 		if (imsLoader.numImages(imageName) > 1) {
 			player = null; // to encourage garbage collection of previous player
 			player = new ImagesPlayer(imageName, Game.getDeltaTime(), seqDuration, true, imsLoader);
-			isLooping = true;
 		} else {
 			System.out.println(imageName + " is not a sequence of images");
 		}
 	}
 
 	public void stopLooping() {
-		if (isLooping) {
+		if (player != null)
 			player.stop();
-			isLooping = false;
-		}
 	}
 
 	public int getWidth() {
@@ -184,7 +179,7 @@ public class Sprite extends Observable {
 	 * @param xDist
 	 * @param yDist
 	 */
-	public void translate(int xDist, int yDist) {
+	public void translate(float xDist, float yDist) {
 		this.position.translate(xDist, yDist);
 	}
 
@@ -200,7 +195,7 @@ public class Sprite extends Observable {
 	 * The sprite's position
 	 */
 	public Vector2 getPosn() {
-		return this.position;
+		return this.position.clone();
 	}
 
 	/**
@@ -249,13 +244,13 @@ public class Sprite extends Observable {
 			this.position.translate(this.velocity.x, this.velocity.y);
 			
 			// update the animation
-			if (isLooping)
+			if (this.player != null)
 			{
 				this.player.updateTick();
 			}
 		}
 		
-		trans.setToTranslation(this.position.x, this.position.y);
+		trans.setToTranslation((int)this.position.x, (int)this.position.y);
 		trans.rotate(this.angle, this.getWidth()/2, this.getHeight()/2);
 		if (flipX)
 		{
@@ -277,7 +272,7 @@ public class Sprite extends Observable {
 				g.setColor(Color.black);
 			} 
 			else {
-				if (isLooping)
+				if (player != null)
 					image = player.getCurrentImage();
 				g.drawImage(image, trans, null);
 			}
