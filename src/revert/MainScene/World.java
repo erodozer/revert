@@ -14,6 +14,7 @@ import revert.Entities.Player;
 import revert.MainScene.notifications.ActorsRemoved;
 import revert.MainScene.notifications.PlayerAttackNotification;
 import revert.MainScene.notifications.WorldNotification;
+import revert.util.BrickManager;
 
 import com.kgp.core.Game;
 import com.kgp.level.BricksManager;
@@ -55,7 +56,7 @@ public class World extends Observable implements Observer{
 	ArrayList<Bullet> bullets;
 
 	//tiles of the level
-	private BricksManager level;
+	private BrickManager level;
 
 	private EnemyFactory enemyFactory;
 	private BulletFactory bulletFactory;
@@ -132,7 +133,7 @@ public class World extends Observable implements Observer{
 		}
 		*/
 		
-		this.level.update(this.player.getPosn());
+		this.level.update(this.player.getRealXPosn(), this.player.getRealYPosn());
 		
 		this.time += Game.getPeriodInMSec();
 		
@@ -192,7 +193,7 @@ public class World extends Observable implements Observer{
 		this.enemyFactory = new EnemyFactory(this, bricksMan.getSpawnPoints());
 	}
 	
-	public BricksManager getLevel()
+	public BrickManager getLevel()
 	{
 		return this.level;
 	}
