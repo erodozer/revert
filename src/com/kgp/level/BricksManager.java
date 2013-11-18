@@ -43,7 +43,7 @@ import revert.util.BrickManager;
 import com.kgp.imaging.ImagesLoader;
 import com.kgp.util.Vector2;
 
-public class BricksManager extends BrickManager  {
+public class BricksManager extends BrickManager {
 	private final static String BRICKS_DIR = "Levels/";
 	private final static int MAX_BRICKS_LINES = 15;
 	// maximum number of lines (rows) of bricks in the scene
@@ -72,11 +72,9 @@ public class BricksManager extends BrickManager  {
 		imsLoader = il;
 
 		loadBricksFile(fnm);
-		
-		for (int i = 0; i < bricks.length; i++)
-		{
-			for (int x = 0; x < bricks[i].length; x++)
-			{
+
+		for (int i = 0; i < bricks.length; i++) {
+			for (int x = 0; x < bricks[i].length; x++) {
 				if (bricks[i][x] > 0)
 					System.out.print(bricks[i][x]);
 				else
@@ -84,19 +82,19 @@ public class BricksManager extends BrickManager  {
 			}
 			System.out.println();
 		}
-		
-		//generate random spawn points because we don't have spawn locations defined in classic style maps
+
+		// generate random spawn points because we don't have spawn locations
+		// defined in classic style maps
 		spawnPoints = new Point[5];
-		for (int i = 0; i < 5; i++)
-		{
-			int x = (int)(Math.random()*this.getWidth());
-			int y = (int)(Math.random()*this.getHeight());
+		for (int i = 0; i < 5; i++) {
+			int x = (int) (Math.random() * this.getWidth());
+			int y = (int) (Math.random() * this.getHeight());
 			Point p = new Point(x, y);
 			spawnPoints[i] = p;
 		}
-		
+
 		yOffset = Math.max(this.getMapHeight(), pHeight) - this.getMapHeight();
-		
+
 		moveSize = (int) (imWidth * MOVE_FACTOR);
 		if (moveSize == 0) {
 			System.out.println("moveSize cannot be 0, setting it to 1");
@@ -120,13 +118,12 @@ public class BricksManager extends BrickManager  {
 	 * The configuration file can contain empty lines and comment lines (those
 	 * starting with //), which are ignored.
 	 */
-	public void loadBricksFile(String fnm)
-	{
+	public void loadBricksFile(String fnm) {
 		String imsFNm = BRICKS_DIR + fnm;
 		System.out.println("Reading bricks file: " + imsFNm);
 
 		ArrayList<Brick> bricksList = new ArrayList<Brick>();
-		
+
 		int numStripImages = -1;
 		int numBricksLines = 0;
 		try {
@@ -147,8 +144,7 @@ public class BricksManager extends BrickManager  {
 					numStripImages = brickImages.size();
 					imWidth = brickImages.get(0).getWidth();
 					imHeight = brickImages.get(0).getHeight();
-				}
-				else { // a bricks map line
+				} else { // a bricks map line
 					if (numBricksLines > MAX_BRICKS_LINES)
 						System.out.println("Max reached, skipping bricks line: " + line);
 					else if (numStripImages == -1)
@@ -164,38 +160,35 @@ public class BricksManager extends BrickManager  {
 			System.out.println("Error reading file: " + imsFNm);
 			System.exit(1);
 		}
-		
+
 		numRows = numBricksLines;
-		
+
 		bricks = new int[numRows][numCols];
 		collisionMask = new boolean[numCols][numRows];
-		
-		for (Brick b : bricksList)
-		{
+
+		for (Brick b : bricksList) {
 			bricks[b.y][b.x] = b.type;
-			if (b.type > 0)
-			{
+			if (b.type > 0) {
 				collisionMask[b.x][b.y] = true;
 			}
 		}
-		
+
 		bricksList = null;
-		
+
 		checkForGaps();
 	}
 
-	private void storeBricks(String line, int lineNo, int numImages, ArrayList<Brick> bricksList)
-	/*
+	/**
 	 * Read a single bricks line, and create Brick objects. A line contains
 	 * digits and spaces (which are ignored). Each digit becomes a Brick object.
 	 * The collection of Brick objects are stored in the bricksList ArrayList.
 	 */
-	{
-		if (line.length() > numCols)
-		{
+	private void storeBricks(String line, int lineNo, int numImages,
+			ArrayList<Brick> bricksList) {
+		if (line.length() > numCols) {
 			numCols = line.length();
 		}
-		
+
 		int imageID;
 		for (int x = 0; x < line.length(); x++) {
 			char ch = line.charAt(x);
@@ -207,7 +200,7 @@ public class BricksManager extends BrickManager  {
 					System.out.println("Image ID " + imageID + " out of range");
 				else
 					// make a Brick object
-					bricksList.add(new Brick(imageID+1, x, lineNo));
+					bricksList.add(new Brick(imageID + 1, x, lineNo));
 			} else
 				System.out.println("Brick char " + ch + " is not a digit");
 		}
@@ -220,50 +213,46 @@ public class BricksManager extends BrickManager  {
 	 * position from 0 to numCols-1. This prevents 'jack' from falling down a
 	 * hole at the bottom of the panel.
 	 */
-	private void checkForGaps()
-	{
-		for (int c = 0; c < bricks[bricks.length-1].length; c++)
-		{
-			int i = bricks[bricks.length-1][c];
+	private void checkForGaps() {
+		for (int c = 0; c < bricks[bricks.length - 1].length; c++) {
+			int i = bricks[bricks.length - 1][c];
 			boolean gap = false;
-			if (i == 0)
-			{
+			if (i == 0) {
 				gap = true;
-				for (int r = bricks[bricks.length-1][c]; r >= 0 && gap; r--)
-				{
-					if (bricks[r][c] > 0)
-					{
+				for (int r = bricks[bricks.length - 1][c]; r >= 0 && gap; r--) {
+					if (bricks[r][c] > 0) {
 						gap = false;
 					}
 				}
 			}
-			if (gap)
-			{
-				System.out.println("Gap found in bricks map bottom line at position " + c);
+			if (gap) {
+				System.out
+						.println("Gap found in bricks map bottom line at position "
+								+ c);
 				System.exit(-1);
 			}
 		}
 	}
 
-	public void update(Vector2 loc)
-	{
-		xRange = (int)loc.x;
-		left = (int)((xRange - pWidth/2f) / (float)imWidth);
-		right = (int)Math.ceil((xRange + pWidth/2f) / (float)imWidth);
-		
-		//System.out.printf("Vis Range: %d\nLeft/Right: %d %d\n", visCols, left, right);
+	public void update(Vector2 loc) {
+		xRange = (int) loc.x;
+		left = (int) ((xRange - pWidth / 2f) / (float) imWidth)-1;
+		right = (int) Math.ceil((xRange + pWidth / 2f) / (float) imWidth);
+
+		// System.out.printf("Vis Range: %d\nLeft/Right: %d %d\n", visCols,
+		// left, right);
 	}
 
 	// -------------- draw the bricks ----------------------
 
 	// ----------------- JumperSprite related methods -------------
 	// various forms of collision detection with the bricks
-	
+
 	@Override
 	public int getBrickHeight() {
 		return imHeight;
 	}
-	
+
 	@Override
 	public int getBrickWidth() {
 		return imWidth;
@@ -275,22 +264,17 @@ public class BricksManager extends BrickManager  {
 
 	@Override
 	public void display(Graphics2D g) {
-		for (int i = left, loc = left, x = left * imWidth + (xRange % imWidth); i <= right; i++, loc++, x += imWidth)
-		{
-			if (loc < 0)
-			{
+		for (int i = left, loc = left, x = loc * imWidth; i <= right; i++, loc++, x += imWidth) {
+			if (loc < 0) {
 				loc += numCols;
-			}
-			else if (loc >= numCols)
-			{
+			} else if (loc >= numCols) {
 				loc %= numCols;
 			}
-			
-			for (int j = 0; j < numRows; j++)
-			{
-				if (bricks[j][loc]-1 >= 0)
-				{
-					g.drawImage(brickImages.get(bricks[j][loc]-1), x, yOffset + (j-1)*imHeight, null);
+
+			for (int j = 0; j < numRows; j++) {
+				if (bricks[j][loc] - 1 >= 0) {
+					g.drawImage(brickImages.get(bricks[j][loc] - 1), x, yOffset
+							+ (j - 1) * imHeight, null);
 				}
 			}
 		}
