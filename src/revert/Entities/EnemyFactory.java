@@ -2,16 +2,18 @@ package revert.Entities;
 
 import java.awt.Point;
 
+import com.kgp.util.Vector2;
+
 import revert.AI.EnemyAi;
 import revert.MainScene.World;
 
 
 public class EnemyFactory {
 
-	Point[] spawnPoints;
+	Vector2[] spawnPoints;
 	World world;
 		
-	public EnemyFactory(World world, Point... spawns)
+	public EnemyFactory(World world, Vector2... spawns)
 	{
 		this.spawnPoints = spawns;
 		this.world = world;
@@ -28,9 +30,9 @@ public class EnemyFactory {
 		
 		for (int i = 0; i < size; i++)
 		{
-			Point loc = spawnPoints[(int)(Math.random()*spawnPoints.length)];
+			Vector2 loc = spawnPoints[(int)(Math.random()*spawnPoints.length)];
 			
-			int[] n = {loc.x, loc.y, (int)(Math.random()*3)};
+			int[] n = {(int)loc.x, (int)loc.y, (int)(Math.random()*3)};
 			
 			wave[i] = n;
 		}
