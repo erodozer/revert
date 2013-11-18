@@ -30,7 +30,6 @@ package com.kgp.level;
  */
 
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -44,6 +43,7 @@ import com.kgp.imaging.ImagesLoader;
 import com.kgp.util.Vector2;
 
 public class BricksManager extends BrickManager {
+
 	private final static String BRICKS_DIR = "Levels/";
 	private final static int MAX_BRICKS_LINES = 15;
 	// maximum number of lines (rows) of bricks in the scene
@@ -85,11 +85,11 @@ public class BricksManager extends BrickManager {
 
 		// generate random spawn points because we don't have spawn locations
 		// defined in classic style maps
-		spawnPoints = new Point[5];
+		spawnPoints = new Vector2[5];
 		for (int i = 0; i < 5; i++) {
 			int x = (int) (Math.random() * this.getWidth());
 			int y = (int) (Math.random() * this.getHeight());
-			Point p = new Point(x, y);
+			Vector2 p = new Vector2(x, y);
 			spawnPoints[i] = p;
 		}
 
@@ -127,8 +127,7 @@ public class BricksManager extends BrickManager {
 		int numStripImages = -1;
 		int numBricksLines = 0;
 		try {
-			InputStream in = getClass().getClassLoader().getResourceAsStream(
-					imsFNm);
+			InputStream in = getClass().getClassLoader().getResourceAsStream(imsFNm);
 			BufferedReader br = new BufferedReader(new InputStreamReader(in));
 			String line;
 			char ch;
@@ -144,7 +143,8 @@ public class BricksManager extends BrickManager {
 					numStripImages = brickImages.size();
 					imWidth = brickImages.get(0).getWidth();
 					imHeight = brickImages.get(0).getHeight();
-				} else { // a bricks map line
+				}
+				else { // a bricks map line
 					if (numBricksLines > MAX_BRICKS_LINES)
 						System.out.println("Max reached, skipping bricks line: " + line);
 					else if (numStripImages == -1)
@@ -156,7 +156,8 @@ public class BricksManager extends BrickManager {
 				}
 			}
 			br.close();
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			System.out.println("Error reading file: " + imsFNm);
 			System.exit(1);
 		}
@@ -183,8 +184,7 @@ public class BricksManager extends BrickManager {
 	 * digits and spaces (which are ignored). Each digit becomes a Brick object.
 	 * The collection of Brick objects are stored in the bricksList ArrayList.
 	 */
-	private void storeBricks(String line, int lineNo, int numImages,
-			ArrayList<Brick> bricksList) {
+	private void storeBricks(String line, int lineNo, int numImages, ArrayList<Brick> bricksList) {
 		if (line.length() > numCols) {
 			numCols = line.length();
 		}
@@ -201,14 +201,15 @@ public class BricksManager extends BrickManager {
 				else
 					// make a Brick object
 					bricksList.add(new Brick(imageID + 1, x, lineNo));
-			} else
+			}
+			else
 				System.out.println("Brick char " + ch + " is not a digit");
 		}
 	} // end of storeBricks()
 
 	// --------------- initialise bricks data structures -----------------
 
-	/*
+	/**
 	 * Check that the bottom map line (numRows-1) has a brick in every x
 	 * position from 0 to numCols-1. This prevents 'jack' from falling down a
 	 * hole at the bottom of the panel.
@@ -226,17 +227,15 @@ public class BricksManager extends BrickManager {
 				}
 			}
 			if (gap) {
-				System.out
-						.println("Gap found in bricks map bottom line at position "
-								+ c);
+				System.out.println("Gap found in bricks map bottom line at position " + c);
 				System.exit(-1);
 			}
 		}
 	}
 
-	public void update(Vector2 loc) {
-		xRange = (int) loc.x;
-		left = (int) ((xRange - pWidth / 2f) / (float) imWidth)-1;
+	public void update() {
+		xRange = (int) currentPos.x;
+		left = (int) ((xRange - pWidth / 2f) / (float) imWidth) - 1;
 		right = (int) Math.ceil((xRange + pWidth / 2f) / (float) imWidth);
 
 		// System.out.printf("Vis Range: %d\nLeft/Right: %d %d\n", visCols,
@@ -267,14 +266,14 @@ public class BricksManager extends BrickManager {
 		for (int i = left, loc = left, x = loc * imWidth; i <= right; i++, loc++, x += imWidth) {
 			if (loc < 0) {
 				loc += numCols;
-			} else if (loc >= numCols) {
+			}
+			else if (loc >= numCols) {
 				loc %= numCols;
 			}
 
 			for (int j = 0; j < numRows; j++) {
 				if (bricks[j][loc] - 1 >= 0) {
-					g.drawImage(brickImages.get(bricks[j][loc] - 1), x, yOffset
-							+ (j - 1) * imHeight, null);
+					g.drawImage(brickImages.get(bricks[j][loc] - 1), x, yOffset + (j * imHeight), null);
 				}
 			}
 		}
