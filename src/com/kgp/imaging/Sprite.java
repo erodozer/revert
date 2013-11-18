@@ -196,11 +196,11 @@ public class Sprite extends Observable {
 		return this.position.y;
 	}
 	
-	public float getRenderXPosn() {
+	public float getRealXPosn() {
 		return this.position.x + this.offset.x;
 	}
 	
-	public float getRenderYPosn() {
+	public float getRealYPosn() {
 		return this.position.y + this.offset.y;
 	}
 	

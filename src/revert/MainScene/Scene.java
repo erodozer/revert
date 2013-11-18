@@ -179,7 +179,7 @@ public class Scene extends GamePanel {
 				parallaxFg.update(player.getMovement());
 			}
 			// transform a camera that follows the player around
-			camera.cpy(player.getPosn());
+			camera.set(player.getRealXPosn(), player.getRealYPosn());
 			camMatrix.setToTranslation(-camera.x, -camera.y);
 			camMatrix.translate(0, PHEIGHT / 2);
 			camMatrix.translate(PWIDTH / 2, 0);
