@@ -31,6 +31,13 @@ public abstract class Actor extends Sprite implements Observer{
 		Right;
 	}
 	
+	public static enum VertMovement
+	{
+		Grounded,
+		Rising,
+		Falling;
+	}
+	
 	//states used for setting movement properties of the actor
 	protected Movement moving;
 	protected Direction facing;
@@ -86,7 +93,7 @@ public abstract class Actor extends Sprite implements Observer{
 	 */
 	final public void moveLeft()
 	{
-		this.setVelocity(-this.moveRate, this.getYVelocity());
+		this.velocity.x = -moveRate;
 		this.moving = Movement.Left;
 		this.setImage(getNextImage(), true);
 	}
@@ -96,7 +103,7 @@ public abstract class Actor extends Sprite implements Observer{
 	 */
 	final public void moveRight()
 	{
-		this.setVelocity(this.moveRate, this.getYVelocity());
+		this.velocity.x = moveRate;
 		this.moving = Movement.Right;
 		this.setImage(getNextImage(), true);
 	}
@@ -106,7 +113,7 @@ public abstract class Actor extends Sprite implements Observer{
 	 */
 	final public void stop()
 	{
-		this.setVelocity(0, this.getYVelocity());
+		this.velocity.x = 0;
 		this.moving = Movement.Still;
 		this.setImage(getNextImage(), true);
 	}
