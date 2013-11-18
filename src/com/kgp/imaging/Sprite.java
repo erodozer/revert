@@ -54,6 +54,10 @@ public class Sprite extends Observable {
 	 * Real position of the sprite in the world
 	 */
 	protected Vector2 position;
+	/**
+	 * Offset used for rendering
+	 */
+	protected Vector2 offset;
 	
 	/**
 	 * Orientation of the sprite
@@ -75,6 +79,7 @@ public class Sprite extends Observable {
 	public Sprite(float x, float y, int w, int h, ImagesLoader imsLd, String name) {
 		this.position = new Vector2();
 		this.velocity = new Vector2();
+		this.offset = new Vector2();
 
 		this.pDimensions = new Dimension(w, h);
 
@@ -191,6 +196,14 @@ public class Sprite extends Observable {
 		return this.position.y;
 	}
 	
+	public float getRenderXPosn() {
+		return this.position.x + this.offset.x;
+	}
+	
+	public float getRenderYPosn() {
+		return this.position.y + this.offset.y;
+	}
+	
 	/**
 	 * The sprite's position
 	 */
@@ -250,7 +263,7 @@ public class Sprite extends Observable {
 			}
 		}
 		
-		trans.setToTranslation((int)this.position.x, (int)this.position.y);
+		trans.setToTranslation((int)this.position.x + this.offset.x, (int)this.position.y + this.offset.y);
 		trans.rotate(this.angle, this.getWidth()/2, this.getHeight()/2);
 		if (flipX)
 		{
