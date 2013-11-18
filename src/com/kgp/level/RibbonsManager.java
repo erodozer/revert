@@ -30,7 +30,7 @@ public class RibbonsManager {
 	 */
 
 	private ArrayList<Ribbon> ribbons;
-	private int moveSize;
+	private float moveSize;
 
 	private ImagesLoader imsLd;
 	
@@ -38,8 +38,8 @@ public class RibbonsManager {
 	
 	// standard distance for a ribbon to 'move' each tick
 
-	public RibbonsManager(int w, int h, int brickMvSz, ImagesLoader imsLd) {
-		moveSize = brickMvSz;
+	public RibbonsManager(int w, int h, float f, ImagesLoader imsLd) {
+		moveSize = f;
 		// the basic move size is the same as the bricks ribbon
 
 		pWidth = w;
@@ -51,7 +51,7 @@ public class RibbonsManager {
 	
 	public void add(String imgName, float mv)
 	{
-		ribbons.add(new Ribbon(pWidth, pHeight, imsLd.getImage(imgName), (int)(mv*moveSize)));
+		ribbons.add(new Ribbon(pWidth, pHeight, imsLd.getImage(imgName), mv*moveSize));
 	}
 
 	public void update(Movement m) {

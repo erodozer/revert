@@ -3,7 +3,6 @@ package revert.MainScene;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -18,7 +17,6 @@ import com.kgp.core.GameFrame;
 import com.kgp.core.GamePanel;
 import com.kgp.core.GameState;
 import com.kgp.imaging.ImagesLoader;
-import com.kgp.imaging.ImagesPlayerWatcher;
 import com.kgp.level.BricksManager;
 import com.kgp.level.RibbonsManager;
 
@@ -127,15 +125,16 @@ public class Scene extends GamePanel {
 		this.world = new World();
 		this.world.setLevel(bricksMan);
 
-		parallaxBg = new RibbonsManager(PWIDTH, PHEIGHT, brickMoveSize, images);
-		parallaxFg = new RibbonsManager(PWIDTH, PHEIGHT, brickMoveSize, images);
+		player = new Player(this.world, images);
+		this.world.setPlayer(player);
+
+		parallaxBg = new RibbonsManager(PWIDTH, PHEIGHT, player.getMoveRate(), images);
+		parallaxFg = new RibbonsManager(PWIDTH, PHEIGHT, player.getMoveRate(), images);
 
 		parallaxBg.add("skyline", 0f);
 		parallaxBg.add("forest3", .35f);
 		parallaxFg.add("grass", 1.1f);
 
-		player = new Player(this.world, images);
-		this.world.setPlayer(player);
 
 		crosshair = new Crosshair(PWIDTH, PHEIGHT, player, images);
 		

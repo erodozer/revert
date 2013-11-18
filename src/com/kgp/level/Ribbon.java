@@ -33,9 +33,9 @@ public class Ribbon {
 	
 	private int pWidth, pHeight; // dimensions of display panel
 
-	private int moveSize; // size of the image move (in pixels)
+	private float moveSize; // size of the image move (in pixels)
 
-	private int head;
+	private float head;
 	
 	AffineTransform self;
 	AffineTransform pre;
@@ -51,7 +51,7 @@ public class Ribbon {
 	 * its tail followed by its head.
 	 */
 
-	public Ribbon(int w, int h, BufferedImage im, int moveSz) {
+	public Ribbon(int w, int h, BufferedImage im, float f) {
 		pWidth = w;
 		pHeight = h;
 
@@ -62,7 +62,8 @@ public class Ribbon {
 
 		head = 0;
 
-		this.moveSize = moveSz;
+		this.moveSize = f;
+		System.out.println(this.moveSize);
 		
 		self = AffineTransform.getTranslateInstance(0, 0);
 		pre = AffineTransform.getTranslateInstance(-width, 0);

@@ -43,7 +43,7 @@ public abstract class Actor extends Sprite implements Observer{
 	protected int hitTimer;
 	
 	//speed at which the sprite moves within the world
-	protected int moveRate;
+	protected float moveRate;
 	
 	//list of names used to associate as a spritesheet for the character
 	protected String spritesheet;
@@ -156,6 +156,11 @@ public abstract class Actor extends Sprite implements Observer{
 	final public Movement getMovement()
 	{
 		return this.moving;
+	}
+	
+	final public float getMoveRate()
+	{
+		return this.moveRate;
 	}
 	
 	/**
