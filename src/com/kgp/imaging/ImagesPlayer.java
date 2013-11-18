@@ -100,7 +100,6 @@ public class ImagesPlayer extends Observable {
 		if (!done) {
 			// update the timer
 			elapsedTime += period;
-			System.out.println(elapsedTime);
 			if (elapsedTime > periodPerFrame) {
 				imPosition += (int) (elapsedTime / periodPerFrame);
 				elapsedTime %= periodPerFrame;
