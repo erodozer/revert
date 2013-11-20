@@ -166,8 +166,17 @@ public class Player extends Actor {
 	public void updateSprite() {
 		if (!isStill()) { // moving
 			if (!isJumping()) // if not jumping
+			{
 				checkIfFalling(); // may have moved out into empty space
-			this.stepNext();
+				this.stepNext();
+			}
+			else
+			{
+				if (checkAhead())
+				{
+					stop();
+				}
+			}
 		}
 
 		if (vertMoveMode == VertMovement.Rising)
@@ -239,6 +248,64 @@ public class Player extends Actor {
 			land();
 		}
 	}
+	
+	/**
+	 * Looks at all bricks ahead of the character as he's traveling to ensure
+	 * there is no collisions before moving ahead
+	 * <p/>
+	 * Automatically calculates the base tile ahead of the character and checks
+	 * up the body of the character to find any collisions ahead in the direction
+	 * that the he is moving.
+	 * 
+	 * @return true if collision occurs
+	 */
+	private boolean checkAhead() {
+		Vector2 nextBrick;
+		// adjust to base and check brick ahead
+		Vector2 p = position.clone();
+
+		// adjust for visible offset
+		if (moving == Movement.Right)
+			p.x -= offset.x;
+		else if (moving == Movement.Left)
+			p.x += offset.x;
+
+		p.x += this.velocity.x;
+		p.y -= 1;
+
+		nextBrick = brickMan.worldToMap(p.x, p.y);
+		
+		return this.checkAhead(nextBrick);
+	}
+	
+	/**
+	 * Looks at all bricks ahead of the character as he's traveling to ensure
+	 * there is no collisions before moving ahead
+	 * 
+	 * @param nextBrick - should be the brick at the base of the character, as this
+	 * 	method iterates up the length of the character to check for bricks/collissions
+	 * 
+	 * @return true if collision occurs
+	 */
+	private boolean checkAhead(Vector2 nextBrick) {
+		// if the brick is the same as what we're currently on then we do
+		// nothing and just let royer continue on his way across the brick
+		if (nextBrick.equals(this.map))
+			return false;
+
+		// if the next brick exists, we check the brick above it to see if it's
+		// empty
+		for (int i = 0; i < this.tileHeight-1; i++) {
+			nextBrick.y--;
+			
+			// if it isn't and we run into a wall and stop
+			if (brickMan.brickExists(nextBrick)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 
 	/**
 	 * Causes Royer to advance up the tilemap if the next tile is only 1 up Does
@@ -262,23 +329,17 @@ public class Player extends Actor {
 
 		// if the brick is the same as what we're currently on then we do
 		// nothing and just let royer continue on his way across the brick
-		if (nextBrick.equals(this.map) || !brickMan.brickExists(nextBrick))
+		if (!brickMan.brickExists(nextBrick))
 			return;
 
-		// if the next brick exists, we check the brick above it to see if it's
-		// empty
-		for (int i = 1; i < this.tileHeight; i++) {
-			nextBrick = new Vector2(nextBrick.x, nextBrick.y - 1);
-
-			// if it isn't and we run into a wall and stop
-			if (brickMan.brickExists(nextBrick)) {
-				stop();
-				return;
-			}
+		if (checkAhead(nextBrick))
+		{
+			stop();
 		}
-
-		// shift up a step
-		this.position.y -= brickMan.getBrickHeight();
+		else
+		{
+			this.position.y -= brickMan.getBrickHeight();
+		}
 	}
 
 	/**
