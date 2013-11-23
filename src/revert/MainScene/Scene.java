@@ -10,6 +10,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 import revert.Entities.Player;
+import revert.util.JsonBricksManager;
 
 import com.kgp.core.AssetsManager;
 import com.kgp.core.GameController;
@@ -117,9 +118,9 @@ public class Scene extends GamePanel {
 	protected void initGame() {
 		ImagesLoader images = AssetsManager.Images;
 
-		BricksManager bricksMan = new BricksManager(PWIDTH, PHEIGHT,
-				BRICKS_INFO, images);
-		int brickMoveSize = bricksMan.getMoveSize();
+		//BricksManager bricksMan = new BricksManager(PWIDTH, PHEIGHT, BRICKS_INFO, images);
+		JsonBricksManager bricksMan = JsonBricksManager.load("level01", AssetsManager.JsonParser);
+		int brickMoveSize = bricksMan.getBrickWidth();
 		this.world = new World();
 		this.world.setLevel(bricksMan);
 
