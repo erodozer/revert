@@ -188,7 +188,7 @@ public class World extends Observable implements Observer{
 	 * Sets the brick level of the world
 	 * @param bricksMan
 	 */
-	public void setLevel(BricksManager bricksMan) {
+	public void setLevel(BrickManager bricksMan) {
 		this.level = bricksMan;
 		this.enemyFactory = new EnemyFactory(this, bricksMan.getSpawnPoints());
 	}
