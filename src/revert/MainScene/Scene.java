@@ -23,26 +23,27 @@ import com.kgp.level.RibbonsManager;
 
 /**
  * Based heavily on Andrew Davison's JackPanel, this scene is the core manager
- * for the game.  It extends the abstracted GamePanel, and can be switched out with
- * other game panels for different experiences.
+ * for the game. It extends the abstracted GamePanel, and can be switched out
+ * with other game panels for different experiences.
  * 
  * In this game, Revert, you play as Royer, as detective in the early 1800s, who
- * after having worked on a case for 8 years, has started to see things changing 
- * with the world.  Upon talking with others, it appears he may be the only one who 
- * has a memory of how things used to be.
+ * after having worked on a case for 8 years, has started to see things changing
+ * with the world. Upon talking with others, it appears he may be the only one
+ * who has a memory of how things used to be.
  * 
  * Creatures of the shadows start to rise up and terrorize him wherever he goes
- * as the world begins to devolve into a state of madness.  Some chase him and attack him
- * while others just bother him with their existance.  The shadow-beings take
- * a toll on his willpower, so he does what he can to eradicate them.
+ * as the world begins to devolve into a state of madness. Some chase him and
+ * attack him while others just bother him with their existance. The
+ * shadow-beings take a toll on his willpower, so he does what he can to
+ * eradicate them.
  * 
  * As he cleanses the world of these creatures, everything starts to revert back
  * to normal, and people's memories return.
  * 
- * In his struggles he has come to realize that the creatures are weak to 3 different
- * kinds of attacks, all corresponding to their personality.  He has crafted
- * a full arsenal of ammo for him to use when necessary.  Use this knowledge and power
- * and restore the world to its rightful state once more.
+ * In his struggles he has come to realize that the creatures are weak to 3
+ * different kinds of attacks, all corresponding to their personality. He has
+ * crafted a full arsenal of ammo for him to use when necessary. Use this
+ * knowledge and power and restore the world to its rightful state once more.
  * 
  * @author nhydock
  **/
@@ -61,6 +62,7 @@ public class Scene extends GamePanel {
 
 	// to display the title/help screen
 	private BufferedImage helpIm;
+	private BufferedImage titleIm;
 
 	private float zoom = 1.0f;
 
@@ -69,9 +71,9 @@ public class Scene extends GamePanel {
 
 	World world;
 
-	//display of in-game stats
+	// display of in-game stats
 	HUD hud;
-	
+
 	public Scene(GameFrame parent) {
 		super(parent);
 
@@ -118,8 +120,10 @@ public class Scene extends GamePanel {
 	protected void initGame() {
 		ImagesLoader images = AssetsManager.Images;
 
-		//BricksManager bricksMan = new BricksManager(PWIDTH, PHEIGHT, BRICKS_INFO, images);
-		JsonBricksManager bricksMan = JsonBricksManager.load("level01", AssetsManager.JsonParser);
+		// BricksManager bricksMan = new BricksManager(PWIDTH, PHEIGHT,
+		// BRICKS_INFO, images);
+		JsonBricksManager bricksMan = JsonBricksManager.load("level01",
+				AssetsManager.JsonParser);
 		int brickMoveSize = bricksMan.getBrickWidth();
 		this.world = new World();
 		this.world.setLevel(bricksMan);
@@ -127,21 +131,22 @@ public class Scene extends GamePanel {
 		player = new Player(this.world, images);
 		this.world.setPlayer(player);
 
-		parallaxBg = new RibbonsManager(PWIDTH, PHEIGHT, player.getMoveRate(), images);
-		parallaxFg = new RibbonsManager(PWIDTH, PHEIGHT, player.getMoveRate(), images);
+		parallaxBg = new RibbonsManager(PWIDTH, PHEIGHT, player.getMoveRate(),
+				images);
+		parallaxFg = new RibbonsManager(PWIDTH, PHEIGHT, player.getMoveRate(),
+				images);
 
 		parallaxBg.add("skyline", 0f);
 		parallaxBg.add("forest3", .35f);
 		parallaxFg.add("grass", 1.1f);
 
-
 		crosshair = new Crosshair(PWIDTH, PHEIGHT, player, images);
-		
+
 		GameController g = new Controller(player, crosshair, this, world);
 		this.addKeyListener(g);
 		this.addMouseListener(g);
 		this.addMouseMotionListener(g);
-		
+
 		g.addObserver(world);
 		g.addObserver(player);
 
@@ -154,12 +159,16 @@ public class Scene extends GamePanel {
 		hud = new HUD(new Dimension(PWIDTH, PHEIGHT));
 		world.addObserver(hud);
 		player.addObserver(hud);
-		
+
 		// prepare title/help screen
-		helpIm = images.getImage("title");
+		helpIm = images.getImage("help");
+		titleIm = images.getImage("title");
 
-		this.setState(GameState.Help);
-
+		this.state = GameState.Active;
+		this.gameUpdate();
+		this.state = null;
+		
+		this.setState(GameState.Start);
 	}
 
 	// ------------- game life cycle methods ------------
@@ -167,7 +176,7 @@ public class Scene extends GamePanel {
 
 	// ----------------------------------------------
 
-	protected void gameUpdate() {
+	protected synchronized void gameUpdate() {
 		if (this.getState() == GameState.Active) {
 			// stop jack and scenery on collision
 			world.update();
@@ -186,8 +195,13 @@ public class Scene extends GamePanel {
 		}
 	}
 
-	protected void draw(Graphics2D dbg) {
+	protected synchronized void draw(Graphics2D dbg) {
 
+		if (this.state == null)
+		{
+			System.out.println("why");
+			return;
+		}
 		// draw a white background
 		dbg.setColor(Color.white);
 		dbg.fillRect(0, 0, PWIDTH, PHEIGHT);
@@ -207,12 +221,21 @@ public class Scene extends GamePanel {
 		crosshair.drawSprite(dbg);
 		dbg.setTransform(orig);
 
-		hud.display(dbg);
+		switch (this.state)
+		{
+			case Active:
+				hud.display(dbg);
+				break;
+			case Help:
+				dbg.drawImage(helpIm, (PWIDTH - helpIm.getWidth()) / 2, (PHEIGHT - helpIm.getHeight()) / 2, null);
+				break;
+			case Start:
+				dbg.drawImage(titleIm, 0, 0, PWIDTH, PHEIGHT, null);
+				break;
+			default:
+				break;
+		}
 
-		// draw the help at the very front (if switched on)
-		if (this.getState() == GameState.Help)
-			dbg.drawImage(helpIm, (PWIDTH - helpIm.getWidth()) / 2,
-					(PHEIGHT - helpIm.getHeight()) / 2, null);
 	}
 
-} // end of JackPanel class
+}

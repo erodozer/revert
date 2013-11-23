@@ -92,7 +92,7 @@ public abstract class GamePanel extends JPanel implements Runnable {
 		setFocusable(true);
 		requestFocus(); // the JPanel now has focus, so receives key events
 
-		state = GameState.Active;
+		state = null;
 
 		// set up message font
 		msgsFont = new Font("SansSerif", Font.BOLD, 24);
@@ -103,12 +103,12 @@ public abstract class GamePanel extends JPanel implements Runnable {
 	}
 
 	public void setState(GameState s) {
-		this.prevState = state;
-		this.state = s;
+		prevState = state;
+		state = s;
 	}
 
 	public GameState getState() {
-		return this.state;
+		return state;
 	}
 
 	/**
@@ -128,7 +128,7 @@ public abstract class GamePanel extends JPanel implements Runnable {
 	 * Initialize and start the thread
 	 */
 	final protected void startGame() {
-		if (animator == null || state != GameState.Active) {
+		if (animator == null || state == null) {
 			initGame();
 			animator = new Thread(this);
 			animator.start();

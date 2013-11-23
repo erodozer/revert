@@ -15,6 +15,8 @@ public class GameRunner {
 		
 		AssetsManager.init();
 		
-		g.setGame(new Scene(g));
+		Scene s = new Scene(g);
+		
+		g.setGame(s);
 	}
 }
