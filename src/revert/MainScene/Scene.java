@@ -115,8 +115,6 @@ public class Scene extends GamePanel {
 	}
 
 	protected void initGame() {
-		AssetsManager.init();
-
 		ImagesLoader images = AssetsManager.Images;
 
 		BricksManager bricksMan = new BricksManager(PWIDTH, PHEIGHT,
