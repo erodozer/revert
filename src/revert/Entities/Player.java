@@ -27,6 +27,7 @@ import revert.MainScene.World;
 import revert.MainScene.notifications.PlayerAttackNotification;
 import revert.MainScene.notifications.PlayerModeNotification;
 import revert.MainScene.notifications.PlayerMovementNotification;
+import revert.MainScene.notifications.PlayerNotification;
 import revert.util.BrickManager;
 
 import com.kgp.core.Game;
@@ -63,7 +64,9 @@ public class Player extends Actor {
 	// general timer used for mode switching/response
 	private int timer;
 
-	private static final int FULLAMMO = 6;
+	public static final int FULLAMMO = 6;
+
+	public static final int MAXHP = 10;
 	private int ammo;
 
 	private int yOffset;
@@ -96,12 +99,24 @@ public class Player extends Actor {
 		this.moving = Movement.Still;
 
 		vertMoveMode = VertMovement.Grounded;
-		maxVertTravel = brickMan.getBrickHeight() * 4;
-		// should be able to jump his max high in .5 sec
+		maxVertTravel = 80;
+		// should be able to jump his max height in .5 sec
 		vertStep = maxVertTravel * 2 * Game.getDeltaTime();
 		vertTravel = 0f;
 
+		this.hp = MAXHP;
 		this.ammo = FULLAMMO;
+	}
+	
+	public void init()
+	{
+		this.hp = MAXHP;
+		this.ammo = FULLAMMO;
+	
+		this.stop();
+		this.isAttacking = false;
+		
+		updateStatus();
 	}
 
 	/**
@@ -110,8 +125,8 @@ public class Player extends Actor {
 	public void setImage(String name) {
 		super.setImage(name);
 
-		this.offset.x = -this.getWidth() / 2;
-		this.offset.y = -this.getHeight();
+		this.offset.x = -this.dimensions.width / 2;
+		this.offset.y = -this.dimensions.height;
 	}
 
 	/**
@@ -156,6 +171,15 @@ public class Player extends Actor {
 		this.velocity.y = 0;
 		setImage(getNextImage(), true);
 	}
+	
+	/**
+	 * Sends a notification about the player's current states
+	 * Mainly for the HUD
+	 */
+	public void updateStatus() {
+		setChanged();
+		notifyObservers(new PlayerNotification(this.hp, this.ammo, this.mode));
+	}
 
 	/**
 	 * Although the sprite is not moving in the x-direction, we must still
@@ -178,6 +202,15 @@ public class Player extends Actor {
 				}
 			}
 		}
+		else if (isAttacking)
+		{
+			timer -= Game.getPeriodInMSec();
+			if (timer < 0)
+			{
+				isAttacking = false;
+				stop();
+			}
+		}
 
 		if (vertMoveMode == VertMovement.Rising)
 			updateRising();
@@ -185,7 +218,6 @@ public class Player extends Actor {
 			updateFalling();
 
 		super.updateSprite();
-		System.out.print(this.position);
 
 		if (this.getXPosn() > world.getWidth()) {
 			this.setPosition(this.getXPosn() - world.getWidth(), this.getYPosn());
@@ -332,7 +364,7 @@ public class Player extends Actor {
 		if (!brickMan.brickExists(nextBrick))
 			return;
 
-		if (checkAhead(nextBrick))
+		if (brickMan.getBrickHeight() > this.getHeight() * .25 && checkAhead(nextBrick))
 		{
 			stop();
 		}
@@ -376,7 +408,10 @@ public class Player extends Actor {
 
 	@Override
 	protected String getNextImage() {
-		if (isJumping()) {
+		if (isAttacking){
+			return "royer_atk";
+		}
+		else if (isJumping()) {
 			return "royer_jmp";
 		}
 		else if (!isStill()) {
@@ -392,10 +427,11 @@ public class Player extends Actor {
 	@Override
 	public void attack() {
 		ammo--;
-		timer = 100;
+		timer = 1000;
 		isAttacking = true;
 		stop();
 		setImage(getNextImage(), false);
+		updateStatus();
 	}
 
 	private void reload() {
@@ -454,18 +490,21 @@ public class Player extends Actor {
 			if (args instanceof PlayerMovementNotification) {
 				PlayerMovementNotification note = (PlayerMovementNotification) args;
 
-				if (note.jump) {
-					jump();
-				}
-				else {
-					if (note.movement == Movement.Left) {
-						moveLeft();
-					}
-					else if (note.movement == Movement.Right) {
-						moveRight();
+				if (!isAttacking)
+				{
+					if (note.jump) {
+						jump();
 					}
 					else {
-						stop();
+						if (note.movement == Movement.Left) {
+							moveLeft();
+						}
+						else if (note.movement == Movement.Right) {
+							moveRight();
+						}
+						else {
+							stop();
+						}
 					}
 				}
 			}
@@ -482,6 +521,8 @@ public class Player extends Actor {
 				else {
 					setMode(note.mode);
 				}
+				
+				updateStatus();
 			}
 			else if (args instanceof PlayerAttackNotification) {
 				if (hasAmmo()) {

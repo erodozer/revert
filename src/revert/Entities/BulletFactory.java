@@ -18,14 +18,15 @@ public class BulletFactory {
 	public Bullet spawnBullet()
 	{
 		Bullet b = new Bullet(world, parent.getMode());
-		Vector2 v = parent.getPosn().clone();
-		v.add(parent.getAim());
+		Vector2 v = new Vector2(parent.getRealXPosn(), parent.getRealYPosn());
 		b.setPosition(v.x, v.y);
 		
 		v = parent.getAim().clone();
 		v.normalize();
-		v.mult(20);
+		v.mult(.5f);
 		b.setVelocity(v.x, v.y);
+		
+		b.setOrientation(v.angle());
 		
 		return b;
 	}

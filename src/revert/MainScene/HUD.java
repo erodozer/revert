@@ -3,10 +3,13 @@ package revert.MainScene;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Panel;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
 import revert.Entities.Player;
+import revert.MainScene.notifications.PlayerModeNotification;
 import revert.MainScene.notifications.PlayerNotification;
 import revert.MainScene.notifications.WorldNotification;
 
@@ -24,9 +27,18 @@ public class HUD implements Observer {
 	String hp = "# 0 / 10";
 	String time = "0";
 	
+	int ammo;
+	
+	ArrayList<BufferedImage> bulletImages;
+	BufferedImage bulletIm;
+	BufferedImage emptyBullet;
+	
 	public HUD(Dimension view)
 	{
 		font = new BitmapFont("bm", AssetsManager.Images);
+		bulletImages = AssetsManager.Images.getImages("ammo");
+		bulletIm = bulletImages.get(0);
+		emptyBullet = bulletImages.get(3);
 		this.view = view;
 	}
 	
@@ -39,6 +51,18 @@ public class HUD implements Observer {
 		font.drawString(g, score, view.width-10, view.height - 10, Alignment.Right);
 		font.drawString(g, hp, 10, view.height - 10);
 		font.drawString(g, time, view.width - 10, 10 + font.getLineHeight(), Alignment.Right);
+		
+		for (int i = 1, x = 10, y = 10; i <= Player.FULLAMMO; i++, x += bulletIm.getWidth() + 4)
+		{
+			if (i > ammo)
+			{
+				g.drawImage(emptyBullet, x, y, null);
+			}
+			else
+			{
+				g.drawImage(bulletIm, x, y, null);		
+			}
+		}
 	}
 	
 	@Override
@@ -51,9 +75,11 @@ public class HUD implements Observer {
 		}
 		else if (o instanceof Player)
 		{
+			System.out.println("yeah");
 			PlayerNotification n = (PlayerNotification) args;
 			hp = n.hp;
-			//ammo = n.ammo;
+			ammo = n.ammo;
+			this.bulletIm = bulletImages.get(n.mode);
 		}
 	}
 	

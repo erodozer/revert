@@ -63,6 +63,10 @@ public class Sprite extends Observable {
 	 * Orientation of the sprite
 	 */
 	protected float angle;
+	/**
+	 * Rotational velocity of the sprite
+	 */
+	protected float rotation;
 	
 	/**
 	 *  image dimensions
@@ -237,6 +241,18 @@ public class Sprite extends Observable {
 		return this.angle;
 	}
 	
+	public void setOrientation(float angle) {
+		this.angle = angle;
+	}
+	
+	public void setRotationalRate(float rate) {
+		this.rotation = rate;
+	}
+	
+	public float getRetationalRate(){
+		return this.rotation;
+	}
+	
 	/**
 	 * @return the bounding box of the sprite
 	 */
@@ -255,6 +271,7 @@ public class Sprite extends Observable {
 	{
 		if (isActive()) {
 			this.position.translate(this.velocity.x, this.velocity.y);
+			this.angle += this.rotation;
 			
 			// update the animation
 			if (this.player != null)

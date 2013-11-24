@@ -21,3 +21,4 @@ o grass.png
 // fonts
 o bmfont.png
 
+s ammo.png 4
