@@ -54,9 +54,6 @@ public class Scene extends GamePanel {
 	private static final int PWIDTH = 1280; // size of panel
 	private static final int PHEIGHT = 720;
 
-	// image, bricks map, clips loader information files
-	private static final String BRICKS_INFO = "bricksInfo.txt";
-
 	private Player player; // the sprites
 	private Crosshair crosshair;
 
@@ -88,15 +85,22 @@ public class Scene extends GamePanel {
 	// handles termination, help, and game-play keys
 	{
 		int keyCode = e.getKeyCode();
-
+		
 		// termination keys
 		// listen for esc, q, end, ctrl-c on the canvas to
 		// allow a convenient exit from the full screen configuration
-		if ((keyCode == KeyEvent.VK_ESCAPE) || (keyCode == KeyEvent.VK_Q)
+		if ((keyCode == KeyEvent.VK_ESCAPE)
 				|| (keyCode == KeyEvent.VK_END)
 				|| ((keyCode == KeyEvent.VK_C) && e.isControlDown()))
 			this.stopGame();
 
+		System.out.println(this.getState() == GameState.Start);
+		if (this.getState() == GameState.Start)
+		{
+			this.setState(GameState.Help);
+			return;
+		}
+		
 		// help controls
 		if (keyCode == KeyEvent.VK_H) {
 			if (this.getState() == GameState.Help) { // help being shown
@@ -122,8 +126,7 @@ public class Scene extends GamePanel {
 
 		// BricksManager bricksMan = new BricksManager(PWIDTH, PHEIGHT,
 		// BRICKS_INFO, images);
-		JsonBricksManager bricksMan = JsonBricksManager.load("level01",
-				AssetsManager.JsonParser);
+		JsonBricksManager bricksMan = JsonBricksManager.load("level01", AssetsManager.JsonParser);
 		int brickMoveSize = bricksMan.getBrickWidth();
 		this.world = new World();
 		this.world.setLevel(bricksMan);
@@ -131,16 +134,18 @@ public class Scene extends GamePanel {
 		player = new Player(this.world, images);
 		this.world.setPlayer(player);
 
-		parallaxBg = new RibbonsManager(PWIDTH, PHEIGHT, player.getMoveRate(),
-				images);
-		parallaxFg = new RibbonsManager(PWIDTH, PHEIGHT, player.getMoveRate(),
-				images);
+		parallaxBg = new RibbonsManager(PWIDTH, PHEIGHT, player.getMoveRate(), images);
+		parallaxFg = new RibbonsManager(PWIDTH, PHEIGHT, player.getMoveRate(), images);
 
 		parallaxBg.add("skyline", 0f);
 		parallaxBg.add("forest3", .35f);
 		parallaxFg.add("grass", 1.1f);
 
 		crosshair = new Crosshair(PWIDTH, PHEIGHT, player, images);
+
+		hud = new HUD(new Dimension(PWIDTH, PHEIGHT));
+		world.addObserver(hud);
+		player.addObserver(hud);
 
 		GameController g = new Controller(player, crosshair, this, world);
 		this.addKeyListener(g);
@@ -155,10 +160,8 @@ public class Scene extends GamePanel {
 				processKey(e);
 			}
 		});
-
-		hud = new HUD(new Dimension(PWIDTH, PHEIGHT));
-		world.addObserver(hud);
-		player.addObserver(hud);
+		
+		player.init();
 
 		// prepare title/help screen
 		helpIm = images.getImage("help");
@@ -166,9 +169,7 @@ public class Scene extends GamePanel {
 
 		this.state = GameState.Active;
 		this.gameUpdate();
-		this.state = null;
-		
-		this.setState(GameState.Start);
+		this.state = GameState.Start;
 	}
 
 	// ------------- game life cycle methods ------------
@@ -176,7 +177,7 @@ public class Scene extends GamePanel {
 
 	// ----------------------------------------------
 
-	protected synchronized void gameUpdate() {
+	protected void gameUpdate() {
 		if (this.getState() == GameState.Active) {
 			// stop jack and scenery on collision
 			world.update();
@@ -195,13 +196,8 @@ public class Scene extends GamePanel {
 		}
 	}
 
-	protected synchronized void draw(Graphics2D dbg) {
+	protected void draw(Graphics2D dbg) {
 
-		if (this.state == null)
-		{
-			System.out.println("why");
-			return;
-		}
 		// draw a white background
 		dbg.setColor(Color.white);
 		dbg.fillRect(0, 0, PWIDTH, PHEIGHT);

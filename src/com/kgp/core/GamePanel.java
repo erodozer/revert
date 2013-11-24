@@ -57,8 +57,8 @@ public abstract class GamePanel extends JPanel implements Runnable {
 	private Thread animator; // the thread that performs the animation
 	private boolean running;
 
-	protected volatile GameState prevState = GameState.ProcessPaused;
-	protected volatile GameState state = GameState.ProcessPaused;
+	protected volatile GameState prevState = GameState.Start;
+	protected volatile GameState state = GameState.Start;
 
 	// used at game termination
 	protected volatile boolean gameOver = false;
@@ -92,8 +92,6 @@ public abstract class GamePanel extends JPanel implements Runnable {
 		setFocusable(true);
 		requestFocus(); // the JPanel now has focus, so receives key events
 
-		state = null;
-
 		// set up message font
 		msgsFont = new Font("SansSerif", Font.BOLD, 24);
 		metrics = this.getFontMetrics(msgsFont);
@@ -102,12 +100,14 @@ public abstract class GamePanel extends JPanel implements Runnable {
 		camMatrix = new AffineTransform();
 	}
 
-	public void setState(GameState s) {
+	public synchronized void setState(GameState s) {
 		prevState = state;
 		state = s;
+		
+		System.out.println(s);
 	}
 
-	public GameState getState() {
+	public synchronized GameState getState() {
 		return state;
 	}
 
@@ -128,7 +128,7 @@ public abstract class GamePanel extends JPanel implements Runnable {
 	 * Initialize and start the thread
 	 */
 	final protected void startGame() {
-		if (animator == null || state == null) {
+		if (animator == null || state == GameState.Start) {
 			initGame();
 			animator = new Thread(this);
 			animator.start();
