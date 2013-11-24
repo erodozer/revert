@@ -10,13 +10,62 @@
          "width":100,
          "x":0,
          "y":0
+        }, 
+        {
+         "height":50,
+         "name":"Spawn Points",
+         "objects":[
+                {
+                 "height":0,
+                 "name":"points",
+                 "polyline":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":344,
+                         "y":1
+                        }, 
+                        {
+                         "x":657,
+                         "y":-152
+                        }, 
+                        {
+                         "x":356,
+                         "y":-387
+                        }, 
+                        {
+                         "x":-49,
+                         "y":-388
+                        }, 
+                        {
+                         "x":-301,
+                         "y":-133
+                        }],
+                 "properties":
+                    {
+
+                    },
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":640,
+                 "y":705
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "width":100,
+         "x":0,
+         "y":0
         }],
  "orientation":"orthogonal",
  "properties":
     {
 
     },
- "tileheight":8,
+ "tileheight":16,
  "tilesets":[
         {
          "firstgid":1,
@@ -33,7 +82,7 @@
          "tileheight":4,
          "tilewidth":4
         }],
- "tilewidth":8,
+ "tilewidth":16,
  "version":1,
  "width":100
 }

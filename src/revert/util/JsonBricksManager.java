@@ -26,6 +26,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.kgp.core.AssetsManager;
+import com.kgp.util.Vector2;
 
 /**
  * Parses a CSV style Tiled Map XML File into a collision mask for levels
@@ -93,6 +94,21 @@ public class JsonBricksManager extends BrickManager {
 			for (int row = 0, i = 0; row < height; row++)
 				for (int col = 0; col < width; col++, i++)
 					t.collisionMask[col][row] = layerData[i] == 2;
+			
+			//second layer is an object of collision points
+			JsonObject pointLayer = layers.get(1).getAsJsonObject();
+			JsonArray points = pointLayer.get("objects").getAsJsonArray().get(0).getAsJsonObject().get("polyline").getAsJsonArray();
+			
+			//deserialize points into a list of spawn areas
+			t.spawnPoints = new Vector2[points.size()];
+			for (int i = 0; i < points.size(); i++)
+			{
+				Vector2 v = new Vector2();
+				JsonObject point = points.get(i).getAsJsonObject();
+				v.x = point.get("x").getAsFloat();
+				v.y = point.get("y").getAsFloat();
+				t.spawnPoints[i] = v;
+			}
 			
 			//get world size
 			t.stepX = data.get("tilewidth").getAsInt();
