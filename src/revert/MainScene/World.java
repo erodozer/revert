@@ -191,6 +191,7 @@ public class World extends Observable implements Observer{
 	public void setLevel(BrickManager bricksMan) {
 		this.level = bricksMan;
 		this.enemyFactory = new EnemyFactory(this, bricksMan.getSpawnPoints());
+		this.startWave();
 	}
 	
 	public BrickManager getLevel()
