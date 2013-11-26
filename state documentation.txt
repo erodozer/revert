@@ -1,0 +1,268 @@
+﻿Project Codename: Revert
+Nicholas Hydock
+Jen Funck
+
+Game State Machine:
+
+Startup
+>> set score to 0
+>> goto newLevel
+>> rendering initializes with player in middle of the screen and ui elements visible
+
+newLevel
+>> chose level type
+>> input disabled, shows Level goals for a few seconds
+>> goto Run when wait is over
+
+Run
+>> input enabled
+>> give points for each kill
+>> count timer
+>> evaluate level conditions
+>> update Player
+>> update Enemies
+>> update Bullets
+>> if level conditions are met: goto Reward
+>>> else goto Failed 
+>> if End/Esc is pressed, goto End
+>> if Pause/Home/F1 is pressed, goto Help
+
+Reward
+>> Player is award bonus points for how well the condition is met
+>> base points rewarded for completing the condition
+>> goto newLevel
+
+Failed
+>> Player is awarded no bonus points
+>> Player may input initials for recording their score
+>> after inputing intials, set score to 0
+>> goto newLevel
+
+Help
+>> game input disabled & updating disabled
+>> display help menu with key guides and what your current mission objective is
+>> if End is pressed, goto End
+>> if Home/F1 is pressed, goto Help
+
+End
+>> unloads assets
+>> closes window/game
+
+
+Player State Machine:
+Startup
+>> Player is created with full health, full ammo
+>> attackMode = 0
+>> goto isStill
+
+States dependent on movement:
+isFacingRight
+>> triggered when mouse is right of the character
+>> else the sprite is flipped when mouse is to the left of the character
+
+isWalkingBackwards
+>> use walking backwards animation when walking
+>> if down is pressed, goto isStill
+>> if mouse is moved to direction that the character is walking: goto isWalking
+>> when right click, space, or up is pressed: goto isRising
+>> if player.ammo <= 0: goto isReloading
+>> left click: goto isAttacking
+
+isWalking
+>> use walking animation is the direction that the character is facing
+>> if down is pressed, goto isStill
+>> if mouse is moved to direction that the character isn't walking: goto isWalkingBackwards
+>> when right click, space, or up is pressed: goto isRising
+>> if player.ammo <= 0: goto isReloading
+>> left click: goto isAttacking
+
+isRising
+>> character rises up with a jumping animation
+>> forward velocity is maintained
+>> when player hits peak jump height or after hitting a surface: goto isFalling
+
+isFalling
+>> decrement y position
+>> when player hits floor: goto isStill
+
+isStill
+>> not moving
+>> when right click, space, or up is pressed: goto isRising
+>> if player.ammo <= 0: goto isReloading
+>> left click: goto isAttacking
+
+isReloading
+>> stop movement, no input
+>> player.ammo becomes full
+>> play reload animation, after 1 second goto previous movement state 
+
+isAttacking
+>> if player.ammo <= 0: goto isReloading
+>> movement stops
+>> show attack sprite
+>> fires a bullet into the world belonging to the player in the direction of the mouse
+>> decrement ammo
+>> if 700 ms pass with no additional clicks: goto previous movement state (if isReloading is previous, just goto isStill)
+>> if addition click within 700ms: repeat fire another bullet
+
+Non-movement states
+isHit
+>> character bounces back a few pixels
+>> if the character is hit 3 times within 1 second, goto isInvulnerable
+
+isInvulnerable
+>> sprite opacity is faded
+>> gives character chance to get away from threat
+>> expires after 3 seconds
+
+attackMode
+>> represents different attack kinds, 1 for each type of enemy
+>> Shift increments through types
+>> Scroll wheel rolls through types
+>> keys 1, 2, 3 manually set the type
+
+
+Enemy State Machine
+
+Movement States:
+
+Common AI Traits, executed in order
+>> if enemy.hp <= 0 : goto isDead
+>> poll environment for player pressence
+>> poll environment for other enemy pressence
+>> if player.distance < viewRange: goto seesPlayer
+>> if player.distance < agroRange and not agro: goto fightPlayer
+>> if other enemy is hurt : goto reactTeammate
+>> if hurt : goto reactPain
+>> if agro and player.distance within reach: goto tryAttack
+
+Movement Affecting States
+isStill, isWalking, reactPain, deadState
+
+AI States
+seesPlayer, fightPlayer, reactTeammate, reactPain
+
+Common States
+isSpawning
+>> hp initializes
+>> show spawning animation
+>> goto isStill
+
+isDead
+>> show dying animation
+>> remove self from game's list of alive enemies
+
+Unique States per Enemy Type
+
+Do – Lazy, extremely passive
+
+isStill
+>> pick random number between 0 and 10
+>> if number is within 0 and 2: goto isWalking
+
+isWalking
+>> pick random point 2 tiles away
+>> take 3 seconds to walk there
+>> goto isStill
+
+seesPlayer
+>> player's hp slowly drains
+
+fightPlayer
+>> do nothing
+
+reactTeammate
+>> do nothing
+
+tryAttack
+>> do nothing, doesn't attack
+
+reactPain
+>> if player.attackMode == 0
+>>> deal damage
+>> else
+>>> bounce back
+>> goto isStill
+
+La – Active, provokable passive
+isStill
+>> pick random number between 0 and 10
+>> if number is within 0 and 5: goto isWalking
+
+isWalking
+>> if agro
+>>> chase after player at 50px/sec
+>> else
+>>> pick random point 5 tiles away
+>> walk at steady rate of 50px/sec
+>> when destination reached
+>>> goto isStill 
+
+seesPlayer
+>> if agro
+>>> goto isWalking
+
+fightPlayer
+>> do nothing
+
+reactTeammate
+>> become agro
+>> goto isStill
+
+tryAttack
+>> roll to attack (0 - 10)
+>> if roll between 0 and 5
+>>> show animation and deal damage
+>>> goto isStill when animation is done
+>> else
+>>> goto isStill
+
+reactPain
+>> if player.attackMode == 1
+>>> deal damage
+>> else
+>>> bounce back
+>> become agro
+>> goto isStill
+
+Re – Active & Agreesive
+isStill
+>> pick random number between 0 and 10
+>> if number is within 0 and 8: goto isWalking
+
+isWalking
+>> if agro
+>>> chase after player at steady rate of 70px/sec
+>> else
+>>> pick random point 8 tiles away
+>> walk at steady rate of 50px/sec
+>> when destination reached
+>>> goto isStill 
+
+seesPlayer
+>> if agro
+>>> goto isWalking
+
+fightPlayer
+>> become agro
+>> goto isWalking
+
+reactTeammate
+>> become agro
+>> goto isWalking
+
+tryAttack
+>> roll to attack (0 - 10)
+>> if roll between 0 and 5
+>>> show animation and deal damage
+>>> goto isStill when animation is done
+>> else
+>>> goto isStill
+
+reactPain
+>> if player.attackMode == 2
+>>> deal damage
+>> else
+>>> bounce back
+>> become agro
+>> goto isStill
