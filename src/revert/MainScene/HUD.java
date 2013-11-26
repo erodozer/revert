@@ -69,9 +69,12 @@ public class HUD implements Observer {
 	public void update(Observable o, Object args) {
 		if (o instanceof World)
 		{
-			WorldNotification n = (WorldNotification) args;
-			score = n.score;
-			time = n.time;
+			if (args instanceof WorldNotification)
+			{
+				WorldNotification n = (WorldNotification) args;
+				score = n.score;
+				time = n.time;
+			}
 		}
 		else if (o instanceof Player)
 		{
