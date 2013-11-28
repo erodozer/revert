@@ -137,9 +137,9 @@ public class Enemy extends Actor {
 	/**
 	 * @return Enemy's identifying type
 	 */
-	public int getType()
+	public Bullet.Mode getType()
 	{
-		return 0;
+		return Bullet.Mode.Gold;
 	}
 	
 	

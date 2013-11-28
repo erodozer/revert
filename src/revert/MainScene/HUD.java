@@ -78,11 +78,10 @@ public class HUD implements Observer {
 		}
 		else if (o instanceof Player)
 		{
-			System.out.println("yeah");
 			PlayerNotification n = (PlayerNotification) args;
 			hp = n.hp;
 			ammo = n.ammo;
-			this.bulletIm = bulletImages.get(n.mode);
+			this.bulletIm = bulletImages.get(n.mode.ordinal());
 		}
 	}
 	

@@ -22,6 +22,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Observable;
 
+import revert.Entities.Bullet.Mode;
 import revert.MainScene.Controller;
 import revert.MainScene.World;
 import revert.MainScene.notifications.PlayerAttackNotification;
@@ -59,7 +60,7 @@ public class Player extends Actor {
 	 */
 	private Vector2 aim;
 
-	private int mode;
+	private Bullet.Mode mode;
 
 	// general timer used for mode switching/response
 	private int timer;
@@ -106,6 +107,8 @@ public class Player extends Actor {
 
 		this.hp = MAXHP;
 		this.ammo = FULLAMMO;
+		
+		this.mode = Bullet.Mode.Copper;
 	}
 	
 	public void init()
@@ -377,7 +380,7 @@ public class Player extends Actor {
 	/**
 	 * @return the current attack mode of the player
 	 */
-	public int getMode() {
+	public Bullet.Mode getMode() {
 		return mode;
 	}
 
@@ -385,25 +388,21 @@ public class Player extends Actor {
 	 * @param i - the attack mode to set the player to
 	 */
 	private void setMode(int i) {
-		this.mode = i;
+		this.mode = Bullet.Mode.values()[i-1];
 	}
 
 	/**
 	 * Sets attack mode to one kind higher
 	 */
 	private void nextMode() {
-		this.mode++;
-		if (this.mode > 2)
-			this.mode = 0;
+		this.mode = this.mode.getNext();
 	}
 
 	/**
 	 * Sets attack mode to one kind lower
 	 */
 	private void prevMode() {
-		this.mode--;
-		if (this.mode < 0)
-			this.mode = 2;
+		this.mode = this.mode.getPrev();
 	}
 
 	@Override
@@ -435,7 +434,8 @@ public class Player extends Actor {
 	}
 
 	private void reload() {
-
+		ammo = FULLAMMO;
+		updateStatus();
 	}
 
 	/**
