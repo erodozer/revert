@@ -81,7 +81,7 @@ public class BitmapFont {
 	 * 
 	 * @param str
 	 */
-	public void stringWidth(String str) {
+	public int stringWidth(String str) {
 		int max = 0;
 
 		for (int i = 0, width = 0; i < str.length(); i++) {
@@ -100,20 +100,44 @@ public class BitmapFont {
 				}
 			}
 		}
+		
+		return max;
 	}
 
 	/**
 	 * Draws a string using the Bitmap font's set of glyphs
 	 * 
-	 * @param g
-	 * @param str
-	 * @param x
-	 * @param y
-	 * @param a
-	 *            - Alignment determining which side to anchor to
+	 * @param g - graphics context
+	 * @param str - string to render
+	 * @param x - horizontal anchor position on the screen
+	 * @param y - vertical anchor position on the screen of the top line
+	 * @param a - Alignment determining which side to anchor to
 	 */
 	public void drawString(Graphics2D g, String str, int x, int y, Alignment a) {
 		if (a == Alignment.Center) {
+			//split up the lines, each one has to be centered
+			String[] lines = str.split("/[\n\r]/");
+			for (int i = 0, locX = x - this.stringWidth(lines[0])/2, locY = y;
+			     i < lines.length; 
+				 i++, locX = x - this.stringWidth(lines[i])/2, locY += this.getLineHeight())
+			{
+				String line = lines[i];
+				for (int n = 0; n < lines.length; n++)
+				{
+					Character c = line.charAt(n);
+					if (c == ' ') {
+						locX += 10;
+					} else {
+						Glyph glyph = glyphs.get(c);
+						if (glyph != null) {
+							g.drawImage(glyph.img, locX - glyph.w, locY
+									- glyph.topHeight, null);
+							locX -= glyph.w;
+						}		
+					}
+				}
+			}
+			
 		} else if (a == Alignment.Right) {
 			for (int i = str.length() - 1, locX = x, locY = y; i >= 0; i--) {
 				Character c = str.charAt(i);
