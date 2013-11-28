@@ -22,3 +22,6 @@ o grass.png
 o bmfont.png
 
 s ammo.png 4
+
+//enemies
+s2 enemy.png 3 7
