@@ -15,6 +15,11 @@ public interface Objective extends Observer {
 	}
 	
 	/**
+	 * Initialize key values of the objective
+	 */
+	public void init();
+	
+	/**
 	 * Calculate the player earned rank for the objective
 	 * @return
 	 */
@@ -31,4 +36,13 @@ public interface Objective extends Observer {
 	 * @return
 	 */
 	public String getMessage();
+	
+	/**
+	 * Get if the conditions of the objective have been fully met
+	 * @return
+	 */
+	public boolean isFinished();
+	
+	
+	public void update(float delta);
 }
