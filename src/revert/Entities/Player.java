@@ -452,16 +452,17 @@ public class Player extends Actor {
 	 * 
 	 * @param p
 	 */
-	public void lookAt(Point2D target, AffineTransform m) {
-		Point2D p = m.transform(new Point((int) (position.x + offset.x), (int) (position.y + offset.y)), null);
-		aim.x = (float) target.getX();
-		aim.y = (float) target.getY();
+	public void lookAt(Vector2 target, AffineTransform m) {
+		Vector2 p = new Vector2();
+		m.transform(new Point((int) (position.x + offset.x), (int) (position.y + offset.y)), p);
+		aim.x = target.x;
+		aim.y = target.y;
 
-		aim.translate((float) -p.getX(), (float) -p.getY());
+		aim.translate((float) -p.x, (float) -p.y);
 		aim = aim.normalize();
 		aim.mult(80);
-
-		flipX = (aim.x < 0);
+		
+		lookAt(aim);
 	}
 
 	public Vector2 getAim() {
