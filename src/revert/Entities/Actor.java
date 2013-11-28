@@ -82,6 +82,9 @@ public abstract class Actor extends Sprite implements Observer{
 		{
 			this.visibility.put(a, false);
 		}
+		
+		this.velocity.x = 0;
+		this.velocity.y = 0;
 	}
 	
 	/**
@@ -116,7 +119,7 @@ public abstract class Actor extends Sprite implements Observer{
 	{
 		this.velocity.x = 0;
 		this.moving = Movement.Still;
-		this.setImage(getNextImage(), true);
+		this.setImage(getNextImage(), false);
 	}
 	
 	/**
