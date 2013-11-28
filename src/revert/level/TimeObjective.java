@@ -12,7 +12,7 @@ import java.util.Observable;
 public class TimeObjective implements Objective {
 
 	float timer;
-	float enemyCount;
+	int enemyCount;
 	
 	public void init(){
 		timer = (float)(Math.random() * 120) + 30;
@@ -36,8 +36,18 @@ public class TimeObjective implements Objective {
 	}
 	@Override
 	public String getMessage() {
-		String message = "D " + enemyCount + " E\nW " + timer + " &";
-		return message;
+		String message = "D %d E\nW %d &";
+		return String.format(message, enemyCount, (int)timer);
+	}
+
+	@Override
+	public boolean isFinished() {
+		return timer <= 0 || enemyCount <= 0;
+	}
+
+	@Override
+	public void update(float delta) {
+		timer -= delta;
 	}
 	
 }

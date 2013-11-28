@@ -10,13 +10,17 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 import revert.Entities.Player;
+import revert.level.Objective;
+import revert.level.TimeObjective;
 import revert.util.JsonBricksManager;
 
 import com.kgp.core.AssetsManager;
+import com.kgp.core.Game;
 import com.kgp.core.GameController;
 import com.kgp.core.GameFrame;
 import com.kgp.core.GamePanel;
 import com.kgp.core.GameState;
+import com.kgp.imaging.BitmapFont.Alignment;
 import com.kgp.imaging.ImagesLoader;
 import com.kgp.level.BricksManager;
 import com.kgp.level.RibbonsManager;
@@ -51,8 +55,8 @@ import com.kgp.level.RibbonsManager;
 public class Scene extends GamePanel {
 	private static final long serialVersionUID = -588578363027322258L;
 
-	private static final int PWIDTH = 1280; // size of panel
-	private static final int PHEIGHT = 720;
+	private static final int PWIDTH = 1024; // size of panel
+	private static final int PHEIGHT = 600;
 
 	private Player player; // the sprites
 	private Crosshair crosshair;
@@ -70,6 +74,10 @@ public class Scene extends GamePanel {
 
 	// display of in-game stats
 	HUD hud;
+	
+	Objective levelObjective;
+	//timer for displaying the level objective message;
+	float objDisplayTimer;
 
 	public Scene(GameFrame parent) {
 		super(parent);
@@ -127,7 +135,6 @@ public class Scene extends GamePanel {
 		// BricksManager bricksMan = new BricksManager(PWIDTH, PHEIGHT,
 		// BRICKS_INFO, images);
 		JsonBricksManager bricksMan = JsonBricksManager.load("level01", AssetsManager.JsonParser);
-		int brickMoveSize = bricksMan.getBrickWidth();
 		this.world = new World();
 		this.world.setLevel(bricksMan);
 
@@ -167,9 +174,29 @@ public class Scene extends GamePanel {
 		helpIm = images.getImage("help");
 		titleIm = images.getImage("title");
 
-		this.state = GameState.Active;
-		this.gameUpdate();
-		this.state = GameState.Start;
+		this.updateView();
+		
+		randomObjective();
+	}
+	
+	/**
+	 * Picks a random type of level objective for the player to complete
+	 */
+	private void randomObjective()
+	{
+		int rand = (int)(Math.random()*3);
+		
+		//TODO pick a random objective type
+		
+		Objective o = null;
+		o = new TimeObjective();
+		
+		world.deleteObserver(levelObjective);
+		levelObjective = o;
+		world.addObserver(levelObjective);
+		levelObjective.init();
+		objDisplayTimer = 3.0f;
+		
 	}
 
 	// ------------- game life cycle methods ------------
@@ -177,22 +204,41 @@ public class Scene extends GamePanel {
 
 	// ----------------------------------------------
 
+	private void updateView() {
+		// stop jack and scenery on collision
+		world.update();
+		player.updateSprite();
+		crosshair.updateSprite();
+		if (!player.isStill()) {
+			parallaxBg.update(player.getMovement());
+			parallaxFg.update(player.getMovement());
+		}
+		
+		// transform a camera that follows the player around
+		camera.set(player.getRealXPosn(), player.getRealYPosn());
+		camMatrix.setToTranslation(-camera.x, -camera.y);
+		camMatrix.translate(0, PHEIGHT / 2);
+		camMatrix.translate(PWIDTH / 2, 0);
+		camMatrix.scale(zoom, zoom);
+	}
+	
 	protected void gameUpdate() {
 		if (this.getState() == GameState.Active) {
-			// stop jack and scenery on collision
-			world.update();
-			player.updateSprite();
-			crosshair.updateSprite();
-			if (!player.isStill()) {
-				parallaxBg.update(player.getMovement());
-				parallaxFg.update(player.getMovement());
+			if (objDisplayTimer <= 0)
+			{
+				updateView();
+				
+				levelObjective.update(Game.getDeltaTime());
+				
+				if (levelObjective.isFinished())
+				{
+					this.setState(GameState.Report);
+				}
 			}
-			// transform a camera that follows the player around
-			camera.set(player.getRealXPosn(), player.getRealYPosn());
-			camMatrix.setToTranslation(-camera.x, -camera.y);
-			camMatrix.translate(0, PHEIGHT / 2);
-			camMatrix.translate(PWIDTH / 2, 0);
-			camMatrix.scale(zoom, zoom);
+			else
+			{
+				objDisplayTimer -= Game.getDeltaTime();
+			}
 		}
 	}
 
@@ -219,9 +265,14 @@ public class Scene extends GamePanel {
 
 		switch (this.state)
 		{
-			case Active:
+			case Active: {
 				hud.display(dbg);
+				if (objDisplayTimer > 0)
+				{
+					hud.font.drawString(dbg, levelObjective.getMessage(), PWIDTH/2, 100, Alignment.Center);
+				}
 				break;
+			}
 			case Help:
 				dbg.drawImage(helpIm, (PWIDTH - helpIm.getWidth()) / 2, (PHEIGHT - helpIm.getHeight()) / 2, null);
 				break;
@@ -231,7 +282,6 @@ public class Scene extends GamePanel {
 			default:
 				break;
 		}
-
 	}
 
 }
