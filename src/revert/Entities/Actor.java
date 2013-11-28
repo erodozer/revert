@@ -10,6 +10,7 @@ import revert.MainScene.notifications.ActorsRemoved;
 
 import com.kgp.core.AssetsManager;
 import com.kgp.imaging.Sprite;
+import com.kgp.util.Vector2;
 
 /**
  * Generic actor class for sprites that move within the world space and are animated with states
@@ -119,11 +120,25 @@ public abstract class Actor extends Sprite implements Observer{
 	}
 	
 	/**
+	 * Make the actor look towards a point and face in that direction
+	 * @param v
+	 */
+	public void lookAt(Vector2 v)
+	{
+		Vector2 dir = this.getPosn().to(v);
+		if (dir.x < position.x)
+			faceLeft();
+		else if (dir.x > position.x)
+			faceRight();
+	}
+	
+	/**
 	 * Turns the actor left
 	 */
 	final public void faceLeft()
 	{
 		this.facing = Direction.Left;
+		this.flipX = true;
 	}
 	
 	/**
@@ -132,6 +147,7 @@ public abstract class Actor extends Sprite implements Observer{
 	final public void faceRight()
 	{
 		this.facing = Direction.Right;
+		this.flipX = false;
 	}
 	
 	/**
