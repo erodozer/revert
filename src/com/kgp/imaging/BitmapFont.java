@@ -83,8 +83,8 @@ public class BitmapFont {
 	 */
 	public int stringWidth(String str) {
 		int max = 0;
-
-		for (int i = 0, width = 0; i < str.length(); i++) {
+		int width = 0;
+		for (int i = 0; i < str.length(); i++) {
 			Character c = str.charAt(i);
 			if (c == '\n' || c == '\r') {
 				if (max < width) {
@@ -100,6 +100,8 @@ public class BitmapFont {
 				}
 			}
 		}
+		if (width > max)
+			max = width;
 		
 		return max;
 	}
@@ -116,13 +118,12 @@ public class BitmapFont {
 	public void drawString(Graphics2D g, String str, int x, int y, Alignment a) {
 		if (a == Alignment.Center) {
 			//split up the lines, each one has to be centered
-			String[] lines = str.split("/[\n\r]/");
-			for (int i = 0, locX = x - this.stringWidth(lines[0])/2, locY = y;
-			     i < lines.length; 
-				 i++, locX = x - this.stringWidth(lines[i])/2, locY += this.getLineHeight())
+			String[] lines = str.split("[\n\r]+");
+			for (int i = 0, locX = x, locY = y; i < lines.length; i++, locY += lineHeight)
 			{
 				String line = lines[i];
-				for (int n = 0; n < lines.length; n++)
+				locX = (int)(x - this.stringWidth(line)/2f);
+				for (int n = 0; n < line.length(); n++)
 				{
 					Character c = line.charAt(n);
 					if (c == ' ') {
@@ -130,9 +131,8 @@ public class BitmapFont {
 					} else {
 						Glyph glyph = glyphs.get(c);
 						if (glyph != null) {
-							g.drawImage(glyph.img, locX - glyph.w, locY
-									- glyph.topHeight, null);
-							locX -= glyph.w;
+							g.drawImage(glyph.img, locX, locY - glyph.topHeight, null);
+							locX += glyph.w;
 						}		
 					}
 				}
@@ -149,8 +149,7 @@ public class BitmapFont {
 				} else {
 					Glyph glyph = glyphs.get(c);
 					if (glyph != null) {
-						g.drawImage(glyph.img, locX - glyph.w, locY
-								- glyph.topHeight, null);
+						g.drawImage(glyph.img, locX - glyph.w, locY - glyph.topHeight, null);
 						locX -= glyph.w;
 					}
 				}
@@ -166,8 +165,7 @@ public class BitmapFont {
 				} else {
 					Glyph glyph = glyphs.get(c);
 					if (glyph != null) {
-						g.drawImage(glyph.img, locX, locY - glyph.topHeight,
-								null);
+						g.drawImage(glyph.img, locX, locY - glyph.topHeight, null);
 						locX += glyph.w;
 					}
 				}
