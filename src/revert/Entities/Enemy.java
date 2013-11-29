@@ -26,6 +26,7 @@ public class Enemy extends Actor {
 	public Enemy(World w, Player player) {
 		super(w, "enemy", new ArrayList<Actor>());
 		
+		this.hp = 3;
 		this.actors.add(player);
 	}
 	
@@ -36,7 +37,7 @@ public class Enemy extends Actor {
 
 	@Override
 	protected String getNextImage() {
-		return null;
+		return "enemy";
 	}
 
 	/**
@@ -121,8 +122,9 @@ public class Enemy extends Actor {
 	 * @return true if bullet has hit the enemy
 	 */
 	public boolean hit(Bullet b) {
-		if (b.getPosn().distance(this.getPosn()) < this.getCollissionRange())
+		if (this.getMyRectangle().contains(b.getPosn()))
 		{
+			System.out.println("hit");
 			if (b.getType() == this.getType())
 			{
 				this.hp--;
