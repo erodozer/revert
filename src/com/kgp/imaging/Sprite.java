@@ -178,9 +178,9 @@ public class Sprite extends Observable {
 	/**
 	 * Forcefully sets the actual position of the sprite
 	 */
-	public void setPosition(float f, float g) {
-		this.position.x = f;
-		this.position.y = g;
+	public void setPosition(float x, float y) {
+		this.position.x = x;
+		this.position.y = y;
 	}
 
 	/**
@@ -258,8 +258,8 @@ public class Sprite extends Observable {
 	 */
 	public Rectangle getMyRectangle() {
 		//set the rectangle's position only when requested
-		myRect.x = (int) this.position.x;
-		myRect.y = (int) this.position.y;
+		myRect.x = (int) (this.position.x + this.offset.x);
+		myRect.y = (int) (this.position.y + this.offset.y);
 		
 		return myRect;
 	}
