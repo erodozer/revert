@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.kgp.core.Game;
 
 import revert.AI.EnemyAi;
+import revert.Entities.Actor.VertMovement;
 import revert.MainScene.World;
 
 public class Enemy extends Actor {
@@ -27,7 +28,15 @@ public class Enemy extends Actor {
 		super(w, "enemy", new ArrayList<Actor>());
 		
 		this.hp = 3;
+		
+		this.velocity.y = 2;
+		this.vertMoveMode = VertMovement.Falling;
+		maxVertTravel = 40;
+		vertStep = maxVertTravel * 2 * Game.getDeltaTime();
+		vertTravel = 0f;
+
 		this.actors.add(player);
+
 	}
 	
 	protected void setAI(EnemyAi ai)
@@ -36,8 +45,13 @@ public class Enemy extends Actor {
 	}
 
 	@Override
-	protected String getNextImage() {
-		return "enemy";
+	protected void setNextImage() {
+		if (isJumping())
+			setImage("enemy_1", false);
+		else if (!isStill())
+			setImage("enemy_1", true);
+		else
+			setImage("enemy_1", false);
 	}
 
 	/**

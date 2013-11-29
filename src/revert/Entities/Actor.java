@@ -10,6 +10,7 @@ import revert.MainScene.notifications.ActorsRemoved;
 import revert.util.BrickManager;
 
 import com.kgp.core.AssetsManager;
+import com.kgp.core.Game;
 import com.kgp.imaging.Sprite;
 import com.kgp.util.Vector2;
 
@@ -101,6 +102,8 @@ public abstract class Actor extends Sprite implements Observer{
 	// distance to move vertically in one step
 	protected float vertStep; 
 
+	// general timer used for mode switching/response
+	protected int timer;
 
 	public Actor(World w, String name, ArrayList<Actor> actors) {
 		super(0, 0, w.getWidth(), w.getHeight(), AssetsManager.Images, name);
@@ -127,13 +130,16 @@ public abstract class Actor extends Sprite implements Observer{
 		super.setImage(name);
 		
 		if (this.brickMan != null)
-			this.tileHeight = (int)(this.getHeight() / this.brickMan.getBrickHeight());
+			this.tileHeight = (int)(this.dimensions.height / this.brickMan.getBrickHeight());
+	
+		this.offset.x = -this.dimensions.width / 2;
+		this.offset.y = -this.dimensions.height;
 	}
 	
 	/**
 	 * Get the image that the actor is suppose to switch to dependent on current states
 	 */
-	abstract protected String getNextImage();
+	abstract protected void setNextImage();
 	
 	/**
 	 * Tells the sprite to start moving to the left
@@ -142,7 +148,7 @@ public abstract class Actor extends Sprite implements Observer{
 	{
 		this.velocity.x = -moveRate;
 		this.moving = Movement.Left;
-		this.setImage(getNextImage(), true);
+		setNextImage();
 	}
 	
 	/**
@@ -152,7 +158,7 @@ public abstract class Actor extends Sprite implements Observer{
 	{
 		this.velocity.x = moveRate;
 		this.moving = Movement.Right;
-		this.setImage(getNextImage(), true);
+		setNextImage();
 	}
 	
 	/**
@@ -162,7 +168,7 @@ public abstract class Actor extends Sprite implements Observer{
 	{
 		this.velocity.x = 0;
 		this.moving = Movement.Still;
-		this.setImage(getNextImage(), false);
+		setNextImage();
 	}
 	
 	/**
@@ -205,7 +211,7 @@ public abstract class Actor extends Sprite implements Observer{
 			this.vertMoveMode = VertMovement.Rising;
 			this.vertTravel = 0f;
 			this.velocity.y = -vertStep;
-			setImage(getNextImage(), false);
+			setNextImage();
 		}
 	}
 
@@ -216,8 +222,18 @@ public abstract class Actor extends Sprite implements Observer{
 		if (vertMoveMode != VertMovement.Falling) {
 			this.vertMoveMode = VertMovement.Falling;
 			this.velocity.y = vertStep;
-			setImage(getNextImage(), false);
+			setNextImage();
 		}
+	}
+
+	/**
+	 * Stop jumping
+	 */
+	private void land() {
+		this.vertMoveMode = VertMovement.Grounded;
+		this.vertTravel = 0;
+		this.velocity.y = 0;
+		setNextImage();
 	}
 	
 	/**
@@ -242,7 +258,151 @@ public abstract class Actor extends Sprite implements Observer{
 	{
 		return this.moveRate;
 	}
+
+	/**
+	 * If the left/right move has put the sprite out in thin air, then put it
+	 * into falling mode.
+	 */
+	protected void checkIfFalling() {
+		// could the sprite move downwards if it wanted to?
+		// test its center x-coord, base y-coord
+		float yTrans = brickMan.checkBrickTop(this.getXPosn(), this.getYPosn(), vertStep);
+		if (yTrans != 0) {
+			fall();
+		}
+	}
+
+	/**
+	 * Rising will continue until the maximum number of vertical steps is
+	 * reached, or the sprite hits the base of a brick. The sprite then switches
+	 * to falling mode.
+	 */
+	protected void updateRising() {
+		if (vertTravel >= maxVertTravel) {
+			fall();
+		}
+		else {
+			float yTrans = brickMan.checkBrickBase(this.getXPosn(), this.getYPosn() - this.getHeight(), vertStep);
+			if (yTrans <= 0) {
+				fall();
+			}
+			else { // can move upwards another step
+				vertTravel += yTrans;
+				if (yTrans < vertStep) {
+					this.velocity.y = -yTrans;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Falling will continue until the sprite hits the top of a brick. The game
+	 * only allows a brick ribbon which has a complete floor, so the sprite must
+	 * eventually touch down.
+	 * 
+	 * Falling mode can be entered without a corresponding rising sequence, for
+	 * instance, when the sprite walks off a cliff.
+	 */
+	protected void updateFalling() {
+		float yTrans = brickMan.checkBrickTop(this.getXPosn(), this.getYPosn(), vertStep);
+		if (yTrans < vertStep) {
+			this.position.y += yTrans;
+			land();
+		}
+	}
 	
+	/**
+	 * Looks at all bricks ahead of the character as he's traveling to ensure
+	 * there is no collisions before moving ahead
+	 * <p/>
+	 * Automatically calculates the base tile ahead of the character and checks
+	 * up the body of the character to find any collisions ahead in the direction
+	 * that the he is moving.
+	 * 
+	 * @return true if collision occurs
+	 */
+	protected boolean checkAhead() {
+		Vector2 nextBrick;
+		// adjust to base and check brick ahead
+		Vector2 p = position.clone();
+
+		// adjust for visible offset
+		if (moving == Movement.Right)
+			p.x -= offset.x;
+		else if (moving == Movement.Left)
+			p.x += offset.x;
+
+		p.x += this.velocity.x;
+		p.y -= 1;
+
+		nextBrick = brickMan.worldToMap(p.x, p.y);
+		
+		return this.checkAhead(nextBrick);
+	}
+	
+	/**
+	 * Looks at all bricks ahead of the character as he's traveling to ensure
+	 * there is no collisions before moving ahead
+	 * 
+	 * @param nextBrick - should be the brick at the base of the character, as this
+	 * 	method iterates up the length of the character to check for bricks/collissions
+	 * 
+	 * @return true if collision occurs
+	 */
+	private boolean checkAhead(Vector2 nextBrick) {
+		// if the brick is the same as what we're currently on then we do
+		// nothing and just let royer continue on his way across the brick
+		if (nextBrick.equals(this.map))
+			return false;
+
+		// if the next brick exists, we check the brick above it to see if it's
+		// empty
+		for (int i = 0; i < this.tileHeight-1; i++) {
+			nextBrick.y--;
+			
+			// if it isn't and we run into a wall and stop
+			if (brickMan.brickExists(nextBrick)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	/**
+	 * Causes Royer to advance up the tilemap if the next tile is only 1 up Does
+	 * not cause Royer to think he's jumping
+	 */
+	protected void stepNext() {
+		Vector2 nextBrick;
+		// adjust to base and check brick ahead
+		Vector2 p = position.clone();
+
+		// adjust for visible offset
+		if (moving == Movement.Right)
+			p.x -= offset.x;
+		else if (moving == Movement.Left)
+			p.x += offset.x;
+
+		p.x += this.velocity.x;
+		p.y -= 1;
+
+		nextBrick = brickMan.worldToMap(p.x, p.y);
+
+		// if the brick is the same as what we're currently on then we do
+		// nothing and just let royer continue on his way across the brick
+		if (!brickMan.brickExists(nextBrick))
+			return;
+
+		if (brickMan.getBrickHeight() > this.getHeight() * .25 && checkAhead(nextBrick))
+		{
+			stop();
+		}
+		else
+		{
+			this.position.y -= brickMan.getBrickHeight();
+		}
+	}
 	/**
 	 * Updates what the actor sees and have them react to changes
 	 */
@@ -328,5 +488,48 @@ public abstract class Actor extends Sprite implements Observer{
 				this.visibility.remove(actor);
 			}
 		}
+	}
+	
+	public void updateSprite()
+	{
+		if (!isStill()) { // moving
+			if (!isJumping()) // if not jumping
+			{
+				checkIfFalling(); // may have moved out into empty space
+				this.stepNext();
+			}
+			else
+			{
+				if (checkAhead())
+				{
+					stop();
+				}
+			}
+		}
+		else if (isAttacking)
+		{
+			timer -= Game.getPeriodInMSec();
+			if (timer < 0)
+			{
+				isAttacking = false;
+				stop();
+			}
+		}
+
+		if (vertMoveMode == VertMovement.Rising)
+			updateRising();
+		else if (vertMoveMode == VertMovement.Falling)
+			updateFalling();
+
+		super.updateSprite();
+
+		if (this.getXPosn() > world.getWidth()) {
+			this.setPosition(this.getXPosn() - world.getWidth(), this.getYPosn());
+		}
+		else if (this.getXPosn() < 0) {
+			this.setPosition(this.getXPosn() + world.getWidth(), this.getYPosn());
+		}
+
+		this.map = brickMan.worldToMap(this.getXPosn(), this.getYPosn());
 	}
 }
