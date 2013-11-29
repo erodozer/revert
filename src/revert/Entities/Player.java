@@ -22,6 +22,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Observable;
 
+import revert.Entities.Actor.VertMovement;
 import revert.Entities.Bullet.Mode;
 import revert.MainScene.Controller;
 import revert.MainScene.World;
@@ -38,22 +39,9 @@ import com.kgp.util.Vector2;
 
 public class Player extends Actor {
 
+	public static final int FULLAMMO = 6;
+	public static final int MAXHP = 10;
 	private static final float DURATION = 0.5f; // secs
-
-	// max number of steps to take when rising upwards in a jump
-	private VertMovement vertMoveMode;
-	private final float maxVertTravel;
-	private float vertTravel;
-	private float vertStep; // distance to move vertically in one step
-
-	private BrickManager brickMan;
-
-	private int tileHeight; // this sprite's height in tiles
-
-	/*
-	 * the current position of the sprite in the tilemap coordinates
-	 */
-	private Vector2 map;
 
 	/*
 	 * the current point that the player is aiming at
@@ -65,17 +53,10 @@ public class Player extends Actor {
 	// general timer used for mode switching/response
 	private int timer;
 
-	public static final int FULLAMMO = 6;
-
-	public static final int MAXHP = 10;
 	private int ammo;
-
-	private int yOffset;
 
 	public Player(World w, ImagesLoader imsLd) {
 		super(w, "royer01", new ArrayList());
-
-		this.brickMan = w.getLevel();
 
 		// standing center screen, facing right
 		// walks 8 tiles per second
@@ -85,8 +66,6 @@ public class Player extends Actor {
 		setVelocity(0, 0); // no movement
 
 		this.duration = DURATION;
-
-		this.yOffset = this.getHeight();
 
 		// our position is the bottom center of the sprite
 		this.position.y = brickMan.findFloor(0, 0, false);
@@ -99,7 +78,8 @@ public class Player extends Actor {
 
 		this.moving = Movement.Still;
 
-		vertMoveMode = VertMovement.Grounded;
+		this.velocity.y = 5;
+		this.vertMoveMode = VertMovement.Falling;
 		maxVertTravel = 80;
 		// should be able to jump his max height in .5 sec
 		vertStep = maxVertTravel * 2 * Game.getDeltaTime();
@@ -130,39 +110,6 @@ public class Player extends Actor {
 
 		this.offset.x = -this.dimensions.width / 2;
 		this.offset.y = -this.dimensions.height;
-	}
-
-	/**
-	 * Check if the player's vert mode is
-	 * 
-	 * @return
-	 */
-	public boolean isJumping() {
-		return this.vertMoveMode != VertMovement.Grounded;
-	}
-
-	/**
-	 * The sprite is asked to jump. It sets its vertMoveMode to RISING, and
-	 * changes its image. The y- position adjustment is done in updateSprite().
-	 */
-	public void jump() {
-		if (vertMoveMode == VertMovement.Grounded) {
-			this.vertMoveMode = VertMovement.Rising;
-			this.vertTravel = 0f;
-			this.velocity.y = -vertStep;
-			setImage(getNextImage(), false);
-		}
-	}
-
-	/**
-	 * Force the actor into a falling state
-	 */
-	public void fall() {
-		if (vertMoveMode != VertMovement.Falling) {
-			this.vertMoveMode = VertMovement.Falling;
-			this.velocity.y = vertStep;
-			setImage(getNextImage(), false);
-		}
 	}
 
 	/**

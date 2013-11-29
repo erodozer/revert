@@ -7,6 +7,7 @@ import java.util.Observer;
 
 import revert.MainScene.World;
 import revert.MainScene.notifications.ActorsRemoved;
+import revert.util.BrickManager;
 
 import com.kgp.core.AssetsManager;
 import com.kgp.imaging.Sprite;
@@ -19,12 +20,18 @@ import com.kgp.util.Vector2;
  */
 public abstract class Actor extends Sprite implements Observer{
 
+	/**
+	 * Facing direction of the actor
+	 */
 	public static enum Direction 
 	{
 		Left,
 		Right;
 	}
 	
+	/**
+	 * How the actor is moving within the world horizontally
+	 */
 	public static enum Movement
 	{
 		Still,
@@ -32,6 +39,9 @@ public abstract class Actor extends Sprite implements Observer{
 		Right;
 	}
 	
+	/**
+	 * How the actor is moving within the world vertically
+	 */
 	public static enum VertMovement
 	{
 		Grounded,
@@ -42,6 +52,7 @@ public abstract class Actor extends Sprite implements Observer{
 	//states used for setting movement properties of the actor
 	protected Movement moving;
 	protected Direction facing;
+	protected VertMovement vertMoveMode;
 	
 	//additional states
 	protected boolean isHit;
@@ -56,9 +67,7 @@ public abstract class Actor extends Sprite implements Observer{
 	//list of names used to associate as a spritesheet for the character
 	protected String spritesheet;
 
-	/**
-	 * Distance away that the actor can see another
-	 */
+	//Distance away that the actor can see another	
 	protected double viewRange;
 	
 	//synchronization lock on actor updating
@@ -69,10 +78,30 @@ public abstract class Actor extends Sprite implements Observer{
 	
 	//all actors that this actor can interact with/watch
 	protected ArrayList<Actor> actors;
+	
+	//the amount of times the actor can still be hit before dying
 	protected int hp;
 	
+	//the world the actor is present within
 	protected World world;
-	
+
+	//brick space the actor moves within
+	// all actors move within tile maps
+	protected BrickManager brickMan;
+
+	//the current position of the sprite in the tilemap coordinates
+	protected Vector2 map;
+	// this sprite's height in tiles
+	protected int tileHeight; 
+
+	// max number of steps to take when rising upwards in a jump
+	protected float maxVertTravel;
+	// total vertical travel so far in a jump
+	protected float vertTravel;
+	// distance to move vertically in one step
+	protected float vertStep; 
+
+
 	public Actor(World w, String name, ArrayList<Actor> actors) {
 		super(0, 0, w.getWidth(), w.getHeight(), AssetsManager.Images, name);
 		this.world = w;
@@ -85,6 +114,20 @@ public abstract class Actor extends Sprite implements Observer{
 		
 		this.velocity.x = 0;
 		this.velocity.y = 0;
+		
+		this.brickMan = w.getLevel();
+
+		this.map = new Vector2();
+		
+		this.stop();
+	}
+	
+	public void setImage(String name)
+	{
+		super.setImage(name);
+		
+		if (this.brickMan != null)
+			this.tileHeight = (int)(this.getHeight() / this.brickMan.getBrickHeight());
 	}
 	
 	/**
@@ -154,16 +197,27 @@ public abstract class Actor extends Sprite implements Observer{
 	}
 	
 	/**
-	 * @return true if the character is not moving
+	 * The sprite is asked to jump. It sets its vertMoveMode to RISING, and
+	 * changes its image. The y- position adjustment is done in updateSprite().
 	 */
-	public boolean isStill()
-	{
-		return moving == Movement.Still;
+	public void jump() {
+		if (vertMoveMode == VertMovement.Grounded) {
+			this.vertMoveMode = VertMovement.Rising;
+			this.vertTravel = 0f;
+			this.velocity.y = -vertStep;
+			setImage(getNextImage(), false);
+		}
 	}
-	
-	public boolean isHit()
-	{
-		return this.isHit;
+
+	/**
+	 * Force the actor into a falling state
+	 */
+	public void fall() {
+		if (vertMoveMode != VertMovement.Falling) {
+			this.vertMoveMode = VertMovement.Falling;
+			this.velocity.y = vertStep;
+			setImage(getNextImage(), false);
+		}
 	}
 	
 	/**
@@ -234,6 +288,27 @@ public abstract class Actor extends Sprite implements Observer{
 	 */
 	final public boolean isAlive() {
 		return this.hp > 0;
+	}
+	
+	/**
+	 * Check if the player is on the ground or moving in the air
+	 * @return boolean
+	 */
+	final public boolean isJumping() {
+		return this.vertMoveMode != VertMovement.Grounded;
+	}
+	
+	/**
+	 * @return true if the character is not moving
+	 */
+	final public boolean isStill()
+	{
+		return moving == Movement.Still;
+	}
+	
+	final public boolean isHit()
+	{
+		return this.isHit;
 	}
 	
 	/**
