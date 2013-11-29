@@ -51,8 +51,8 @@ import com.kgp.level.RibbonsManager;
 public class Scene extends GamePanel {
 	private static final long serialVersionUID = -588578363027322258L;
 
-	private static final int PWIDTH = 1280; // size of panel
-	private static final int PHEIGHT = 720;
+	private static final int PWIDTH = 1024; // size of panel
+	private static final int PHEIGHT = 600;
 
 	private Player player; // the sprites
 	private Crosshair crosshair;
