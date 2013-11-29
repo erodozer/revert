@@ -1,22 +1,6 @@
 package com.kgp.level;
 
-// Ribbon.java
-// Andrew Davison, April 2005, ad@fivedots.coe.psu.ac.th
 
-/* A ribbon manages an image which is wider than the game panel's
- width: width >= pWidth
-
- When a sprite is instructed to move left or right, the 
- sprite doesn't actually move, instead the ribbon moves in
- the _opposite_direction (right or left). The amount of movement 
- is specified in moveSize.
-
- The image is wrapped around the panel, so at a given moment
- the tail of the image, followed by its head may be visible 
- in the panel.
-
- A collection of ribbons are managed by a RibbonsManager object.
- */
 
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
@@ -24,6 +8,22 @@ import java.awt.image.BufferedImage;
 
 import revert.Entities.Actor.Movement;
 
+//Ribbon.java
+//Andrew Davison, April 2005, ad@fivedots.coe.psu.ac.th
+
+/**
+ * A ribbon manages an image which is wider than the game panel's width: width
+ * >= pWidth
+ * <p/>
+ * When a sprite is instructed to move left or right, the sprite doesn't
+ * actually move, instead the ribbon moves in the opposite direction (right or
+ * left). The amount of movement is specified in moveSize.
+ * <p/>
+ * The image is wrapped around the panel, so at a given moment the tail of the
+ * image, followed by its head may be visible in the panel.
+ * <p/>
+ * A collection of ribbons are managed by a RibbonsManager object.
+ */
 public class Ribbon {
 	private BufferedImage im;
 	private float width; // the width of the image (>= pWidth)
@@ -42,7 +42,7 @@ public class Ribbon {
 	AffineTransform post;
 	
 
-	/*
+	/**
 	 * The x-coord in the panel where the start of the image (its head) should
 	 * be drawn. It can range between -width to width (exclusive), so can have a
 	 * value beyond the confines of the panel (0-pWidth).
@@ -73,7 +73,11 @@ public class Ribbon {
 		width *= pHeight/height;
 		wScale = pHeight/height;
 		hScale = pHeight/height;
-	} // end of Ribbon()
+		
+		self.scale(wScale, hScale);
+		pre.scale(wScale, hScale);
+		post.scale(wScale, hScale);
+	}
 
 	/*
 	 * Increment the xImHead value depending on the movement flags. It can range
@@ -102,10 +106,9 @@ public class Ribbon {
 		post.scale(wScale, hScale);
 
 		// System.out.println("xImHead is " + xImHead);
-	} // end of update()
+	}
 
-	public void display(Graphics2D g)
-	/*
+	/**
 	 * Consider 5 cases: 
 	 *   head > 0, when xImHead == 0, draw only the im head when xImHead >
 	 * 0, draw the im tail and im head, or only the im tail. when xImHead < 0,
@@ -113,6 +116,7 @@ public class Ribbon {
 	 * 
 	 * xImHead can range between -width to width (exclusive)
 	 */
+	public void display(Graphics2D g)
 	{
 		//image right of the left edge
 		if (head > 0)
@@ -141,4 +145,4 @@ public class Ribbon {
 		}
 	}
 
-} // end of Ribbon
+}

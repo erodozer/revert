@@ -8,13 +8,37 @@ import com.kgp.imaging.Sprite;
 
 public class Bullet extends Sprite {
 
-	private int type;
+	public static enum Mode {
+		Gold, Silver, Copper;
+		
+		public Mode getNext()
+		{
+			int type = this.ordinal();
+			type++;
+			if (type >= Mode.values().length)
+				type = 0;
+			return Mode.values()[type];
+		}
+		
+		public Mode getPrev()
+		{
+			int type = this.ordinal();
+			type--;
+			if (type < 0)
+				type = Mode.values().length-1;
+			return Mode.values()[type];
+		}
+	}
 	
-	public Bullet(World w, int type) {
+	private Mode type;
+	
+	public Bullet(World w, Mode type) {
 		super(0, 0, w.getWidth(), w.getHeight(), AssetsManager.Images, "bullet");
+	
+		this.type = type;
 	}
 
-	public int getType()
+	public Mode getType()
 	{
 		return this.type;
 	}

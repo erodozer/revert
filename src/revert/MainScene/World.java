@@ -63,7 +63,6 @@ public class World extends Observable implements Observer{
 	
 	private int score;
 	private int time;
-	private int hp;
 	
 	public World()
 	{
@@ -86,8 +85,8 @@ public class World extends Observable implements Observer{
 			{
 				if (a instanceof Enemy)
 				{
-					enemies.remove(i);
-					allActors.remove(a);
+					enemies.remove(a);
+					allActors.remove(i);
 					action.actors.add(a);
 					this.setChanged();
 					n--;
@@ -107,8 +106,9 @@ public class World extends Observable implements Observer{
 		/**
 		 * Perform bullet update
 		 */
-		for (Bullet b : bullets)
+		for (int i = 0; i < bullets.size(); i++)
 		{
+			Bullet b = bullets.get(i);
 			b.updateSprite();
 			for (Enemy e : enemies)
 			{
@@ -116,13 +116,19 @@ public class World extends Observable implements Observer{
 				{
 					e.hit(b);
 					score += HIT_BONUS;
+					bullets.remove(i);
+					i--;
+					continue;
 				}
 			}
+			
 			if ((b.getXPosn() > player.getPosn().x + player.getPWidth()/2) ||
 			   (b.getXPosn() < player.getPosn().x - player.getPWidth()/2) ||
 			   (b.getYPosn() > player.getPosn().y + player.getPHeight()/2) ||
 			   (b.getYPosn() < player.getPosn().y - player.getPHeight()/2)){
-				
+				bullets.remove(i);
+				i--;
+				continue;
 			}
 		}
 		
@@ -156,6 +162,7 @@ public class World extends Observable implements Observer{
 			int[] data = waveData[i];
 			Enemy e = enemyFactory.generateEnemy(data[2]);
 			e.setPosition(data[0], data[1]);
+			e.stop();
 			list.add(e);
 		}
 		

@@ -22,6 +22,8 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Observable;
 
+import revert.Entities.Actor.VertMovement;
+import revert.Entities.Bullet.Mode;
 import revert.MainScene.Controller;
 import revert.MainScene.World;
 import revert.MainScene.notifications.PlayerAttackNotification;
@@ -37,44 +39,24 @@ import com.kgp.util.Vector2;
 
 public class Player extends Actor {
 
+	public static final int FULLAMMO = 6;
+	public static final int MAXHP = 10;
 	private static final float DURATION = 0.5f; // secs
-
-	// max number of steps to take when rising upwards in a jump
-	private VertMovement vertMoveMode;
-	private final float maxVertTravel;
-	private float vertTravel;
-	private float vertStep; // distance to move vertically in one step
-
-	private BrickManager brickMan;
-
-	private int tileHeight; // this sprite's height in tiles
-
-	/*
-	 * the current position of the sprite in the tilemap coordinates
-	 */
-	private Vector2 map;
 
 	/*
 	 * the current point that the player is aiming at
 	 */
 	private Vector2 aim;
 
-	private int mode;
+	private Bullet.Mode mode;
 
 	// general timer used for mode switching/response
 	private int timer;
 
-	public static final int FULLAMMO = 6;
-
-	public static final int MAXHP = 10;
 	private int ammo;
-
-	private int yOffset;
 
 	public Player(World w, ImagesLoader imsLd) {
 		super(w, "royer01", new ArrayList());
-
-		this.brickMan = w.getLevel();
 
 		// standing center screen, facing right
 		// walks 8 tiles per second
@@ -84,8 +66,6 @@ public class Player extends Actor {
 		setVelocity(0, 0); // no movement
 
 		this.duration = DURATION;
-
-		this.yOffset = this.getHeight();
 
 		// our position is the bottom center of the sprite
 		this.position.y = brickMan.findFloor(0, 0, false);
@@ -98,7 +78,8 @@ public class Player extends Actor {
 
 		this.moving = Movement.Still;
 
-		vertMoveMode = VertMovement.Grounded;
+		this.velocity.y = 5;
+		this.vertMoveMode = VertMovement.Falling;
 		maxVertTravel = 80;
 		// should be able to jump his max height in .5 sec
 		vertStep = maxVertTravel * 2 * Game.getDeltaTime();
@@ -106,6 +87,8 @@ public class Player extends Actor {
 
 		this.hp = MAXHP;
 		this.ammo = FULLAMMO;
+		
+		this.mode = Bullet.Mode.Copper;
 	}
 	
 	public void init()
@@ -127,39 +110,6 @@ public class Player extends Actor {
 
 		this.offset.x = -this.dimensions.width / 2;
 		this.offset.y = -this.dimensions.height;
-	}
-
-	/**
-	 * Check if the player's vert mode is
-	 * 
-	 * @return
-	 */
-	public boolean isJumping() {
-		return this.vertMoveMode != VertMovement.Grounded;
-	}
-
-	/**
-	 * The sprite is asked to jump. It sets its vertMoveMode to RISING, and
-	 * changes its image. The y- position adjustment is done in updateSprite().
-	 */
-	public void jump() {
-		if (vertMoveMode == VertMovement.Grounded) {
-			this.vertMoveMode = VertMovement.Rising;
-			this.vertTravel = 0f;
-			this.velocity.y = -vertStep;
-			setImage(getNextImage(), false);
-		}
-	}
-
-	/**
-	 * Force the actor into a falling state
-	 */
-	public void fall() {
-		if (vertMoveMode != VertMovement.Falling) {
-			this.vertMoveMode = VertMovement.Falling;
-			this.velocity.y = vertStep;
-			setImage(getNextImage(), false);
-		}
 	}
 
 	/**
@@ -377,7 +327,7 @@ public class Player extends Actor {
 	/**
 	 * @return the current attack mode of the player
 	 */
-	public int getMode() {
+	public Bullet.Mode getMode() {
 		return mode;
 	}
 
@@ -385,25 +335,21 @@ public class Player extends Actor {
 	 * @param i - the attack mode to set the player to
 	 */
 	private void setMode(int i) {
-		this.mode = i;
+		this.mode = Bullet.Mode.values()[i-1];
 	}
 
 	/**
 	 * Sets attack mode to one kind higher
 	 */
 	private void nextMode() {
-		this.mode++;
-		if (this.mode > 2)
-			this.mode = 0;
+		this.mode = this.mode.getNext();
 	}
 
 	/**
 	 * Sets attack mode to one kind lower
 	 */
 	private void prevMode() {
-		this.mode--;
-		if (this.mode < 0)
-			this.mode = 2;
+		this.mode = this.mode.getPrev();
 	}
 
 	@Override
@@ -435,7 +381,8 @@ public class Player extends Actor {
 	}
 
 	private void reload() {
-
+		ammo = FULLAMMO;
+		updateStatus();
 	}
 
 	/**
@@ -452,16 +399,17 @@ public class Player extends Actor {
 	 * 
 	 * @param p
 	 */
-	public void lookAt(Point2D target, AffineTransform m) {
-		Point2D p = m.transform(new Point((int) (position.x + offset.x), (int) (position.y + offset.y)), null);
-		aim.x = (float) target.getX();
-		aim.y = (float) target.getY();
+	public void lookAt(Vector2 target, AffineTransform m) {
+		Vector2 p = new Vector2();
+		m.transform(new Point((int) (position.x + offset.x), (int) (position.y + offset.y)), p);
+		aim.x = target.x;
+		aim.y = target.y;
 
-		aim.translate((float) -p.getX(), (float) -p.getY());
+		aim.translate((float) -p.x, (float) -p.y);
 		aim = aim.normalize();
 		aim.mult(80);
-
-		flipX = (aim.x < 0);
+		
+		lookAt(aim);
 	}
 
 	public Vector2 getAim() {

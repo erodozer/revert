@@ -1,5 +1,6 @@
 package revert.MainScene.notifications;
 
+import revert.Entities.Bullet.Mode;
 import revert.Entities.Player;
 
 /**
@@ -13,9 +14,9 @@ public class PlayerNotification {
 	
 	public final String hp;
 	public final int ammo;
-	public final int mode;
+	public final Mode mode;
 	
-	public PlayerNotification(final int hp, final int ammo, final int mode)
+	public PlayerNotification(final int hp, final int ammo, final Mode mode)
 	{
 		this.hp = String.format(HP_FMT, hp, Player.MAXHP);
 		this.ammo = ammo;

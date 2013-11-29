@@ -15,6 +15,7 @@ import revert.MainScene.notifications.PlayerMovementNotification;
 import com.kgp.core.GameController;
 import com.kgp.core.GamePanel;
 import com.kgp.core.GameState;
+import com.kgp.util.Vector2;
 
 /**
  * Main controller class for handling the game input that alters the player in the world
@@ -46,8 +47,7 @@ public class Controller extends GameController {
 		int x = e.getX();
 		int y = e.getY();
 		
-		Point p = new Point(x, y);
-		this.player.lookAt(p, panel.getMatrix());
+		this.player.lookAt(new Vector2(x, y), panel.getMatrix());
 	}
 
 	public void keyPressed(KeyEvent e) {

@@ -1,5 +1,7 @@
 package com.kgp.util;
 
+import java.awt.geom.Point2D;
+
 /**
  * Simple class for handling Vector math of vectors with a length of 2.
  * 
@@ -8,7 +10,7 @@ package com.kgp.util;
  * 
  * @author Nicholas Hydock
  */
-public class Vector2 {
+public class Vector2 extends Point2D.Float{
 
 	/**
 	 * Basic general vectors
@@ -18,10 +20,6 @@ public class Vector2 {
 	public static final Vector2 DOWN = new Vector2(0, 1);
 	public static final Vector2 LEFT = new Vector2(-1, 0);
 	public static final Vector2 RIGHT = new Vector2(1, 0);
-	
-	
-	public float x;
-	public float y;
 	
 	public Vector2(float a, float b)
 	{
@@ -160,16 +158,6 @@ public class Vector2 {
 	public float angle()
 	{
 		return (float)Math.atan2(y, x);
-	}
-	
-	/**
-	 * Get the distance between two vectors
-	 * @param v
-	 * @return float
-	 */
-	public float distance(Vector2 v)
-	{
-		return (float)Math.sqrt((v.x-x)*(v.x-x) + (v.y-y)*(v.y-y));
 	}
 
 	/**
