@@ -24,4 +24,4 @@ o bmfont.png
 s ammo.png 4
 
 //enemies
-s2 enemy.png 3 7
+s enemy_1.png 7
