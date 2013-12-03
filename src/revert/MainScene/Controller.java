@@ -47,7 +47,13 @@ public class Controller extends GameController {
 		int x = e.getX();
 		int y = e.getY();
 		
-		this.player.lookAt(new Vector2(x, y), panel.getMatrix());
+		Vector2 v = new Vector2(x, y);
+		v.x -= panel.getWidth()/2f;
+		v.x += player.getXPosn();
+		v.y -= panel.getHeight()/2f;
+		v.y += player.getYPosn() - player.getHeight()/2f;
+		
+		this.player.lookAt(v);
 	}
 
 	public void keyPressed(KeyEvent e) {

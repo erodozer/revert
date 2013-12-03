@@ -180,17 +180,12 @@ public class Player extends Actor {
 	 * 
 	 * @param p
 	 */
-	public void lookAt(Vector2 target, AffineTransform m) {
-		Vector2 p = new Vector2();
-		m.transform(new Point((int) (position.x + offset.x), (int) (position.y + offset.y)), p);
-		aim.x = target.x;
-		aim.y = target.y;
-
-		aim.translate((float) -p.x, (float) -p.y);
+	public void lookAt(Vector2 target) {
+		super.lookAt(target);
+		
+		aim = this.position.to(target);
 		aim = aim.normalize();
 		aim.mult(80);
-		
-		lookAt(aim);
 	}
 
 	public Vector2 getAim() {

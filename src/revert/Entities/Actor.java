@@ -132,7 +132,7 @@ public abstract class Actor extends Sprite implements Observer{
 		if (this.brickMan != null)
 			this.tileHeight = (int)(this.dimensions.height / this.brickMan.getBrickHeight());
 	
-		this.offset.x = -this.dimensions.width / 2;
+		this.offset.x = -this.dimensions.width / 2f;
 		this.offset.y = -this.dimensions.height;
 	}
 	
@@ -177,10 +177,10 @@ public abstract class Actor extends Sprite implements Observer{
 	 */
 	public void lookAt(Vector2 v)
 	{
-		Vector2 dir = this.getPosn().to(v);
-		if (dir.x < position.x)
+		Vector2 dir = position.to(v).normalize();
+		if (dir.x < 0)
 			faceLeft();
-		else if (dir.x > position.x)
+		else if (dir.x > 0)
 			faceRight();
 	}
 	
