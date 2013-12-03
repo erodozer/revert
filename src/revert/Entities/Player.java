@@ -264,4 +264,9 @@ public class Player extends Actor {
 		}
 	}
 
+	@Override
+	public boolean inRange(Actor a) {
+		return false;
+	}
+
 }
