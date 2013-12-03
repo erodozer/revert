@@ -25,4 +25,16 @@ public interface EnemyAi {
 	 * AI definition of how to act with actors when in an aggressive state
 	 */
 	public void aggress(Actor a);
+	
+	/**
+	 * Get the distance that the ai is capable of seeing things
+	 * @return
+	 */
+	public float viewRange();
+	
+	/**
+	 * Get distance and which the ai is able to follow at while being aggressive after
+	 * something enters its range
+	 */
+	public float aggressRange();
 }
