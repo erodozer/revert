@@ -158,5 +158,17 @@ public class Enemy extends Actor {
 		return Bullet.Mode.Gold;
 	}
 	
+	/**
+	 * Check the actor postion wrt enemy
+	 * @param a - any actor on field
+	 * @return true if actor is to the right of enemy
+	 */
+	public boolean isRightOf(Actor a)
+	{
+		if(this.getXPosn() - a.getXPosn() < 0)
+			return true;
+		else
+			return false;
+	}
 	
 }
