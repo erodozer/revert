@@ -1,10 +1,8 @@
 package revert.Entities;
 
-import java.awt.Point;
-
 import com.kgp.util.Vector2;
 
-import revert.AI.EnemyAi;
+import revert.AI.*;
 import revert.MainScene.World;
 
 
@@ -13,6 +11,11 @@ public class EnemyFactory {
 	Vector2[] spawnPoints;
 	World world;
 		
+	/**
+	 * Create a factory for the world that will generate enemies at spawn points
+	 * @param world
+	 * @param spawns
+	 */
 	public EnemyFactory(World world, Vector2... spawns)
 	{
 		this.spawnPoints = spawns;
@@ -40,6 +43,11 @@ public class EnemyFactory {
 		return wave;
 	}
 	
+	/**
+	 * Creates an enemy with an AI type
+	 * @param type
+	 * @return
+	 */
 	public Enemy generateEnemy(int type)
 	{
 		Enemy e = new Enemy(world, world.getPlayer());
@@ -50,7 +58,8 @@ public class EnemyFactory {
 		}
 		else
 		{
-			System.out.println("No enemy type corresponds to value: " + type + ".  Instantiating basic enemy");
+			System.out.println("No enemy AI type corresponds to value: " + type + ".  Instantiating basic enemy");
+			ai = new NullAI();
 		}
 		
 		e.setAI(ai);
