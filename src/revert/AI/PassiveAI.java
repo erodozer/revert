@@ -12,6 +12,8 @@ public class PassiveAI implements EnemyAi
 	private Enemy e;									//agent
 	private float timer;								//timer for movement
 	private final double MOVE_TIME = Math.pow(3,9);		//max movement time
+	private final int VIEW_RANGE = 30;
+	private final int AGGRESS_RANGE = 0;
 	
 	
 	public PassiveAI(Enemy e)
@@ -74,6 +76,16 @@ public class PassiveAI implements EnemyAi
 	@Override
 	public void aggress(Actor a) 
 	{
+	}
+	@Override
+	public float viewRange() {
+		// TODO Auto-generated method stub
+		return VIEW_RANGE;
+	}
+	@Override
+	public float aggressRange() {
+		// TODO Auto-generated method stub
+		return AGGRESS_RANGE;
 	}
 
 }

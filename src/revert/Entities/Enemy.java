@@ -67,15 +67,18 @@ public class Enemy extends Actor {
 	 * React on notification of an actor entering this enemy's view area
 	 */
 	@Override
-	protected void reactOnInView(Actor a) {
+	protected void reactOnInView(Actor a) 
+	{
+		ai.inView(a);
 	}
 
 	/**
 	 * React on notification of an actor exiting this enemy's view area
 	 */
 	@Override
-	protected void reactOnOutOfView(Actor a) {
-		
+	protected void reactOnOutOfView(Actor a) 
+	{
+		ai.outOfView(a);
 	}
 
 	/**

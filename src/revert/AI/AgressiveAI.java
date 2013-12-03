@@ -4,6 +4,7 @@ import com.kgp.util.Vector2;
 
 import revert.Entities.Actor;
 import revert.Entities.Enemy;
+import revert.Entities.Actor.Direction;
 
 public class AgressiveAI implements EnemyAi 
 {
@@ -11,12 +12,13 @@ public class AgressiveAI implements EnemyAi
 	private float timer;
 	private final double MOVE_TIME = Math.pow(5,9);
 	private boolean agro;
-	
+	private final int VIEW_RANGE = 70;
+	private final int AGGRESS_RANGE = 50;
 	
 	public AgressiveAI(Enemy e)
 	{
 		this.e = e;
-		agro = true;
+		agro = false;
 	}
 	
 	/**
@@ -43,10 +45,11 @@ public class AgressiveAI implements EnemyAi
 	{
 		if(agro)
 		{
-			if(e.isRightOf(a))
-				e.moveRight();
-			else
+			e.lookAt(new Vector2(a.getXPosn(),a.getYPosn()));
+			if(e.getDirection() == Direction.Left)
 				e.moveLeft();
+			else
+				e.moveRight();
 			if(e.inRange(a))
 				attack(a);
 		}
@@ -107,5 +110,17 @@ public class AgressiveAI implements EnemyAi
 				e.stop();
 			}
 		}
+	}
+
+	@Override
+	public float viewRange() {
+		// TODO Auto-generated method stub
+		return VIEW_RANGE;
+	}
+
+	@Override
+	public float aggressRange() {
+		// TODO Auto-generated method stub
+		return AGGRESS_RANGE;
 	}
 }
