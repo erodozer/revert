@@ -208,6 +208,16 @@ public class Sprite extends Observable {
 		return this.position.y + this.offset.y;
 	}
 	
+	public float getCenterXPosn() {
+		return this.position.x + this.offset.x + this.dimensions.width/2f;
+	}
+	
+	public float getCenterYPosn() {
+		return this.position.y + this.offset.y + this.dimensions.height/2f;
+	}
+	
+	
+	
 	/**
 	 * The sprite's position
 	 */
