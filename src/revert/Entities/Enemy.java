@@ -1,17 +1,15 @@
 package revert.Entities;
 
 import java.util.ArrayList;
+import java.util.Observable;
 
 import com.kgp.core.Game;
 
 import revert.AI.EnemyAi;
-import revert.Entities.Actor.VertMovement;
 import revert.MainScene.World;
+import revert.MainScene.notifications.ActorsRemoved;
 
 public class Enemy extends Actor {
-	
-	//enemy is aggressively chasing the player and will attack
-	protected boolean aggro;
 	
 	//enemy is chasing after an actor
 	protected Actor follow;
@@ -53,6 +51,25 @@ public class Enemy extends Actor {
 		else
 			setImage("enemy_1", false);
 	}
+	
+	/**
+	 * Updates on notifications from the world that the actor is observing
+	 * @param o - object that sent the notification
+	 * @param args - type of notification
+	 */
+	@Override
+	public void update(Observable o, Object args)
+	{
+		super.update(o, args);
+		
+		if (args instanceof Actor)
+		{
+			if (this.visibility.get(args))
+			{
+				ai.aggress((Actor)args);
+			}
+		}
+	}
 
 	/**
 	 * Attack the target the enemy is following
@@ -68,6 +85,7 @@ public class Enemy extends Actor {
 	 */
 	@Override
 	protected void reactOnInView(Actor a) {
+		ai.inView(a);
 	}
 
 	/**
@@ -75,51 +93,7 @@ public class Enemy extends Actor {
 	 */
 	@Override
 	protected void reactOnOutOfView(Actor a) {
-		
-	}
-
-	/**
-	 * Perform updates on the enemy's aggressive condition handling
-	 */
-	final protected void updateAggro()
-	{
-		//count down the aggro timer to leave agro mode
-		if (!aggro && aggroTimer > 0)
-		{
-			aggroTimer -= Game.getPeriodInMSec();
-		}
-		
-		if (aggro)
-		{
-			ai.aggress(follow);
-			if (follow == null)
-				return;
-			
-			//check distance and chance to attack
-			if (Math.abs(follow.getPosn().distance(this.getPosn())) < this.getAttackRange())
-			{
-				if (attackWait < 0)
-				{
-					attack();
-					attackWait = this.getAttackWait();
-				}
-			}
-		}
-	}
-	
-	/**
-	 * @return enemy's reach for attacking the player
-	 */
-	protected double getAttackRange() {
-		return -1;
-	}
-	
-	/**
-	 * @return time pause between attacks
-	 */
-	protected int getAttackWait()
-	{
-		return 300;
+		ai.outOfView(a);
 	}
 	
 	/**
@@ -173,7 +147,7 @@ public class Enemy extends Actor {
 	
 	public boolean inRange(Actor a)
 	{
-		if(Math.abs(this.getXPosn()-a.getXPosn()) == 10)
+		if(this.getPosn().distance(a.getPosn()) <= ai.viewRange())
 			return true;
 		else
 			return false;

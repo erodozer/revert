@@ -39,4 +39,19 @@ public class NullAI implements EnemyAi{
 		return -1;
 	}
 
+	@Override
+	public int attackRate() {
+		return -1;
+	}
+
+	@Override
+	public float attackRange() {
+		return -1;
+	}
+
+	@Override
+	public void update(float delta) {
+		// DO NOTHING
+	}
+
 }

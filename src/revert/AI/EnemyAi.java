@@ -3,7 +3,7 @@ package revert.AI;
 import revert.Entities.Actor;
 
 public interface EnemyAi {
-
+	
 	/**
 	 * AI to be invoked when an actor is told to attack
 	 */
@@ -37,4 +37,23 @@ public interface EnemyAi {
 	 * something enters its range
 	 */
 	public float aggressRange();
+	
+	/**
+	 * Get the speed at which the enemy will issue attack commands when aggressing
+	 * @return
+	 */
+	public int attackRate();
+	
+	/**
+	 * Get the distance at which enemy attacks may hit
+	 * @return
+	 */
+	public float attackRange();
+	
+	/**
+	 * Perform generic updates dependent on the update cycle of the game,
+	 * such as iterating internal timers
+	 * @param delta
+	 */
+	public void update(float delta);
 }
