@@ -56,4 +56,15 @@ public interface EnemyAi {
 	 * @param delta
 	 */
 	public void update(float delta);
+
+	/**
+	 * Perform basic movement when non aggressive
+	 */
+	public void walk();
+	
+	/**
+	 * Get if the enemy is in an aggressive state
+	 * @return
+	 */
+	public boolean isAgro();
 }
