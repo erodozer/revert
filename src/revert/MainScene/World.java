@@ -5,19 +5,13 @@ import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
-import revert.Entities.Actor;
-import revert.Entities.Bullet;
-import revert.Entities.BulletFactory;
-import revert.Entities.Enemy;
-import revert.Entities.EnemyFactory;
-import revert.Entities.Player;
+import revert.Entities.*;
 import revert.MainScene.notifications.ActorsRemoved;
 import revert.MainScene.notifications.PlayerAttackNotification;
 import revert.MainScene.notifications.WorldNotification;
 import revert.util.BrickManager;
 
 import com.kgp.core.Game;
-import com.kgp.level.BricksManager;
 
 /**
  * World class that keeps track of all entities and alterations to the world
@@ -78,6 +72,9 @@ public class World extends Observable implements Observer{
 	{
 		ActorsRemoved action = new ActorsRemoved();
 		
+		/**
+		 * Update what actors are still alive within this scene
+		 */
 		for (int i = 0, n = allActors.size(); i < n;)
 		{
 			Actor a = allActors.get(i);
@@ -102,6 +99,9 @@ public class World extends Observable implements Observer{
 		
 		this.notifyObservers(action);
 		
+		/**
+		 * TODO Update Visibility of Actors
+		 */
 		
 		/**
 		 * Perform bullet update
@@ -156,7 +156,6 @@ public class World extends Observable implements Observer{
 	{
 		ArrayList<Enemy> list = new ArrayList<Enemy>();
 		
-		// TODO generate the enemies
 		for (int i = 0; i < waveData.length; i++)
 		{
 			int[] data = waveData[i];
@@ -175,7 +174,6 @@ public class World extends Observable implements Observer{
 	 */
 	public void startWave()
 	{
-		// TODO implement wave startup
 		this.enemies = genEnemies(enemyFactory.createWave(15));
 		this.allActors.addAll(this.enemies);
 		currentWave++;
