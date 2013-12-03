@@ -171,4 +171,12 @@ public class Enemy extends Actor {
 			return false;
 	}
 	
+	public boolean inRange(Actor a)
+	{
+		if(Math.abs(this.getXPosn()-a.getXPosn()) == 10)
+			return true;
+		else
+			return false;
+	}
+	
 }

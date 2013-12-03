@@ -8,10 +8,10 @@ import revert.Entities.Enemy;
 public class ActiveAI implements EnemyAi 
 {
 	
-	private Enemy e;
-	private float timer;
-	private final double MOVE_TIME = Math.pow(5,9);
-	private boolean agro;
+	private Enemy e;									//agent
+	private float timer;								//timer for movement
+	private final double MOVE_TIME = Math.pow(5,9);		//maximum movement time
+	private boolean agro;								//bool for agro
 	
 	public ActiveAI(Enemy e)
 	{
@@ -19,6 +19,9 @@ public class ActiveAI implements EnemyAi
 		agro = false;
 	}
 	
+	/**
+	 * Rolls for attack and sits still
+	 */
 	@Override
 	public void attack(Actor a) 
 	{
@@ -31,6 +34,10 @@ public class ActiveAI implements EnemyAi
 			e.stop();
 	}
 
+	/**
+	 * if agro'ed will chase player and attack
+	 * otherwise meander
+	 */
 	@Override
 	public void inView(Actor a) 
 	{
@@ -40,11 +47,16 @@ public class ActiveAI implements EnemyAi
 				e.moveRight();
 			else
 				e.moveLeft();
+			if(e.inRange(a))
+				attack(a);
 		}
 		else
 			walk();
 	}
 
+	/**
+	 * Drops Agro and Meanders
+	 */
 	@Override
 	public void outOfView(Actor a) 
 	{
@@ -53,18 +65,30 @@ public class ActiveAI implements EnemyAi
 		walk();
 	}
 
+	/**
+	 * Agent only becomes agressive if prevoked
+	 */
 	@Override
 	public void aggress(Actor a) 
 	{
 		agro = true;
 		e.addObserver(a);
+		inView(a);
 	}
 
+	/**
+	 * 
+	 * @return true if agent is aggressive
+	 */
 	public boolean isAgro()
 	{
 		return agro;
 	}
 	
+	
+	/**
+	 * Simple walking action
+	 */
 	public void walk()
 	{
 		int i = (int)Math.random()*10;

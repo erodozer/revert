@@ -9,20 +9,28 @@ import sun.awt.AWTCharset;
 public class PassiveAI implements EnemyAi 
 {
 
-	private Enemy e;
-	private float timer;
-	private final double MOVE_TIME = Math.pow(3,9);
+	private Enemy e;									//agent
+	private float timer;								//timer for movement
+	private final double MOVE_TIME = Math.pow(3,9);		//max movement time
+	
 	
 	public PassiveAI(Enemy e)
 	{
 		this.e = e;
 	}
+	/**
+	 * This agent does not attack
+	 */
 	@Override
 	public void attack(Actor a) 
 	{
 		//Does Nothing
 	}
 
+	/**
+	 * If the player comes in view the agent stops 
+	 * and the player begins to loose health
+	 */
 	@Override
 	public void inView(Actor a) 
 	{
@@ -30,6 +38,9 @@ public class PassiveAI implements EnemyAi
 		a.takeHit();
 	}
 
+	/**
+	 * Meanders back and forth at random
+	 */
 	@Override
 	public void outOfView(Actor a) 
 	{
@@ -56,12 +67,13 @@ public class PassiveAI implements EnemyAi
 		
 
 	}
-
+	
+	/**
+	 * This agent does not agress
+	 */
 	@Override
 	public void aggress(Actor a) 
 	{
-		//Does Nothing
-
 	}
 
 }
