@@ -17,7 +17,6 @@ import revert.MainScene.notifications.WorldNotification;
 import revert.util.BrickManager;
 
 import com.kgp.core.Game;
-import com.kgp.level.BricksManager;
 
 /**
  * World class that keeps track of all entities and alterations to the world
@@ -106,30 +105,34 @@ public class World extends Observable implements Observer{
 		/**
 		 * Perform bullet update
 		 */
-		for (int i = 0; i < bullets.size(); i++)
+		for (int i = 0; i < bullets.size();)
 		{
 			Bullet b = bullets.get(i);
 			b.updateSprite();
-			for (Enemy e : enemies)
+			boolean dead = false;
+			for (int n = 0; n < enemies.size() && !dead; n++)
 			{
+				Enemy e = enemies.get(n);
 				if (b.getPosn().distance(e.getPosn()) < 10)
 				{
 					e.hit(b);
 					score += HIT_BONUS;
 					bullets.remove(i);
-					i--;
-					continue;
+					dead = true;
 				}
 			}
 			
-			if ((b.getXPosn() > player.getPosn().x + player.getPWidth()/2) ||
+			if (!dead && 
+			   ((b.getXPosn() > player.getPosn().x + player.getPWidth()/2) ||
 			   (b.getXPosn() < player.getPosn().x - player.getPWidth()/2) ||
 			   (b.getYPosn() > player.getPosn().y + player.getPHeight()/2) ||
-			   (b.getYPosn() < player.getPosn().y - player.getPHeight()/2)){
+			   (b.getYPosn() < player.getPosn().y - player.getPHeight()/2))){
 				bullets.remove(i);
-				i--;
-				continue;
+				dead = true;
 			}
+			
+			if (!dead)
+				i++;
 		}
 		
 		/*
