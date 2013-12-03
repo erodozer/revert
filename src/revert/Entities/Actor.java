@@ -475,6 +475,9 @@ public abstract class Actor extends Sprite implements Observer{
 	{
 		hp--;
 	}
+	
+	abstract public boolean inRange(Actor a);
+	
 	/**
 	 * Updates on notifications from the world that the actor is observing
 	 * @param o - object that sent the notification
@@ -490,6 +493,34 @@ public abstract class Actor extends Sprite implements Observer{
 			for (Actor actor : a.actors)
 			{
 				this.visibility.remove(actor);
+			}
+		}
+		
+		if (o == world)
+		{
+			if (args instanceof Actor)
+			{
+				Actor a = (Actor)args;
+				if (visibility.containsKey(a))
+				{
+					boolean see = visibility.get(a);
+					if (see)
+					{
+						if (!inRange(a))
+						{
+							visibility.put(a, false);
+							this.reactOnOutOfView(a);
+						}
+					}
+					else
+					{
+						if (!inRange(a))
+						{
+							visibility.put(a, true);
+							this.reactOnInView(a);
+						}
+					}
+				}
 			}
 		}
 	}
