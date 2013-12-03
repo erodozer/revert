@@ -2,14 +2,12 @@ package revert.MainScene;
 
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.Panel;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
 import revert.Entities.Player;
-import revert.MainScene.notifications.PlayerModeNotification;
 import revert.MainScene.notifications.PlayerNotification;
 import revert.MainScene.notifications.WorldNotification;
 

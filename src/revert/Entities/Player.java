@@ -16,8 +16,6 @@ package revert.Entities;
  * to the BricksManager object.
  */
 
-import java.awt.Point;
-import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.Observable;
 
@@ -48,7 +46,7 @@ public class Player extends Actor {
 	private int ammo;
 
 	public Player(World w, ImagesLoader imsLd) {
-		super(w, "royer01", new ArrayList());
+		super(w, "royer01", new ArrayList<Actor>());
 
 		// standing center screen, facing right
 		// walks 8 tiles per second

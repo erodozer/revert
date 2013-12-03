@@ -2,11 +2,10 @@ package revert.Entities;
 
 import java.util.ArrayList;
 
-import com.kgp.core.Game;
-
 import revert.AI.EnemyAi;
-import revert.Entities.Actor.VertMovement;
 import revert.MainScene.World;
+
+import com.kgp.core.Game;
 
 public class Enemy extends Actor {
 	

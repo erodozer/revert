@@ -1,11 +1,9 @@
 package revert.Entities;
 
-import java.awt.Point;
-
-import com.kgp.util.Vector2;
-
 import revert.AI.EnemyAi;
 import revert.MainScene.World;
+
+import com.kgp.util.Vector2;
 
 
 public class EnemyFactory {

@@ -1,8 +1,8 @@
 package revert.Entities;
 
-import com.kgp.util.Vector2;
-
 import revert.MainScene.World;
+
+import com.kgp.util.Vector2;
 
 public class BulletFactory {
 

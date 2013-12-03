@@ -1,7 +1,6 @@
 package revert.util;
 
 import java.awt.Graphics2D;
-import java.awt.Point;
 
 import com.kgp.util.Vector2;
 

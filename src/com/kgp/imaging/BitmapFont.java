@@ -174,14 +174,13 @@ public class BitmapFont {
 	 * @author Nicholas Hydock
 	 */
 	private class Glyph {
-		int w, h, topHeight;
+		int w, topHeight;
 		BufferedImage img;
 
 		public Glyph(int x, int y, int w, int h, int baseline, BufferedImage src) {
 			this.img = src.getSubimage(x, y, w, h);
 			this.w = w + 2; // add salvage to the right for the next character
 							// that follows
-			this.h = h;
 			this.topHeight = h - (h - baseline);
 		}
 	}

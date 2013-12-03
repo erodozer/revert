@@ -3,7 +3,6 @@ package revert.Entities;
 import revert.MainScene.World;
 
 import com.kgp.core.AssetsManager;
-import com.kgp.imaging.ImagesLoader;
 import com.kgp.imaging.Sprite;
 
 public class Bullet extends Sprite {

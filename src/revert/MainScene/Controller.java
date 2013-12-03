@@ -1,13 +1,11 @@
 package revert.MainScene;
 
-import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 
-import revert.Entities.BulletFactory;
-import revert.Entities.Player;
 import revert.Entities.Actor.Movement;
+import revert.Entities.Player;
 import revert.MainScene.notifications.PlayerAttackNotification;
 import revert.MainScene.notifications.PlayerModeNotification;
 import revert.MainScene.notifications.PlayerMovementNotification;

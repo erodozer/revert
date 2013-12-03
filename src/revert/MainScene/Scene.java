@@ -18,7 +18,6 @@ import com.kgp.core.GameFrame;
 import com.kgp.core.GamePanel;
 import com.kgp.core.GameState;
 import com.kgp.imaging.ImagesLoader;
-import com.kgp.level.BricksManager;
 import com.kgp.level.RibbonsManager;
 
 /**
@@ -94,7 +93,6 @@ public class Scene extends GamePanel {
 				|| ((keyCode == KeyEvent.VK_C) && e.isControlDown()))
 			this.stopGame();
 
-		System.out.println(this.getState() == GameState.Start);
 		if (this.getState() == GameState.Start)
 		{
 			this.setState(GameState.Help);
@@ -127,7 +125,7 @@ public class Scene extends GamePanel {
 		// BricksManager bricksMan = new BricksManager(PWIDTH, PHEIGHT,
 		// BRICKS_INFO, images);
 		JsonBricksManager bricksMan = JsonBricksManager.load("level01", AssetsManager.JsonParser);
-		int brickMoveSize = bricksMan.getBrickWidth();
+		
 		this.world = new World();
 		this.world.setLevel(bricksMan);
 
@@ -188,10 +186,9 @@ public class Scene extends GamePanel {
 				parallaxFg.update(player.getMovement());
 			}
 			// transform a camera that follows the player around
-			camera.set(player.getRealXPosn(), player.getRealYPosn());
+			camera.set(player.getCenterXPosn(), player.getRealYPosn());
 			camMatrix.setToTranslation(-camera.x, -camera.y);
-			camMatrix.translate(0, PHEIGHT / 2);
-			camMatrix.translate(PWIDTH / 2, 0);
+			camMatrix.translate(PWIDTH / 2, PHEIGHT / 2);
 			camMatrix.scale(zoom, zoom);
 		}
 	}
