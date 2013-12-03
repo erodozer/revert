@@ -3,6 +3,7 @@ package revert.AI;
 import com.kgp.util.Vector2;
 
 import revert.Entities.Actor;
+import revert.Entities.Actor.Direction;
 import revert.Entities.Enemy;
 
 public class ActiveAI implements EnemyAi 
@@ -12,6 +13,8 @@ public class ActiveAI implements EnemyAi
 	private float timer;								//timer for movement
 	private final double MOVE_TIME = Math.pow(5,9);		//maximum movement time
 	private boolean agro;								//bool for agro
+	private final int VIEW_RANGE = 50;
+	private final int AGGRESS_RANGE = 30;
 	
 	public ActiveAI(Enemy e)
 	{
@@ -43,10 +46,11 @@ public class ActiveAI implements EnemyAi
 	{
 		if(agro)
 		{
-			if(e.isRightOf(a))
-				e.moveRight();
-			else
+			e.lookAt(new Vector2(a.getXPosn(),a.getYPosn()));
+			if(e.getDirection() == Direction.Left)
 				e.moveLeft();
+			else
+				e.moveRight();
 			if(e.inRange(a))
 				attack(a);
 		}
@@ -61,7 +65,6 @@ public class ActiveAI implements EnemyAi
 	public void outOfView(Actor a) 
 	{
 		agro = false;
-		e.deleteObserver(a);
 		walk();
 	}
 
@@ -111,5 +114,17 @@ public class ActiveAI implements EnemyAi
 				e.stop();
 			}
 		}
+	}
+
+	@Override
+	public float viewRange() {
+		// TODO Auto-generated method stub
+		return VIEW_RANGE;
+	}
+
+	@Override
+	public float aggressRange() {
+		// TODO Auto-generated method stub
+		return AGGRESS_RANGE;
 	}
 }
