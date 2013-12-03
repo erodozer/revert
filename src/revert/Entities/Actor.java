@@ -471,6 +471,10 @@ public abstract class Actor extends Sprite implements Observer{
 		return this.isHit;
 	}
 	
+	public void takeHit()
+	{
+		hp--;
+	}
 	/**
 	 * Updates on notifications from the world that the actor is observing
 	 * @param o - object that sent the notification
