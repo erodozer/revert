@@ -9,16 +9,18 @@ import revert.Entities.Enemy;
 public class ActiveAI implements EnemyAi 
 {
 	
-	private Enemy e;									//agent
-	private float timer;								//timer for movement
-	private final double MOVE_TIME = Math.pow(5,9);		//maximum movement time
-	private boolean agro;								//bool for agro
-	private final int VIEW_RANGE = 50;
-	private final int AGGRESS_RANGE = 30;
+	Enemy parent;									//agent
+	boolean agro;								//bool for agro
+	
+	float agroTimer;
+	float attackTimer;
+	float walkTimer;
+	
+	float MOVE_TIME;
 	
 	public ActiveAI(Enemy e)
 	{
-		this.e = e;
+		parent = e;
 		agro = false;
 	}
 	
@@ -34,7 +36,7 @@ public class ActiveAI implements EnemyAi
 			{
 				a.takeHit();
 			}
-			e.stop();
+			parent.stop();
 	}
 
 	/**
@@ -46,12 +48,12 @@ public class ActiveAI implements EnemyAi
 	{
 		if(agro)
 		{
-			e.lookAt(new Vector2(a.getXPosn(),a.getYPosn()));
-			if(e.getDirection() == Direction.Left)
-				e.moveLeft();
+			parent.lookAt(new Vector2(a.getXPosn(),a.getYPosn()));
+			if(parent.getDirection() == Direction.Left)
+				parent.moveLeft();
 			else
-				e.moveRight();
-			if(e.inRange(a))
+				parent.moveRight();
+			if(parent.inRange(a))
 				attack(a);
 		}
 		else
@@ -75,7 +77,7 @@ public class ActiveAI implements EnemyAi
 	public void aggress(Actor a) 
 	{
 		agro = true;
-		e.addObserver(a);
+		parent.addObserver(a);
 		inView(a);
 	}
 
@@ -94,24 +96,28 @@ public class ActiveAI implements EnemyAi
 	 */
 	public void walk()
 	{
-		int i = (int)Math.random()*10;
-		if( i <= 5)
+		if (walkTimer < 0)
 		{
-			timer = System.nanoTime();
-			int j = (int)Math.random();
-			if(j == 1)
+			int i = (int)Math.random()*10;
+			if( i <= 5)
 			{
-				e.lookAt(Vector2.LEFT);
-				while((timer - System.nanoTime()) < MOVE_TIME)
-					e.moveLeft();
-				e.stop();
+				int j = (int)Math.random();
+				if(j == 1)
+				{
+					parent.lookAt(Vector2.LEFT);
+					parent.moveLeft();
+				}
+				else
+				{
+					parent.lookAt(Vector2.RIGHT);
+					parent.moveRight();
+				}
+				walkTimer = MOVE_TIME;
 			}
 			else
 			{
-				e.lookAt(Vector2.RIGHT);
-				while((timer - System.nanoTime()) < MOVE_TIME)
-					e.moveRight();
-				e.stop();
+				parent.stop();
+				walkTimer = .5f;
 			}
 		}
 	}
@@ -119,12 +125,46 @@ public class ActiveAI implements EnemyAi
 	@Override
 	public float viewRange() {
 		// TODO Auto-generated method stub
-		return VIEW_RANGE;
+		return 50;
 	}
 
 	@Override
 	public float aggressRange() {
 		// TODO Auto-generated method stub
-		return AGGRESS_RANGE;
+		return 30;
+	}
+
+	@Override
+	public int attackRate() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public float attackRange() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void update(float delta) 
+	{
+			if (agro)
+			{
+				agroTimer -= delta;
+				
+				//time out agro when the target is too far away
+				if (agroTimer < 0)
+					agro = false;
+				
+				//decrease attack timer
+				if (attackTimer > 0)
+					attackTimer -= delta;
+			}
+			else
+			{
+				if (walkTimer > 0)
+					walkTimer -= delta;
+			}
 	}
 }

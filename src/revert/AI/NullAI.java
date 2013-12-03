@@ -54,4 +54,16 @@ public class NullAI implements EnemyAi{
 		// DO NOTHING
 	}
 
+	@Override
+	public void walk() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean isAgro() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }
