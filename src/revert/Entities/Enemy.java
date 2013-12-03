@@ -66,7 +66,14 @@ public class Enemy extends Actor {
 		{
 			if (this.visibility.get(args))
 			{
-				ai.aggress((Actor)args);
+				if (ai.isAgro())
+				{
+					ai.aggress((Actor)args);
+				}
+				else
+				{
+					ai.walk();
+				}
 			}
 		}
 	}
