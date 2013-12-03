@@ -4,21 +4,20 @@ import com.kgp.util.Vector2;
 
 import revert.Entities.Actor;
 import revert.Entities.Enemy;
-import sun.awt.AWTCharset;
 
 public class PassiveAI implements EnemyAi 
 {
-
-	private Enemy e;									//agent
-	private float timer;								//timer for movement
-	private final double MOVE_TIME = Math.pow(3,9);		//max movement time
-	private final int VIEW_RANGE = 30;
-	private final int AGGRESS_RANGE = 0;
+	Enemy parent;
 	
+	private final float MOVE_TIME = (float)Math.pow(3,9);		//max movement time
+
+	float walkTimer;
+	
+	boolean stare;
 	
 	public PassiveAI(Enemy e)
 	{
-		this.e = e;
+		parent = e;
 	}
 	/**
 	 * This agent does not attack
@@ -27,6 +26,7 @@ public class PassiveAI implements EnemyAi
 	public void attack(Actor a) 
 	{
 		//Does Nothing
+		a.takeHit();
 	}
 
 	/**
@@ -36,7 +36,8 @@ public class PassiveAI implements EnemyAi
 	@Override
 	public void inView(Actor a) 
 	{
-		e.stop();
+		stare = true;
+		parent.stop();
 		a.takeHit();
 	}
 
@@ -46,28 +47,7 @@ public class PassiveAI implements EnemyAi
 	@Override
 	public void outOfView(Actor a) 
 	{
-		int i = (int)Math.random()*10;
-		if( i <= 2)
-		{
-			timer = System.nanoTime();
-			int j = (int)Math.random();
-			if(j == 1)
-			{
-				e.lookAt(Vector2.LEFT);
-				while((timer - System.nanoTime()) < MOVE_TIME)
-					e.moveLeft();
-				e.stop();
-			}
-			else
-			{
-				e.lookAt(Vector2.RIGHT);
-				while((timer - System.nanoTime()) < MOVE_TIME)
-					e.moveRight();
-				e.stop();
-			}
-		}
-		
-
+		stare = false;
 	}
 	
 	/**
@@ -76,16 +56,75 @@ public class PassiveAI implements EnemyAi
 	@Override
 	public void aggress(Actor a) 
 	{
+		a.takeHit();
 	}
+	
 	@Override
 	public float viewRange() {
-		// TODO Auto-generated method stub
-		return VIEW_RANGE;
+		return 30;
 	}
 	@Override
 	public float aggressRange() {
+		return -1;
+	}
+	@Override
+	public int attackRate() {
 		// TODO Auto-generated method stub
-		return AGGRESS_RANGE;
+		return 0;
+	}
+	@Override
+	public float attackRange() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	
+	@Override
+	public void update(float delta) {
+		if (!stare){
+			if (walkTimer > 0)
+				walkTimer -= delta;
+		}
+	}
+	
+	@Override
+	/**
+	 * Simple walking action
+	 */
+	public void walk()
+	{
+		if (stare)
+			return;
+		
+		if (walkTimer < 0)
+		{
+			int i = (int)Math.random()*10;
+			if( i <= 2)
+			{
+				int j = (int)Math.random();
+				if(j == 1)
+				{
+					parent.lookAt(Vector2.LEFT);
+					parent.moveLeft();
+				}
+				else
+				{
+					parent.lookAt(Vector2.RIGHT);
+					parent.moveRight();
+				}
+				walkTimer = MOVE_TIME;
+			}
+			else
+			{
+				parent.stop();
+				walkTimer = .5f;
+			}
+		}
+	}
+	
+	@Override
+	public boolean isAgro() {
+		// does not get aggressive
+		return stare;
 	}
 
 }

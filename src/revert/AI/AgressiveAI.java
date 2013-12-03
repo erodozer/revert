@@ -8,16 +8,18 @@ import revert.Entities.Actor.Direction;
 
 public class AgressiveAI implements EnemyAi 
 {
-	private Enemy e;
-	private float timer;
-	private final double MOVE_TIME = Math.pow(5,9);
-	private boolean agro;
-	private final int VIEW_RANGE = 70;
-	private final int AGGRESS_RANGE = 50;
+	boolean agro;
+	Enemy parent;
+	
+	float agroTimer;
+	float attackTimer;
+	float walkTimer;
+	
+	float MOVE_TIME;
 	
 	public AgressiveAI(Enemy e)
 	{
-		this.e = e;
+		parent = e;
 		agro = false;
 	}
 	
@@ -33,8 +35,7 @@ public class AgressiveAI implements EnemyAi
 		{
 			a.takeHit();
 		}
-		e.stop();
-
+		parent.stop();
 	}
 
 	/**
@@ -45,12 +46,12 @@ public class AgressiveAI implements EnemyAi
 	{
 		if(agro)
 		{
-			e.lookAt(new Vector2(a.getXPosn(),a.getYPosn()));
-			if(e.getDirection() == Direction.Left)
-				e.moveLeft();
+			parent.lookAt(new Vector2(a.getXPosn(),a.getYPosn()));
+			if(parent.getDirection() == Direction.Left)
+				parent.moveLeft();
 			else
-				e.moveRight();
-			if(e.inRange(a))
+				parent.moveRight();
+			if(parent.inRange(a))
 				attack(a);
 		}
 
@@ -72,8 +73,31 @@ public class AgressiveAI implements EnemyAi
 	@Override
 	public void aggress(Actor a) 
 	{
-		inView(a);
-
+		if (!agro)
+		{
+			if (a.getPosn().distance(parent.getPosn()) < this.aggressRange())
+			{
+				agro = true;
+				attackTimer = this.attackRate();
+				agroTimer = 3.0f;
+			}
+		}
+		else
+		{
+			//set the timer to full as long as there is an actor within range
+			if (a.getPosn().distance(parent.getPosn()) < this.aggressRange())
+			{
+				agroTimer = 3.0f;
+				agro = true;
+			}
+			
+			//attack this enemy if the timer is up
+			if (attackTimer < 0)
+			{
+				attack(a);
+				attackTimer = this.attackRate();
+			}
+		}
 	}
 	
 	/**
@@ -90,37 +114,75 @@ public class AgressiveAI implements EnemyAi
 	 */
 	public void walk()
 	{
-		int i = (int)Math.random()*10;
-		if( i <= 8)
+		if (walkTimer < 0)
 		{
-			timer = System.nanoTime();
-			int j = (int)Math.random();
-			if(j == 1)
+			int i = (int)Math.random()*10;
+			if( i <= 8)
 			{
-				e.lookAt(Vector2.LEFT);
-				while((timer - System.nanoTime()) < MOVE_TIME)
-					e.moveLeft();
-				e.stop();
+				int j = (int)Math.random();
+				if(j == 1)
+				{
+					parent.lookAt(Vector2.LEFT);
+					parent.moveLeft();
+				}
+				else
+				{
+					parent.lookAt(Vector2.RIGHT);
+					parent.moveRight();
+				}
+				walkTimer = MOVE_TIME;
 			}
 			else
 			{
-				e.lookAt(Vector2.RIGHT);
-				while((timer - System.nanoTime()) < MOVE_TIME)
-					e.moveRight();
-				e.stop();
+				parent.stop();
+				walkTimer = .5f;
 			}
 		}
 	}
 
 	@Override
 	public float viewRange() {
-		// TODO Auto-generated method stub
-		return VIEW_RANGE;
+		return 70;
 	}
 
 	@Override
 	public float aggressRange() {
+		return 50;
+	}
+
+	@Override
+	public int attackRate() {
 		// TODO Auto-generated method stub
-		return AGGRESS_RANGE;
+		return 0;
+	}
+
+	@Override
+	public float attackRange() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	/**
+	 * Update timers
+	 */
+	public void update(float delta)
+	{
+		if (agro)
+		{
+			agroTimer -= delta;
+			
+			//time out agro when the target is too far away
+			if (agroTimer < 0)
+				agro = false;
+			
+			//decrease attack timer
+			if (attackTimer > 0)
+				attackTimer -= delta;
+		}
+		else
+		{
+			if (walkTimer > 0)
+				walkTimer -= delta;
+		}
 	}
 }
