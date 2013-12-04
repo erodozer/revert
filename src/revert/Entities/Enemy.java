@@ -7,7 +7,7 @@ import com.kgp.core.Game;
 import com.kgp.util.Vector2;
 
 import revert.AI.ActiveAI;
-import revert.AI.AggressiveAI;
+import revert.AI.AgressiveAI;
 import revert.AI.EnemyAi;
 import revert.AI.NullAI;
 import revert.AI.PassiveAI;
@@ -30,7 +30,7 @@ public class Enemy extends Actor {
 	private Mode type;
 
 	protected Enemy(World w, Player player, int type) {
-		super(w, "enemy", new ArrayList<Actor>());
+		super(w, "enemy");
 
 		this.hp = 3;
 
@@ -40,8 +40,12 @@ public class Enemy extends Actor {
 		vertStep = maxVertTravel * 2 * Game.getDeltaTime();
 		vertTravel = 0f;
 
-		this.actors.add(player);
-		this.actors.addAll(w.getEnemies());
+		
+		visibility.put(player, false);
+		for (Actor a : w.getEnemies())
+		{
+			visibility.put(a, false);
+		}
 
 		this.type = Bullet.Mode.values()[type];
 
@@ -50,13 +54,13 @@ public class Enemy extends Actor {
 		} else if (type == 1) {
 			ai = new ActiveAI(this);
 		} else if (type == 2) {
-			ai = new AggressiveAI(this);
+			ai = new AgressiveAI(this);
 		} else {
 			System.out.println("No enemy AI type corresponds to value: " + type + ".  Instantiating basic enemy");
 			ai = new NullAI();
 		}
 		
-		name = "enemy_" + type;
+		name = "enemy_" + (type+1);
 	}
 
 	protected void setAI(EnemyAi ai) {
@@ -66,7 +70,8 @@ public class Enemy extends Actor {
 	@Override
 	protected void setNextImage() {
 		if (isHit)
-			setImage(name + "_hit", true, false);
+			return;
+			//setImage(name + "_hit", true, false);
 		else if (isJumping())
 			setImage(name, false);
 		else if (!isStill())
@@ -99,14 +104,7 @@ public class Enemy extends Actor {
 	protected void reactOnOutOfView(Actor a) {
 		ai.outOfView(a);
 	}
-
-	/**
-	 * @return the area range of contact for being hit by a bullet
-	 */
-	protected double getCollissionRange() {
-		return 10;
-	}
-
+	
 	/**
 	 * Check for collision with the entity
 	 * 
@@ -115,7 +113,7 @@ public class Enemy extends Actor {
 	 * @return true if bullet has hit the enemy
 	 */
 	public boolean hit(Bullet b) {
-		if (this.getMyRectangle().contains(b.getPosn())) {
+		if (getMyRectangle().contains(b.getPosn())) {
 			System.out.println("hit");
 			if (b.getType() == this.getType()) {
 				takeHit();
@@ -136,20 +134,6 @@ public class Enemy extends Actor {
 	 */
 	public Bullet.Mode getType() {
 		return type;
-	}
-
-	/**
-	 * Check the actor postion wrt enemy
-	 * 
-	 * @param a
-	 *            - any actor on field
-	 * @return true if actor is to the right of enemy
-	 */
-	public boolean isRightOf(Actor a) {
-		if (this.getXPosn() - a.getXPosn() < 0)
-			return true;
-		else
-			return false;
 	}
 	
 	public boolean inRange(Actor a)

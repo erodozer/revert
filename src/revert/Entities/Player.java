@@ -35,7 +35,7 @@ import com.kgp.util.Vector2;
 public class Player extends Actor {
 
 	public static final int FULLAMMO = 6;
-	public static final int MAXHP = 10;
+	public static final int MAXHP = 100;
 	private static final float DURATION = 0.5f; // secs
 
 	/*
@@ -48,7 +48,7 @@ public class Player extends Actor {
 	private int ammo;
 
 	public Player(World w, ImagesLoader imsLd) {
-		super(w, "royer01", new ArrayList());
+		super(w, "royer01");
 
 		// standing center screen, facing right
 		// walks 8 tiles per second
@@ -133,8 +133,12 @@ public class Player extends Actor {
 
 	@Override
 	protected void setNextImage() {
-		if (isAttacking){
-			this.setImage("royer_atk", false);
+		
+		if (isHit){
+			this.setImage("royer_hit", true, false);
+		}
+		else if (isAttacking){
+			this.setImage("royer_atk", true, false);
 		}
 		else if (isJumping()) {
 			this.setImage("royer_jmp", false);

@@ -1,11 +1,11 @@
 package revert.Entities;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
 import revert.MainScene.World;
+import revert.MainScene.notifications.ActorsAdded;
 import revert.MainScene.notifications.ActorsRemoved;
 import revert.util.BrickManager;
 
@@ -74,11 +74,8 @@ public abstract class Actor extends Sprite implements Observer{
 	//synchronization lock on actor updating
 	protected boolean actorLock = false;
 	
-	//list of actors in range
+	//list of actors in that are in range and can be interacted with
 	protected HashMap<Actor, Boolean> visibility;
-	
-	//all actors that this actor can interact with/watch
-	protected ArrayList<Actor> actors;
 	
 	//the amount of times the actor can still be hit before dying
 	protected int hp;
@@ -105,15 +102,10 @@ public abstract class Actor extends Sprite implements Observer{
 	// general timer used for mode switching/response
 	protected int timer;
 
-	public Actor(World w, String name, ArrayList<Actor> actors) {
+	public Actor(World w, String name) {
 		super(0, 0, w.getWidth(), w.getHeight(), AssetsManager.Images, name);
 		this.world = w;
-		this.actors = actors;
 		this.visibility = new HashMap<Actor, Boolean>();
-		for (Actor a : this.actors)
-		{
-			this.visibility.put(a, false);
-		}
 		
 		this.velocity.x = 0;
 		this.velocity.y = 0;
@@ -403,35 +395,6 @@ public abstract class Actor extends Sprite implements Observer{
 			this.position.y -= brickMan.getBrickHeight();
 		}
 	}
-	/**
-	 * Updates what the actor sees and have them react to changes
-	 */
-	final protected void updateView()
-	{
-		while (actorLock);
-		
-		actorLock = true;
-		
-		for (Actor a : actors)
-		{
-			boolean sees = (a.position.distance(this.position) < viewRange);
-			boolean vis = visibility.get(a);
-			
-			if (vis != sees)
-			{
-				visibility.put(a, sees);
-				
-				if (sees)
-					reactOnInView(a);
-				else
-					reactOnOutOfView(a);
-			}
-		}
-		
-		actorLock = false;
-		
-		return ;
-	}
 	
 	/**
 	 * Have the actor do something once something is within their viewing range
@@ -475,6 +438,8 @@ public abstract class Actor extends Sprite implements Observer{
 	{
 		hp--;
 		this.isHit = true;
+		stop();
+		setNextImage();
 	}
 	
 	abstract public boolean inRange(Actor a);
@@ -496,30 +461,36 @@ public abstract class Actor extends Sprite implements Observer{
 				this.visibility.remove(actor);
 			}
 		}
-		
-		if (o == world)
+		else if (args instanceof ActorsAdded)
 		{
-			if (args instanceof Actor)
+			ActorsAdded a = (ActorsAdded)args;
+			System.out.println(a);
+			for (Actor actor : a.actors)
 			{
-				Actor a = (Actor)args;
-				if (visibility.containsKey(a))
+				this.visibility.put(actor, false);
+			}
+		}
+		else if (args instanceof Actor)
+		{
+			Actor a = (Actor)args;
+			if (visibility.containsKey(a))
+			{
+				System.out.println(a);
+				boolean see = visibility.get(a);
+				if (see)
 				{
-					boolean see = visibility.get(a);
-					if (see)
+					if (!inRange(a))
 					{
-						if (!inRange(a))
-						{
-							visibility.put(a, false);
-							this.reactOnOutOfView(a);
-						}
+						visibility.put(a, false);
+						this.reactOnOutOfView(a);
 					}
-					else
+				}
+				else
+				{
+					if (!inRange(a))
 					{
-						if (!inRange(a))
-						{
-							visibility.put(a, true);
-							this.reactOnInView(a);
-						}
+						visibility.put(a, true);
+						this.reactOnInView(a);
 					}
 				}
 			}
