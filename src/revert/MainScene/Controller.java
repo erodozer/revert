@@ -94,15 +94,15 @@ public class Controller extends GameController {
 			setChanged();
 		} 
 		else if (keyCode == KeyEvent.VK_1) {
-			note = new PlayerModeNotification(1);
+			note = new PlayerModeNotification(0);
 			setChanged();
 		} 
 		else if (keyCode == KeyEvent.VK_2) {
-			note = new PlayerModeNotification(2);
+			note = new PlayerModeNotification(1);
 			setChanged();
 		} 
 		else if (keyCode == KeyEvent.VK_3) {
-			note = new PlayerModeNotification(3);
+			note = new PlayerModeNotification(2);
 			setChanged();
 		}
 
