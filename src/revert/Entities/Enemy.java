@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Observable;
 
 import com.kgp.core.Game;
+import com.kgp.util.Vector2;
 
 import revert.AI.EnemyAi;
 import revert.MainScene.World;
@@ -133,7 +134,40 @@ public class Enemy extends Actor {
 	public boolean inRange(Actor a)
 	{
 		if(this.getPosn().distance(a.getPosn()) <= ai.viewRange())
+		{
+			Vector2 enemyPosn = brickMan.worldToMap(this.getRealXPosn(), this.getRealYPosn());
+			Vector2 actorPosn = brickMan.worldToMap(a.getRealXPosn(), a.getRealYPosn());
+			Vector2[][] nextBrick;
+			
+			if(enemyPosn.y == actorPosn.y)
+			{
+				if(this.getDirection() == Direction.Left)
+				{
+					
+					//Look out as far as the agent's view Range
+					//Um...Only go so many bricks?
+					//Not wanting to count the whole thing
+					for(float i = 0; i < ai.viewRange()/brickMan.getBrickWidth(); brickMan.getBrickWidth())
+					{
+						//Set up the means that it adds bricks to check vertically
+						//I've changed this so many time  ~o.o~
+						
+						//if(brickMan.brickExists(new Vector2(i,enemyPosn.y)))
+						
+						
+					}
+				}
+				else
+				{
+				
+				}
+			}
+			else
+			{
+				
+			}
 			return true;
+		}
 		else
 			return false;
 	}

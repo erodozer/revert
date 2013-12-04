@@ -74,4 +74,6 @@ public interface EnemyAi {
 	 * Perform basic actions upon being hit
 	 */
 	public void hit();
+	
+	
 }
