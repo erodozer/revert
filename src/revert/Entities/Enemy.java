@@ -7,7 +7,6 @@ import com.kgp.core.Game;
 
 import revert.AI.EnemyAi;
 import revert.MainScene.World;
-import revert.MainScene.notifications.ActorsRemoved;
 
 public class Enemy extends Actor {
 	
@@ -50,32 +49,6 @@ public class Enemy extends Actor {
 			setImage("enemy_1", true);
 		else
 			setImage("enemy_1", false);
-	}
-	
-	/**
-	 * Updates on notifications from the world that the actor is observing
-	 * @param o - object that sent the notification
-	 * @param args - type of notification
-	 */
-	@Override
-	public void update(Observable o, Object args)
-	{
-		super.update(o, args);
-		
-		if (args instanceof Actor)
-		{
-			if (this.visibility.get(args))
-			{
-				if (ai.isAgro())
-				{
-					ai.aggress((Actor)args);
-				}
-				else
-				{
-					ai.walk();
-				}
-			}
-		}
 	}
 
 	/**
@@ -164,5 +137,34 @@ public class Enemy extends Actor {
 		else
 			return false;
 	}
+
+	public EnemyAi getAI() {
+		return ai;
+	}
 	
+	@Override
+	public void updateSprite()
+	{
+		super.updateSprite();
+		ai.update(Game.getDeltaTime());
+	}
+	
+	/**
+	 * Updates on notifications from the world that the actor is observing
+	 * @param o - object that sent the notification
+	 * @param args - type of notification
+	 */
+	@Override
+	public void update(Observable o, Object args)
+	{
+		super.update(o, args);
+		
+		if (args instanceof Actor)
+		{
+			//only call ai updates against actors that are seen by this one
+			if (visibility.get(args)){
+				ai.update((Actor)args);
+			}
+		}
+	}
 }
