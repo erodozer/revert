@@ -6,9 +6,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import revert.Entities.*;
-import revert.MainScene.notifications.ActorsRemoved;
-import revert.MainScene.notifications.PlayerAttackNotification;
-import revert.MainScene.notifications.WorldNotification;
+import revert.MainScene.notifications.*;
 import revert.util.BrickManager;
 
 import com.kgp.core.Game;
@@ -102,11 +100,16 @@ public class World extends Observable implements Observer{
 		/**
 		 * TODO Update Visibility of Actors
 		 */
+		for (Actor a : this.allActors)
+		{
+			this.setChanged();
+			this.notifyObservers(allActors);
+		}
 		
 		/**
 		 * Perform bullet update
 		 */
-		for (int i = 0; i < bullets.size(); i++)
+		for (int i = 0; i < bullets.size();)
 		{
 			Bullet b = bullets.get(i);
 			b.updateSprite();
@@ -117,9 +120,15 @@ public class World extends Observable implements Observer{
 					e.hit(b);
 					score += HIT_BONUS;
 					bullets.remove(i);
-					i--;
 					continue;
 				}
+			}
+			
+			//remove bullets that hit bricks
+			if (this.level.brickExists(this.level.worldToMap(b.getXPosn(), b.getYPosn())))
+			{
+				bullets.remove(i);
+				continue;
 			}
 			
 			if ((b.getXPosn() > player.getPosn().x + player.getPWidth()/2) ||
@@ -127,9 +136,9 @@ public class World extends Observable implements Observer{
 			   (b.getYPosn() > player.getPosn().y + player.getPHeight()/2) ||
 			   (b.getYPosn() < player.getPosn().y - player.getPHeight()/2)){
 				bullets.remove(i);
-				i--;
 				continue;
 			}
+			i++;
 		}
 		
 		/*
@@ -163,6 +172,7 @@ public class World extends Observable implements Observer{
 			e.setPosition(data[0], data[1]);
 			e.stop();
 			list.add(e);
+			this.addObserver(e);
 		}
 		
 		return list;
@@ -175,6 +185,9 @@ public class World extends Observable implements Observer{
 	public void startWave()
 	{
 		this.enemies = genEnemies(enemyFactory.createWave(15));
+		ActorsAdded n = new ActorsAdded(this.enemies);
+		this.setChanged();
+		this.notifyObservers(n);
 		this.allActors.addAll(this.enemies);
 		currentWave++;
 		waves--;
