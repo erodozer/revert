@@ -5,6 +5,7 @@ import com.kgp.util.Vector2;
 import revert.Entities.Actor;
 import revert.Entities.Enemy;
 import revert.Entities.Actor.Direction;
+import revert.Entities.Player;
 
 public class AgressiveAI implements EnemyAi 
 {
@@ -44,17 +45,15 @@ public class AgressiveAI implements EnemyAi
 	@Override
 	public void inView(Actor a) 
 	{
-		if(agro)
+		if (a instanceof Player)
 		{
-			parent.lookAt(new Vector2(a.getXPosn(),a.getYPosn()));
-			if(parent.getDirection() == Direction.Left)
-				parent.moveLeft();
-			else
-				parent.moveRight();
-			if(parent.inRange(a))
-				attack(a);
+			//go back to agro if the player steps within view 
+			// while it's waiting to phase out of agro
+			if (!agro && agroTimer > 0f)
+			{
+				agro = true;
+			}
 		}
-
 	}
 
 	/**
@@ -63,8 +62,13 @@ public class AgressiveAI implements EnemyAi
 	@Override
 	public void outOfView(Actor a) 
 	{
-		walk();
-
+		if (a instanceof Player)
+		{
+			//start transition phase to out of agro once the player 
+			// exits the view range of the player
+			agro = false;
+			agroTimer = 3.0f;
+		}
 	}
 
 	/**
@@ -73,29 +77,25 @@ public class AgressiveAI implements EnemyAi
 	@Override
 	public void aggress(Actor a) 
 	{
-		if (!agro)
-		{
-			if (a.getPosn().distance(parent.getPosn()) < this.aggressRange())
+		float dist = (float)a.getPosn().distance(parent.getPosn());
+		
+		//player within range of the enemy
+		if (agro) {
+			//attack this enemy if the timer is up
+			if (attackTimer <= 0)
 			{
-				agro = true;
-				attackTimer = this.attackRate();
-				agroTimer = 3.0f;
+				if (dist < this.attackRange()) {
+					attack(a);
+					attackTimer = attackRate();
+				}
 			}
 		}
 		else
 		{
-			//set the timer to full as long as there is an actor within range
-			if (a.getPosn().distance(parent.getPosn()) < this.aggressRange())
+			if (dist < this.aggressRange())
 			{
-				agroTimer = 3.0f;
+				attackTimer = attackRate();
 				agro = true;
-			}
-			
-			//attack this enemy if the timer is up
-			if (attackTimer < 0)
-			{
-				attack(a);
-				attackTimer = this.attackRate();
 			}
 		}
 	}
@@ -151,15 +151,19 @@ public class AgressiveAI implements EnemyAi
 	}
 
 	@Override
-	public int attackRate() {
-		// TODO Auto-generated method stub
-		return 0;
+	public float attackRate() {
+		return 2.0f;
 	}
 
 	@Override
 	public float attackRange() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 30;
+	}
+
+	@Override
+	public void hit()
+	{
+		agro = true;
 	}
 
 	/**
@@ -167,29 +171,45 @@ public class AgressiveAI implements EnemyAi
 	 */
 	public void update(float delta)
 	{
-		if (agro)
-		{
-			agroTimer -= delta;
-			
-			//time out agro when the target is too far away
-			if (agroTimer < 0)
-				agro = false;
-			
+		//as long as the ai is truly aggressive, try attacking
+		if (agro) {
 			//decrease attack timer
 			if (attackTimer > 0)
 				attackTimer -= delta;
 		}
+		//wait for agro to go away once the timer is done
+		else if (!agro && agroTimer > 0)
+		{
+			agroTimer -= delta;
+		}
 		else
 		{
+			//decrease walk wait timer when not agro
 			if (walkTimer > 0)
 				walkTimer -= delta;
 		}
 	}
 
 	@Override
-	public void hit()
-	{
-		agro = true;
-		
+	public void update(Actor a) {
+		if (a instanceof Player) {
+			//as long as it's in an aggressive phase, try aggressing
+			if (agroTimer > 0)
+			{
+				aggress(a);
+			}
+		}
+
+		if (a instanceof Enemy)
+		{
+			Enemy e = (Enemy)a;
+			
+			//go agro if nearby ally is hurt
+			if (e.getAI().isAgro())
+			{
+				this.agro = true;
+				this.agroTimer = 3f;
+			}
+		}
 	}
 }
