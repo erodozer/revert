@@ -49,9 +49,9 @@ public class Enemy extends Actor {
 		this.type = Bullet.Mode.values()[type];
 
 		if (type == 0) {
-			ai = new PassiveAI(this);
-		} else if (type == 1) {
 			ai = new ActiveAI(this);
+		} else if (type == 1) {
+			ai = new PassiveAI(this);
 		} else if (type == 2) {
 			ai = new AgressiveAI(this);
 		} else {
@@ -61,11 +61,7 @@ public class Enemy extends Actor {
 		
 		name = "enemy_" + (type+1);
 	}
-
-	protected void setAI(EnemyAi ai) {
-		this.ai = ai;
-	}
-
+	
 	@Override
 	protected void setNextImage() {
 		if (isHit)
@@ -74,7 +70,7 @@ public class Enemy extends Actor {
 		else if (isJumping())
 			setImage(name, false);
 		else if (!isStill())
-			setImage(name, true);
+			setImage(name, false);
 		else
 			setImage(name, false);
 	}
@@ -93,6 +89,7 @@ public class Enemy extends Actor {
 	 */
 	@Override
 	protected void reactOnInView(Actor a) {
+		System.out.println("woot");
 		ai.inView(a);
 	}
 
@@ -137,6 +134,8 @@ public class Enemy extends Actor {
 	
 	public boolean inRange(Actor a)
 	{
+		return this.getPosn().distance(a.getPosn()) <= ai.viewRange();
+		/*
 		if(this.getPosn().distance(a.getPosn()) <= ai.viewRange())
 		{
 			Vector2 enemyPosn = brickMan.worldToMap(this.getRealXPosn(), this.getRealYPosn());
@@ -174,6 +173,7 @@ public class Enemy extends Actor {
 		}
 		else
 			return false;
+		*/
 	}
 
 	public EnemyAi getAI() {
@@ -197,11 +197,12 @@ public class Enemy extends Actor {
 	@Override
 	public void update(Observable o, Object args) {
 		super.update(o, args);
-
 		if (args instanceof Actor) {
 			// only call ai updates against actors that are seen by this one
-			if (visibility.get(args)) {
-				ai.update((Actor) args);
+			if (visibility.containsKey(args)){
+				if (visibility.get(args)) {
+					ai.update((Actor) args);
+				}
 			}
 		}
 	}

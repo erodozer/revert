@@ -1,14 +1,15 @@
 package revert.MainScene.notifications;
 
-import java.util.ArrayList;
+import java.util.Set;
 
 import revert.Entities.Actor;
 
 public class ActorsRemoved 
 {
-	public ArrayList<Actor> actors;
+	public Set<Actor> actors;
 	
+	public ActorsRemoved(Set<Actor> a)
 	{
-		actors = new ArrayList<Actor>();
+		actors = a;
 	}
 }

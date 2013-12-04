@@ -38,8 +38,8 @@ public class Crosshair extends Sprite {
 	 */
 	public void updateSprite()
 	{
-		this.position.x = (int)(this.parent.getXPosn() + this.parent.getAim().x - this.getWidth()/2);
-		this.position.y = (int)(this.parent.getYPosn() - this.parent.getHeight()/2f + this.parent.getAim().y - this.getHeight()/2);
+		this.position.x = (int)(this.parent.getCenterXPosn() + this.parent.getAim().x - this.getWidth()/2);
+		this.position.y = (int)(this.parent.getCenterYPosn() + this.parent.getAim().y - this.getHeight()/2);
 		//this.angle = (int)this.parent.getAim().angle();
 		super.updateSprite();
 	}

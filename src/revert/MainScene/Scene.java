@@ -160,6 +160,7 @@ public class Scene extends GamePanel {
 		});
 		
 		player.init();
+		world.init();
 
 		// prepare title/help screen
 		helpIm = images.getImage("help");

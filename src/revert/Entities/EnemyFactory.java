@@ -42,19 +42,7 @@ public class EnemyFactory {
 	
 	public Enemy generateEnemy(int type)
 	{
-		Enemy e = new Enemy(world, world.getPlayer());
-		EnemyAi ai = null;
-		if (type == 0)
-		{
-			//ai = new PassiveAi();
-		}
-		else
-		{
-			System.out.println("No enemy type corresponds to value: " + type + ".  Instantiating basic enemy");
-		}
-		
-		e.setAI(ai);
-		
+		Enemy e = new Enemy(world, world.getPlayer(), type);
 		return e;
 	}
 }

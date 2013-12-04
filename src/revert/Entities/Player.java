@@ -1,24 +1,7 @@
 package revert.Entities;
 
-// JumperSprite.java
-// Andrew Davison, April 2005, ad@fivedots.coe.psu.ac.th
-
-/*
- * A sprite can move left/right, jump and stand still. In fact, a sprite doesn't
- * move horizontally at all, so the left and right movement requests only change
- * various status flags, not its locx value. The sprite has looping images for
- * when it is moving left or right, and single images for when it is standing
- * still or jumping. The sprite stores its world coordinate in (xWorld, yWorld).
- * Jumping has a rising and falling component. Rising and falling can be stopped
- * by the sprite hitting a brick. The sprite's movement left or right can be
- * stopped by hitting a brick. A sprite will start falling if it walks off a
- * brick into space. Brick queries (mostly about collision detection) are sent
- * to the BricksManager object.
- */
-
 import java.awt.Point;
 import java.awt.geom.AffineTransform;
-import java.util.ArrayList;
 import java.util.Observable;
 
 import revert.MainScene.Controller;
@@ -52,7 +35,8 @@ public class Player extends Actor {
 
 		// standing center screen, facing right
 		// walks 8 tiles per second
-		this.moveRate = (int) (brickMan.getBrickWidth() * 8 * Game.getDeltaTime());
+		this.moveRate = (int) (brickMan.getBrickWidth() * 8 * Game
+				.getDeltaTime());
 		// the move size is the same as the bricks ribbon
 
 		setVelocity(0, 0); // no movement
@@ -79,24 +63,22 @@ public class Player extends Actor {
 
 		this.hp = MAXHP;
 		this.ammo = FULLAMMO;
-		
+
 		this.mode = Bullet.Mode.Gold;
 	}
-	
-	public void init()
-	{
+
+	public void init() {
 		this.hp = MAXHP;
 		this.ammo = FULLAMMO;
-	
+
 		this.stop();
 		this.isAttacking = false;
-		
+
 		updateStatus();
 	}
-	
+
 	/**
-	 * Sends a notification about the player's current states
-	 * Mainly for the HUD
+	 * Sends a notification about the player's current states Mainly for the HUD
 	 */
 	public void updateStatus() {
 		setChanged();
@@ -111,7 +93,8 @@ public class Player extends Actor {
 	}
 
 	/**
-	 * @param i - the attack mode to set the player to
+	 * @param i
+	 *            - the attack mode to set the player to
 	 */
 	private void setMode(int i) {
 		this.mode = Bullet.Mode.values()[i];
@@ -133,21 +116,16 @@ public class Player extends Actor {
 
 	@Override
 	protected void setNextImage() {
-		
-		if (isHit){
+
+		if (isHit) {
 			this.setImage("royer_hit", true, false);
-		}
-		else if (isAttacking){
+		} else if (isAttacking) {
 			this.setImage("royer_atk", true, false);
-		}
-		else if (isJumping()) {
+		} else if (isJumping()) {
 			this.setImage("royer_jmp", false);
-		}
-		else if (!isStill()) {
+		} else if (!isStill()) {
 			this.setImage("royer_walking", true);
-		}
-		else
-		{
+		} else {
 			this.setImage("royer01", false);
 		}
 	}
@@ -179,23 +157,18 @@ public class Player extends Actor {
 		return ammo > 0;
 	}
 
-	/**
-	 * Have the player look towards a point in the world
-	 * 
-	 * @param p
-	 */
-	public void lookAt(Vector2 target, AffineTransform m) {
-		Vector2 p = new Vector2();
-		m.transform(new Point((int) (position.x + offset.x), (int) (position.y + offset.y)), p);
-		aim.x = target.x;
-		aim.y = target.y;
-
-		aim.translate((float) -p.x, (float) -p.y);
-		aim = aim.normalize();
-		aim.mult(80);
-		
-		lookAt(aim);
-	}
+    /**
+     * Have the player look towards a point in the world
+     *
+     * @param p
+     */
+    public void lookAt(Vector2 target) {
+            super.lookAt(target);
+            
+            aim = this.position.to(target);
+            aim = aim.normalize();
+            aim.mult(80);
+    }
 
 	public Vector2 getAim() {
 		return aim;
@@ -223,19 +196,15 @@ public class Player extends Actor {
 			if (args instanceof PlayerMovementNotification) {
 				PlayerMovementNotification note = (PlayerMovementNotification) args;
 
-				if (!isAttacking)
-				{
+				if (!isAttacking) {
 					if (note.jump) {
 						jump();
-					}
-					else {
+					} else {
 						if (note.movement == Movement.Left) {
 							moveLeft();
-						}
-						else if (note.movement == Movement.Right) {
+						} else if (note.movement == Movement.Right) {
 							moveRight();
-						}
-						else {
+						} else {
 							stop();
 						}
 					}
@@ -247,21 +216,17 @@ public class Player extends Actor {
 
 				if (note.next) {
 					nextMode();
-				}
-				else if (note.prev) {
+				} else if (note.prev) {
 					prevMode();
-				}
-				else {
+				} else {
 					setMode(note.mode);
 				}
-				
+
 				updateStatus();
-			}
-			else if (args instanceof PlayerAttackNotification) {
+			} else if (args instanceof PlayerAttackNotification) {
 				if (hasAmmo()) {
 					attack();
-				}
-				else {
+				} else {
 					reload();
 				}
 			}

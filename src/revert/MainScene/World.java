@@ -2,6 +2,8 @@ package revert.MainScene;
 
 import java.awt.Graphics2D;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -29,7 +31,7 @@ public class World extends Observable implements Observer{
 	/**
 	 * All the current enemies available for attacking
 	 */
-	ArrayList<Enemy> enemies;
+	Set<Enemy> enemies;
 	
 	/**
 	 * All the waves of enemies queued for the world
@@ -40,7 +42,7 @@ public class World extends Observable implements Observer{
 	/**
 	 * All the actors added to this world
 	 */
-	ArrayList<Actor> allActors;
+	Set<Actor> allActors;
 	
 	/**
 	 * Projectiles sent by the player
@@ -56,10 +58,12 @@ public class World extends Observable implements Observer{
 	private int score;
 	private int time;
 	
+	private boolean lock;
+	
 	public World()
 	{
-		this.enemies = new ArrayList<Enemy>();
-		this.allActors = new ArrayList<Actor>();
+		this.enemies = new HashSet<Enemy>();
+		this.allActors = new HashSet<Actor>();
 		this.bullets = new ArrayList<Bullet>();
 	}
 	
@@ -68,34 +72,37 @@ public class World extends Observable implements Observer{
 	 */
 	public void update()
 	{
-		ActorsRemoved action = new ActorsRemoved();
-		
 		/**
 		 * Update what actors are still alive within this scene
 		 */
-		for (int i = 0, n = allActors.size(); i < n;)
 		{
-			Actor a = allActors.get(i);
-			if (!a.isAlive())
+			Set<Actor> dead = new HashSet<Actor>();
+			for (Actor a : allActors)
 			{
-				if (a instanceof Enemy)
+				if (!a.isAlive())
 				{
+					if (a instanceof Enemy)
+					{
+						dead.add(a);
+					}
+				}
+				else
+				{
+					a.updateSprite();
+				}
+			}
+			
+			for (Actor a : dead)
+			{
+				allActors.remove(a);
+				if (a instanceof Enemy){
 					enemies.remove(a);
-					allActors.remove(i);
-					action.actors.add(a);
-					this.setChanged();
-					n--;
 					score += KILL_BONUS;
 				}
 			}
-			else
-			{
-				a.updateSprite();
-				i++;
-			}
+			
+			this.notifyObservers(new ActorsRemoved(dead));
 		}
-		
-		this.notifyObservers(action);
 		
 		/**
 		 * TODO Update Visibility of Actors
@@ -103,16 +110,19 @@ public class World extends Observable implements Observer{
 		for (Actor a : this.allActors)
 		{
 			this.setChanged();
-			this.notifyObservers(allActors);
+			this.notifyObservers(a);
 		}
 		
 		/**
 		 * Perform bullet update
 		 */
+		while (lock);
+		lock = true;
 		for (int i = 0; i < bullets.size();)
 		{
 			Bullet b = bullets.get(i);
 			b.updateSprite();
+			boolean dead = false;
 			for (Enemy e : enemies)
 			{
 				if (b.getPosn().distance(e.getPosn()) < 10)
@@ -120,33 +130,31 @@ public class World extends Observable implements Observer{
 					e.hit(b);
 					score += HIT_BONUS;
 					bullets.remove(i);
-					continue;
+					dead = true;
+					break;
 				}
 			}
 			
 			//remove bullets that hit bricks
-			if (this.level.brickExists(this.level.worldToMap(b.getXPosn(), b.getYPosn())))
+			if (!dead && this.level.brickExists(this.level.worldToMap(b.getXPosn(), b.getYPosn())))
 			{
 				bullets.remove(i);
-				continue;
+				dead = true;
 			}
 			
-			if ((b.getXPosn() > player.getPosn().x + player.getPWidth()/2) ||
+			if (!dead &&
+			   ((b.getXPosn() > player.getPosn().x + player.getPWidth()/2) ||
 			   (b.getXPosn() < player.getPosn().x - player.getPWidth()/2) ||
 			   (b.getYPosn() > player.getPosn().y + player.getPHeight()/2) ||
-			   (b.getYPosn() < player.getPosn().y - player.getPHeight()/2)){
+			   (b.getYPosn() < player.getPosn().y - player.getPHeight()/2))){
 				bullets.remove(i);
-				continue;
+				dead = true;
 			}
-			i++;
+			
+			if (!dead)
+				i++;
 		}
-		
-		/*
-		if (enemies.size() < 0 && currentWave < waves)
-		{
-			this.startWave();
-		}
-		*/
+		lock = false;
 		
 		this.level.update(this.player.getRealXPosn(), this.player.getRealYPosn());
 		
@@ -161,9 +169,9 @@ public class World extends Observable implements Observer{
 	 * @param waveData - array formatted in [enemyNum][x, y, type]
 	 * @return ArrayList of instantiated enemy objects in the world
 	 */
-	public ArrayList<Enemy> genEnemies(int[][] waveData)
+	public Set<Enemy> genEnemies(int[][] waveData)
 	{
-		ArrayList<Enemy> list = new ArrayList<Enemy>();
+		Set<Enemy> list = new HashSet<Enemy>();
 		
 		for (int i = 0; i < waveData.length; i++)
 		{
@@ -184,11 +192,15 @@ public class World extends Observable implements Observer{
 	 */
 	public void startWave()
 	{
-		this.enemies = genEnemies(enemyFactory.createWave(15));
-		ActorsAdded n = new ActorsAdded(this.enemies);
+		this.enemies = genEnemies(enemyFactory.createWave(1));
+		
+		this.allActors.clear();
+		this.allActors.addAll(enemies);
+		this.allActors.add(player);
+		
 		this.setChanged();
-		this.notifyObservers(n);
-		this.allActors.addAll(this.enemies);
+		this.notifyObservers(allActors);
+		
 		currentWave++;
 		waves--;
 	}
@@ -200,6 +212,7 @@ public class World extends Observable implements Observer{
 	public void setPlayer(Player player) {
 		this.player = player;
 		this.bulletFactory = new BulletFactory(this, player);
+		this.allActors.add(player);
 	}
 
 	/**
@@ -209,7 +222,6 @@ public class World extends Observable implements Observer{
 	public void setLevel(BrickManager bricksMan) {
 		this.level = bricksMan;
 		this.enemyFactory = new EnemyFactory(this, bricksMan.getSpawnPoints());
-		this.startWave();
 	}
 	
 	public BrickManager getLevel()
@@ -223,6 +235,7 @@ public class World extends Observable implements Observer{
 	public void init()
 	{
 		this.waves = 5;
+		this.startWave();
 	}
 
 	/**
@@ -249,7 +262,7 @@ public class World extends Observable implements Observer{
 	/**
 	 * @return the list of enemies currently being managed by the world
 	 */
-	public ArrayList<Enemy> getEnemies() {
+	public Set<Enemy> getEnemies() {
 		return this.enemies;
 	}
 	
@@ -267,10 +280,14 @@ public class World extends Observable implements Observer{
 			e.drawSprite(g);
 		}
 		
-		for (Bullet b : bullets)
+		while (lock);
+		lock = true;
+		for (int i = 0; i < bullets.size(); i++)
 		{
+			Bullet b = bullets.get(i);
 			b.drawSprite(g);
 		}
+		lock = false;
 	}
 
 	public void add(Bullet b) {

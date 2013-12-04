@@ -1,8 +1,10 @@
 package revert.Entities;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
 
 import revert.MainScene.World;
 import revert.MainScene.notifications.ActorsAdded;
@@ -169,10 +171,10 @@ public abstract class Actor extends Sprite implements Observer{
 	 */
 	public void lookAt(Vector2 v)
 	{
-		Vector2 dir = this.getPosn().to(v);
-		if (dir.x < position.x)
+		Vector2 dir = position.to(v).normalize();
+		if (dir.x < 0)
 			faceLeft();
-		else if (dir.x > position.x)
+		else if (dir.x > 0)
 			faceRight();
 	}
 	
@@ -461,21 +463,23 @@ public abstract class Actor extends Sprite implements Observer{
 				this.visibility.remove(actor);
 			}
 		}
-		else if (args instanceof ActorsAdded)
+		else if (args instanceof Set)
 		{
-			ActorsAdded a = (ActorsAdded)args;
-			System.out.println(a);
-			for (Actor actor : a.actors)
+			Set<Actor> a = (Set<Actor>)args;
+			for (Actor actor : a)
 			{
-				this.visibility.put(actor, false);
+				if (actor != this)
+				{
+					this.visibility.put(actor, false);
+				}
 			}
 		}
 		else if (args instanceof Actor)
 		{
 			Actor a = (Actor)args;
+			
 			if (visibility.containsKey(a))
 			{
-				System.out.println(a);
 				boolean see = visibility.get(a);
 				if (see)
 				{
@@ -487,7 +491,7 @@ public abstract class Actor extends Sprite implements Observer{
 				}
 				else
 				{
-					if (!inRange(a))
+					if (inRange(a))
 					{
 						visibility.put(a, true);
 						this.reactOnInView(a);
