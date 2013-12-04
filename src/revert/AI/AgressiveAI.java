@@ -18,6 +18,8 @@ public class AgressiveAI implements EnemyAi
 	
 	float MOVE_TIME;
 	
+	int aggressionCount;
+	
 	public AgressiveAI(Enemy e)
 	{
 		parent = e;
@@ -53,6 +55,10 @@ public class AgressiveAI implements EnemyAi
 			{
 				agro = true;
 			}
+			
+			//increase agro count dependence if already agro
+			if (agro)
+				aggressionCount++;
 		}
 	}
 
@@ -64,10 +70,14 @@ public class AgressiveAI implements EnemyAi
 	{
 		if (a instanceof Player)
 		{
-			//start transition phase to out of agro once the player 
-			// exits the view range of the player
-			agro = false;
-			agroTimer = 3.0f;
+			aggressionCount--;
+			if (aggressionCount <= 0)
+			{
+				//start transition phase to out of agro once all players have
+				// exited the view range of the enemy
+				agro = false;
+				agroTimer = 3.0f;
+			}
 		}
 	}
 
@@ -80,28 +90,17 @@ public class AgressiveAI implements EnemyAi
 		float dist = (float)a.getPosn().distance(parent.getPosn());
 		
 		//player within range of the enemy
-		if (agro) {
-			//attack this enemy if the timer is up
-			if (attackTimer <= 0)
-			{
-				if (dist < this.attackRange()) {
-					attack(a);
-					attackTimer = attackRate();
-				}
-			}
-		}
-		else
+		//attack this enemy if the timer is up
+		if (attackTimer <= 0)
 		{
-			if (dist < this.aggressRange())
-			{
+			if (dist < this.attackRange()) {
+				attack(a);
 				attackTimer = attackRate();
-				agro = true;
 			}
 		}
 	}
 	
 	/**
-	 * 
 	 * @return true if agent is aggressive
 	 */
 	public boolean isAgro()
@@ -114,29 +113,26 @@ public class AgressiveAI implements EnemyAi
 	 */
 	public void walk()
 	{
-		if (walkTimer < 0)
+		int i = (int)Math.random()*10;
+		if( i <= 8)
 		{
-			int i = (int)Math.random()*10;
-			if( i <= 8)
+			int j = (int)Math.random();
+			if(j == 1)
 			{
-				int j = (int)Math.random();
-				if(j == 1)
-				{
-					parent.lookAt(Vector2.LEFT);
-					parent.moveLeft();
-				}
-				else
-				{
-					parent.lookAt(Vector2.RIGHT);
-					parent.moveRight();
-				}
-				walkTimer = MOVE_TIME;
+				parent.lookAt(Vector2.LEFT);
+				parent.moveLeft();
 			}
 			else
 			{
-				parent.stop();
-				walkTimer = .5f;
+				parent.lookAt(Vector2.RIGHT);
+				parent.moveRight();
 			}
+			walkTimer = MOVE_TIME;
+		}
+		else
+		{
+			parent.stop();
+			walkTimer = .5f;
 		}
 	}
 
@@ -145,6 +141,9 @@ public class AgressiveAI implements EnemyAi
 		return 70;
 	}
 
+	/**
+	 * How close a player has to be to make this enemy aggressive
+	 */
 	@Override
 	public float aggressRange() {
 		return 50;
@@ -177,16 +176,17 @@ public class AgressiveAI implements EnemyAi
 			if (attackTimer > 0)
 				attackTimer -= delta;
 		}
-		//wait for agro to go away once the timer is done
-		else if (!agro && agroTimer > 0)
+		else 
 		{
-			agroTimer -= delta;
-		}
-		else
-		{
-			//decrease walk wait timer when not agro
-			if (walkTimer > 0)
+			//wait for agro to go away once the timer is done
+			if (!agro && agroTimer > 0)
+				agroTimer -= delta;
+			
+			//decrease walk wait timer when not pure agro
+			if (walkTimer > 0) 
 				walkTimer -= delta;
+			else
+				walk();
 		}
 	}
 
@@ -194,22 +194,24 @@ public class AgressiveAI implements EnemyAi
 	public void update(Actor a) {
 		if (a instanceof Player) {
 			//as long as it's in an aggressive phase, try aggressing
-			if (agroTimer > 0)
-			{
+			if (agro)
 				aggress(a);
-			}
+			else {
+				//if the player is in the aggression range while visible, then
+				// the ai will become agro
+				agro = a.getPosn().distance(parent.getPosn()) < this.aggressRange();
+				
+				if (agro)
+					aggressionCount++;
+			}	
 		}
 
 		if (a instanceof Enemy)
 		{
 			Enemy e = (Enemy)a;
 			
-			//go agro if nearby ally is hurt
-			if (e.getAI().isAgro())
-			{
-				this.agro = true;
-				this.agroTimer = 3f;
-			}
+			//go agro if nearby ally is agro
+			agro = agro || e.getAI().isAgro();
 		}
 	}
 }
