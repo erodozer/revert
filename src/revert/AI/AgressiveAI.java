@@ -79,7 +79,7 @@ public class AgressiveAI implements EnemyAi
 	}
 
 	/**
-	 * Always Agressive so once play comes into view jump to inView
+	 * Always Aggressive so once play comes into view jump to inView
 	 */
 	@Override
 	public void aggress(Actor a) 
@@ -159,7 +159,9 @@ public class AgressiveAI implements EnemyAi
 	@Override
 	public void hit()
 	{
-		
+		//make an enemy on edge without making them truly agro
+		// if you step close to them then they'll become agro
+		agroTimer = 3.0f;
 	}
 
 	/**
