@@ -1,23 +1,29 @@
 package revert.AI;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.kgp.util.Vector2;
 
 import revert.Entities.Actor;
 import revert.Entities.Enemy;
+import revert.Entities.Player;
 
 public class PassiveAI implements EnemyAi 
 {
 	Enemy parent;
 	
-	private final float MOVE_TIME = (float)Math.pow(3,9);		//max movement time
+	//max movement time
+	private final float MOVE_TIME = (float)Math.pow(3,9);
 
 	float walkTimer;
 	
-	boolean stare;
+	Set<Actor> aggressors;
 	
 	public PassiveAI(Enemy e)
 	{
 		parent = e;
+		aggressors = new HashSet<Actor>();
 	}
 	/**
 	 * This agent does not attack
@@ -25,7 +31,7 @@ public class PassiveAI implements EnemyAi
 	@Override
 	public void attack(Actor a) 
 	{
-		//Does Nothing
+		//stare to death
 		a.takeHit();
 	}
 
@@ -36,9 +42,11 @@ public class PassiveAI implements EnemyAi
 	@Override
 	public void inView(Actor a) 
 	{
-		stare = true;
-		parent.stop();
-		a.takeHit();
+		//stare only at players
+		if (a instanceof Player) {
+			parent.stop();
+			aggressors.add(a);
+		}
 	}
 
 	/**
@@ -47,42 +55,55 @@ public class PassiveAI implements EnemyAi
 	@Override
 	public void outOfView(Actor a) 
 	{
-		stare = false;
+		aggressors.remove(a);
 	}
 	
 	/**
-	 * This agent does not agress
+	 * This agent does not agress, only stares
 	 */
 	@Override
 	public void aggress(Actor a) 
 	{
-		a.takeHit();
+		attack(a);
 	}
 	
 	@Override
 	public float viewRange() {
 		return 30;
 	}
+	
+	/**
+	 *  passive AI are indirectly aggressive thanks to their stare
+	 */
 	@Override
 	public float aggressRange() {
 		return -1;
 	}
+	
+	/**
+	 * Never attacks
+	 */
 	@Override
-	public int attackRate() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	@Override
-	public float attackRange() {
-		// TODO Auto-generated method stub
-		return 0;
+	public float attackRate() {
+		return -1;
 	}
 	
 	@Override
+	public float attackRange() {
+		// no worries
+		return 0;
+	}
+	
+	/**
+	 * Walks around when not staring at something
+	 */
+	@Override
 	public void update(float delta) {
-		if (!stare){
+		if (!isAgro()){
 			if (walkTimer > 0)
 				walkTimer -= delta;
+			else
+				walk();
 		}
 	}
 	
@@ -92,44 +113,45 @@ public class PassiveAI implements EnemyAi
 	 */
 	public void walk()
 	{
-		if (stare)
-			return;
-		
-		if (walkTimer < 0)
+		int i = (int)Math.random()*10;
+		if( i <= 2)
 		{
-			int i = (int)Math.random()*10;
-			if( i <= 2)
+			int j = (int)Math.random();
+			if(j == 1)
 			{
-				int j = (int)Math.random();
-				if(j == 1)
-				{
-					parent.lookAt(Vector2.LEFT);
-					parent.moveLeft();
-				}
-				else
-				{
-					parent.lookAt(Vector2.RIGHT);
-					parent.moveRight();
-				}
-				walkTimer = MOVE_TIME;
+				parent.lookAt(Vector2.LEFT);
+				parent.moveLeft();
 			}
 			else
 			{
-				parent.stop();
-				walkTimer = .5f;
+				parent.lookAt(Vector2.RIGHT);
+				parent.moveRight();
 			}
+			walkTimer = MOVE_TIME;
+		}
+		else
+		{
+			parent.stop();
+			walkTimer = .5f;
 		}
 	}
 	
 	@Override
 	public boolean isAgro() {
-		// does not get aggressive
-		return stare;
+		// staring is their aggressiveness
+		return aggressors.size() > 0;
 	}
 	@Override
 	public void hit() {
-		// TODO Auto-generated method stub
-		
+		// do nothing
+	}
+	
+	@Override
+	public void update(Actor a) {
+		// stare at the player when he's visible to the passive AI
+		if (isAgro())
+			if (a instanceof Player)
+				aggress(a);
 	}
 
 }
