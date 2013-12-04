@@ -139,11 +139,11 @@ public class AgressiveAI implements EnemyAi
 	}
 
 	/**
-	 * How close a player has to be to make this enemy aggressive
+	 * Aggressive enemies become aggressive as soon as the player enters its view range
 	 */
 	@Override
 	public float aggressRange() {
-		return 50;
+		return 70;
 	}
 
 	@Override
