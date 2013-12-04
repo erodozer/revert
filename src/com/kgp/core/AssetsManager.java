@@ -2,13 +2,13 @@ package com.kgp.core;
 
 import java.io.InputStream;
 
+import revert.util.JsonBricksManager;
+import revert.util.JsonBricksManager.JsonBricksDeserializer;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.kgp.audio.ClipsLoader;
 import com.kgp.imaging.ImagesLoader;
-
-import revert.util.JsonBricksManager;
-import revert.util.JsonBricksManager.JsonBricksDeserializer;
 
 
 /**

@@ -59,8 +59,8 @@ public class Vector2 extends Point2D.Float{
 	 */
 	public void add(Vector2 v)
 	{
-		x -= v.x;
-		y -= v.y;
+		x += v.x;
+		y += v.y;
 	}
 	
 	/**

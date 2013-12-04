@@ -1,8 +1,8 @@
 package revert.Entities;
 
-import com.kgp.util.Vector2;
-
 import revert.MainScene.World;
+
+import com.kgp.util.Vector2;
 
 public class BulletFactory {
 
@@ -18,7 +18,9 @@ public class BulletFactory {
 	public Bullet spawnBullet()
 	{
 		Bullet b = new Bullet(world, parent.getMode());
-		Vector2 v = new Vector2(parent.getRealXPosn(), parent.getRealYPosn());
+		Vector2 v = new Vector2(parent.getCenterXPosn(), parent.getCenterYPosn());
+		v.add(parent.getAim());
+		
 		b.setPosition(v.x, v.y);
 		
 		v = parent.getAim().clone();

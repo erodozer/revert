@@ -1,13 +1,11 @@
 package revert.MainScene;
 
-import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 
-import revert.Entities.BulletFactory;
-import revert.Entities.Player;
 import revert.Entities.Actor.Movement;
+import revert.Entities.Player;
 import revert.MainScene.notifications.PlayerAttackNotification;
 import revert.MainScene.notifications.PlayerModeNotification;
 import revert.MainScene.notifications.PlayerMovementNotification;
@@ -47,7 +45,13 @@ public class Controller extends GameController {
 		int x = e.getX();
 		int y = e.getY();
 		
-		this.player.lookAt(new Vector2(x, y), panel.getMatrix());
+		Vector2 v = new Vector2(x, y);
+		v.x -= panel.getWidth()/2f;
+		v.x += player.getXPosn();
+		v.y -= panel.getHeight()/2f;
+		v.y += player.getYPosn() - player.getHeight()/2f;
+		
+		this.player.lookAt(v);
 	}
 
 	public void keyPressed(KeyEvent e) {

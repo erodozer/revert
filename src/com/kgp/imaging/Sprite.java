@@ -26,6 +26,7 @@ import com.kgp.util.Vector2;
  *  @author Andrew Davison, April 2005, ad@fivedots.coe.psu.ac.th
  */
 public class Sprite extends Observable {
+
 	// default dimensions when there is no image
 	private static final int SIZE = 12;
 
@@ -232,6 +233,16 @@ public class Sprite extends Observable {
 	public float getRealYPosn() {
 		return this.position.y + this.offset.y;
 	}
+	
+	public float getCenterXPosn() {
+		return this.position.x + this.offset.x + this.dimensions.width/2f;
+	}
+	
+	public float getCenterYPosn() {
+		return this.position.y + this.offset.y + this.dimensions.height/2f;
+	}
+	
+	
 	
 	/**
 	 * The sprite's position
