@@ -128,6 +128,18 @@ public class Sprite extends Observable {
 			this.loopImage(duration);
 		}
 	}
+	
+	public void setImage(String name, boolean animated, boolean loop)
+	{
+		this.setImage(name);
+		if (animated)
+		{
+			if (loop)
+				this.loopImage(duration);
+			else
+				this.playImage(duration);
+		}
+	}
 
 	/**
 	 * Switch on loop playing
@@ -141,6 +153,23 @@ public class Sprite extends Observable {
 		if (imsLoader.numImages(imageName) > 1) {
 			player = null; // to encourage garbage collection of previous player
 			player = new ImagesPlayer(imageName, Game.getDeltaTime(), seqDuration, true, imsLoader);
+		} else {
+			System.out.println(imageName + " is not a sequence of images");
+		}
+	}
+	
+	/**
+	 * Animate through a spritesheet once
+	 * 
+	 * @param animPeriod
+	 *            - period length in ms (from the enclosing panel)
+	 * @param seqDuration
+	 *            - The total time for the loop to play the sequence
+	 */
+	public void playImage(float seqDuration) {
+		if (imsLoader.numImages(imageName) > 1) {
+			player = null; // to encourage garbage collection of previous player
+			player = new ImagesPlayer(imageName, Game.getDeltaTime(), seqDuration, false, imsLoader);
 		} else {
 			System.out.println(imageName + " is not a sequence of images");
 		}
@@ -260,6 +289,8 @@ public class Sprite extends Observable {
 		//set the rectangle's position only when requested
 		myRect.x = (int) (this.position.x + this.offset.x);
 		myRect.y = (int) (this.position.y + this.offset.y);
+		myRect.width = this.dimensions.width;
+		myRect.height = this.dimensions.height;
 		
 		return myRect;
 	}
