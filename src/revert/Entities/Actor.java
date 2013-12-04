@@ -1,13 +1,11 @@
 package revert.Entities;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
 
 import revert.MainScene.World;
-import revert.MainScene.notifications.ActorsAdded;
 import revert.MainScene.notifications.ActorsRemoved;
 import revert.util.BrickManager;
 
@@ -61,9 +59,6 @@ public abstract class Actor extends Sprite implements Observer{
 	protected boolean isHit;
 	protected boolean isAttacking;
 	
-	//timer for how long the actor is in a state of reacting to being hit
-	protected int hitTimer;
-	
 	//speed at which the sprite moves within the world
 	protected float moveRate;
 	
@@ -102,7 +97,7 @@ public abstract class Actor extends Sprite implements Observer{
 	protected float vertStep; 
 
 	// general timer used for mode switching/response
-	protected int timer;
+	protected float timer;
 
 	public Actor(World w, String name) {
 		super(0, 0, w.getWidth(), w.getHeight(), AssetsManager.Images, name);
@@ -439,7 +434,8 @@ public abstract class Actor extends Sprite implements Observer{
 	public void takeHit()
 	{
 		hp--;
-		this.isHit = true;
+		isHit = true;
+		timer = 2f;
 		stop();
 		setNextImage();
 	}
@@ -503,6 +499,24 @@ public abstract class Actor extends Sprite implements Observer{
 	
 	public void updateSprite()
 	{
+		if (isHit)
+		{
+			if (this.player != null) {
+				if (this.player.atSequenceEnd()) {
+					isHit = false;
+				}
+			}
+			else {
+				timer -= Game.getDeltaTime();
+				if (timer < 0) {
+					isHit = false;
+				}
+			}
+			
+			if (!isHit)
+				setNextImage();
+		}
+		
 		if (!isStill()) { // moving
 			if (!isJumping()) // if not jumping
 			{
