@@ -126,5 +126,10 @@ public class PassiveAI implements EnemyAi
 		// does not get aggressive
 		return stare;
 	}
+	@Override
+	public void hit() {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

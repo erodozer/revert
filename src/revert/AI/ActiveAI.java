@@ -9,7 +9,7 @@ import revert.Entities.Enemy;
 public class ActiveAI implements EnemyAi 
 {
 	
-	Enemy parent;									//agent
+	Enemy parent;								//agent
 	boolean agro;								//bool for agro
 	
 	float agroTimer;
@@ -66,7 +66,6 @@ public class ActiveAI implements EnemyAi
 	@Override
 	public void outOfView(Actor a) 
 	{
-		agro = false;
 		walk();
 	}
 
@@ -76,8 +75,6 @@ public class ActiveAI implements EnemyAi
 	@Override
 	public void aggress(Actor a) 
 	{
-		agro = true;
-		parent.addObserver(a);
 		inView(a);
 	}
 
@@ -167,4 +164,12 @@ public class ActiveAI implements EnemyAi
 					walkTimer -= delta;
 			}
 	}
+
+	@Override
+	public void hit() 
+	{
+		agro = true;
+	}
+	
+	
 }

@@ -66,4 +66,10 @@ public class NullAI implements EnemyAi{
 		return false;
 	}
 
+	@Override
+	public void hit() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

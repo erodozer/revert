@@ -185,4 +185,11 @@ public class AgressiveAI implements EnemyAi
 				walkTimer -= delta;
 		}
 	}
+
+	@Override
+	public void hit()
+	{
+		agro = true;
+		
+	}
 }
