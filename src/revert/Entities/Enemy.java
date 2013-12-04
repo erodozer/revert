@@ -6,27 +6,34 @@ import java.util.Observable;
 import com.kgp.core.Game;
 import com.kgp.util.Vector2;
 
+import revert.AI.ActiveAI;
+import revert.AI.AggressiveAI;
 import revert.AI.EnemyAi;
+import revert.AI.NullAI;
+import revert.AI.PassiveAI;
+import revert.Entities.Bullet.Mode;
 import revert.MainScene.World;
 
+/**
+ * Main enemy object that the player will have to fight during the
+ * course of the game.
+ * @author nhydock
+ *
+ */
 public class Enemy extends Actor {
-	
-	//enemy is chasing after an actor
-	protected Actor follow;
 
-	//timer for waiting until attacking again
-	protected int attackWait;
-	
-	//timer for waiting to exit aggro mode
-	protected int aggroTimer;
-	
+	//filename for animations
+	private String name;
+
 	protected EnemyAi ai;
-	
-	public Enemy(World w, Player player) {
+
+	private Mode type;
+
+	protected Enemy(World w, Player player, int type) {
 		super(w, "enemy", new ArrayList<Actor>());
-		
+
 		this.hp = 3;
-		
+
 		this.velocity.y = 2;
 		this.vertMoveMode = VertMovement.Falling;
 		maxVertTravel = 40;
@@ -34,22 +41,38 @@ public class Enemy extends Actor {
 		vertTravel = 0f;
 
 		this.actors.add(player);
+		this.actors.addAll(w.getEnemies());
 
+		this.type = Bullet.Mode.values()[type];
+
+		if (type == 0) {
+			ai = new PassiveAI(this);
+		} else if (type == 1) {
+			ai = new ActiveAI(this);
+		} else if (type == 2) {
+			ai = new AggressiveAI(this);
+		} else {
+			System.out.println("No enemy AI type corresponds to value: " + type + ".  Instantiating basic enemy");
+			ai = new NullAI();
+		}
+		
+		name = "enemy_" + type;
 	}
-	
-	protected void setAI(EnemyAi ai)
-	{
+
+	protected void setAI(EnemyAi ai) {
 		this.ai = ai;
 	}
 
 	@Override
 	protected void setNextImage() {
-		if (isJumping())
-			setImage("enemy_1", false);
+		if (isHit)
+			setImage(name + "_hit", true, false);
+		else if (isJumping())
+			setImage(name, false);
 		else if (!isStill())
-			setImage("enemy_1", true);
+			setImage(name, true);
 		else
-			setImage("enemy_1", false);
+			setImage(name, false);
 	}
 
 	/**
@@ -57,8 +80,8 @@ public class Enemy extends Actor {
 	 */
 	@Override
 	public void attack() {
-		//Do Nothing
-		//Override for different actions on queuing attacks
+		// Do Nothing
+		// Override for different actions on queuing attacks
 	}
 
 	/**
@@ -76,26 +99,25 @@ public class Enemy extends Actor {
 	protected void reactOnOutOfView(Actor a) {
 		ai.outOfView(a);
 	}
-	
+
 	/**
 	 * @return the area range of contact for being hit by a bullet
 	 */
-	protected double getCollissionRange()
-	{
+	protected double getCollissionRange() {
 		return 10;
 	}
 
 	/**
 	 * Check for collision with the entity
-	 * @param b - bullet object fired by the player
+	 * 
+	 * @param b
+	 *            - bullet object fired by the player
 	 * @return true if bullet has hit the enemy
 	 */
 	public boolean hit(Bullet b) {
-		if (this.getMyRectangle().contains(b.getPosn()))
-		{
+		if (this.getMyRectangle().contains(b.getPosn())) {
 			System.out.println("hit");
-			if (b.getType() == this.getType())
-			{
+			if (b.getType() == this.getType()) {
 				takeHit();
 				this.hitTimer = 200;
 				return true;
@@ -103,29 +125,28 @@ public class Enemy extends Actor {
 		}
 		return false;
 	}
-	
-	public void takeHit()
-	{
+
+	public void takeHit() {
 		super.takeHit();
 		ai.hit();
 	}
-	
+
 	/**
 	 * @return Enemy's identifying type
 	 */
-	public Bullet.Mode getType()
-	{
-		return Bullet.Mode.Gold;
+	public Bullet.Mode getType() {
+		return type;
 	}
-	
+
 	/**
 	 * Check the actor postion wrt enemy
-	 * @param a - any actor on field
+	 * 
+	 * @param a
+	 *            - any actor on field
 	 * @return true if actor is to the right of enemy
 	 */
-	public boolean isRightOf(Actor a)
-	{
-		if(this.getXPosn() - a.getXPosn() < 0)
+	public boolean isRightOf(Actor a) {
+		if (this.getXPosn() - a.getXPosn() < 0)
 			return true;
 		else
 			return false;
@@ -175,29 +196,29 @@ public class Enemy extends Actor {
 	public EnemyAi getAI() {
 		return ai;
 	}
-	
+
 	@Override
-	public void updateSprite()
-	{
+	public void updateSprite() {
 		super.updateSprite();
 		ai.update(Game.getDeltaTime());
 	}
-	
+
 	/**
 	 * Updates on notifications from the world that the actor is observing
-	 * @param o - object that sent the notification
-	 * @param args - type of notification
+	 * 
+	 * @param o
+	 *            - object that sent the notification
+	 * @param args
+	 *            - type of notification
 	 */
 	@Override
-	public void update(Observable o, Object args)
-	{
+	public void update(Observable o, Object args) {
 		super.update(o, args);
-		
-		if (args instanceof Actor)
-		{
-			//only call ai updates against actors that are seen by this one
-			if (visibility.get(args)){
-				ai.update((Actor)args);
+
+		if (args instanceof Actor) {
+			// only call ai updates against actors that are seen by this one
+			if (visibility.get(args)) {
+				ai.update((Actor) args);
 			}
 		}
 	}

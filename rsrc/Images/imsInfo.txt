@@ -25,3 +25,5 @@ s ammo.png 4
 
 //enemies
 s enemy_1.png 7
+s enemy_2.png 7
+s enemy_3.png 7
