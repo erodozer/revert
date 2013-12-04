@@ -105,7 +105,7 @@ public class World extends Observable implements Observer{
 		}
 		
 		/**
-		 * TODO Update Visibility of Actors
+		 * Update Visibility of Actors
 		 */
 		for (Actor a : this.allActors)
 		{
@@ -125,11 +125,9 @@ public class World extends Observable implements Observer{
 			boolean dead = false;
 			for (Enemy e : enemies)
 			{
-				if (b.getPosn().distance(e.getPosn()) < 10)
+				if (e.hit(b))
 				{
-					e.hit(b);
 					score += HIT_BONUS;
-					bullets.remove(i);
 					dead = true;
 					break;
 				}
@@ -138,7 +136,6 @@ public class World extends Observable implements Observer{
 			//remove bullets that hit bricks
 			if (!dead && this.level.brickExists(this.level.worldToMap(b.getXPosn(), b.getYPosn())))
 			{
-				bullets.remove(i);
 				dead = true;
 			}
 			
@@ -147,12 +144,15 @@ public class World extends Observable implements Observer{
 			   (b.getXPosn() < player.getPosn().x - player.getPWidth()/2) ||
 			   (b.getYPosn() > player.getPosn().y + player.getPHeight()/2) ||
 			   (b.getYPosn() < player.getPosn().y - player.getPHeight()/2))){
-				bullets.remove(i);
 				dead = true;
 			}
 			
-			if (!dead)
+			if (dead) {
+				bullets.remove(i);
+			}
+			else {
 				i++;
+			}
 		}
 		lock = false;
 		
@@ -192,7 +192,7 @@ public class World extends Observable implements Observer{
 	 */
 	public void startWave()
 	{
-		this.enemies = genEnemies(enemyFactory.createWave(1));
+		this.enemies = genEnemies(enemyFactory.createWave(5));
 		
 		this.allActors.clear();
 		this.allActors.addAll(enemies);
