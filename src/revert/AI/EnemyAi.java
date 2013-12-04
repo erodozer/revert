@@ -67,4 +67,9 @@ public interface EnemyAi {
 	 * @return
 	 */
 	public boolean isAgro();
+	
+	/**
+	 * Perform basic actions upon being hit
+	 */
+	public void hit();
 }

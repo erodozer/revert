@@ -122,13 +122,18 @@ public class Enemy extends Actor {
 			System.out.println("hit");
 			if (b.getType() == this.getType())
 			{
-				this.hp--;
-				this.isHit = true;
+				takeHit();
 				this.hitTimer = 200;
 				return true;
 			}
 		}
 		return false;
+	}
+	
+	public void takeHit()
+	{
+		super.takeHit();
+		ai.hit();
 	}
 	
 	/**

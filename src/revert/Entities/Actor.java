@@ -474,6 +474,7 @@ public abstract class Actor extends Sprite implements Observer{
 	public void takeHit()
 	{
 		hp--;
+		this.isHit = true;
 	}
 	
 	abstract public boolean inRange(Actor a);
