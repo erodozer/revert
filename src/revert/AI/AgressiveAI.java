@@ -1,29 +1,31 @@
 package revert.AI;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.kgp.util.Vector2;
 
 import revert.Entities.Actor;
 import revert.Entities.Enemy;
-import revert.Entities.Actor.Direction;
 import revert.Entities.Player;
 
 public class AgressiveAI implements EnemyAi 
 {
-	boolean agro;
 	Enemy parent;
 	
-	float agroTimer;
-	float attackTimer;
-	float walkTimer;
+	float agroTimer;	//phase out of agro when once agro and now there are no more aggressors
+	float attackTimer;	//staller to prevent constant attacks
+	float walkTimer;	//staller to create a methodical walking pattern
 	
 	float MOVE_TIME;
 	
-	int aggressionCount;
+	//keep track of all actors that are causing this AI to be aggressive
+	Set<Actor> aggressors;
 	
 	public AgressiveAI(Enemy e)
 	{
 		parent = e;
-		agro = false;
+		aggressors = new HashSet<Actor>();
 	}
 	
 	/**
@@ -49,16 +51,13 @@ public class AgressiveAI implements EnemyAi
 	{
 		if (a instanceof Player)
 		{
+			//increase agro dependence if already agro
+			if (isAgro())
+				aggressors.add(a);
 			//go back to agro if the player steps within view 
 			// while it's waiting to phase out of agro
-			if (!agro && agroTimer > 0f)
-			{
-				agro = true;
-			}
-			
-			//increase agro count dependence if already agro
-			if (agro)
-				aggressionCount++;
+			else if (agroTimer > 0f)
+				aggressors.add(a);
 		}
 	}
 
@@ -68,16 +67,14 @@ public class AgressiveAI implements EnemyAi
 	@Override
 	public void outOfView(Actor a) 
 	{
-		if (a instanceof Player)
+		//remove actor from list of aggressors if it is one
+		aggressors.remove(a);
+		
+		//start transition phase to out of agro once all players have
+		// exited the view range of the enemy
+		if (!isAgro())
 		{
-			aggressionCount--;
-			if (aggressionCount <= 0)
-			{
-				//start transition phase to out of agro once all players have
-				// exited the view range of the enemy
-				agro = false;
-				agroTimer = 3.0f;
-			}
+			agroTimer = 3.0f;
 		}
 	}
 
@@ -105,7 +102,7 @@ public class AgressiveAI implements EnemyAi
 	 */
 	public boolean isAgro()
 	{
-		return agro;
+		return aggressors.size() > 0 && agroTimer > 0;
 	}
 
 	/**
@@ -162,7 +159,7 @@ public class AgressiveAI implements EnemyAi
 	@Override
 	public void hit()
 	{
-		agro = true;
+		
 	}
 
 	/**
@@ -171,7 +168,7 @@ public class AgressiveAI implements EnemyAi
 	public void update(float delta)
 	{
 		//as long as the ai is truly aggressive, try attacking
-		if (agro) {
+		if (isAgro()) {
 			//decrease attack timer
 			if (attackTimer > 0)
 				attackTimer -= delta;
@@ -179,7 +176,7 @@ public class AgressiveAI implements EnemyAi
 		else 
 		{
 			//wait for agro to go away once the timer is done
-			if (!agro && agroTimer > 0)
+			if (!isAgro() && agroTimer > 0)
 				agroTimer -= delta;
 			
 			//decrease walk wait timer when not pure agro
@@ -194,15 +191,21 @@ public class AgressiveAI implements EnemyAi
 	public void update(Actor a) {
 		if (a instanceof Player) {
 			//as long as it's in an aggressive phase, try aggressing
-			if (agro)
+			if (isAgro())
+			{
 				aggress(a);
-			else {
-				//if the player is in the aggression range while visible, then
-				// the ai will become agro
-				agro = a.getPosn().distance(parent.getPosn()) < this.aggressRange();
 				
-				if (agro)
-					aggressionCount++;
+				//make sure this player is an aggressor even if they were just in the
+				// visible range before the enemy became agro
+				aggressors.add(a);
+			}
+			else {
+				//if the player is in the aggression range while visible, 
+				// and the enemy was not previously agro, then make them
+				if (a.getPosn().distance(parent.getPosn()) < this.aggressRange())
+				{
+					aggressors.add(a);
+				}
 			}	
 		}
 
@@ -210,8 +213,9 @@ public class AgressiveAI implements EnemyAi
 		{
 			Enemy e = (Enemy)a;
 			
-			//go agro if nearby ally is agro
-			agro = agro || e.getAI().isAgro();
+			//if another visible enemy is agro, then this enemy is agro
+			if (e.getAI().isAgro())
+				aggressors.add(e);
 		}
 	}
 }
