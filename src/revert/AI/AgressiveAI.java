@@ -84,12 +84,11 @@ public class AgressiveAI implements EnemyAi
 	@Override
 	public void aggress(Actor a) 
 	{
-		float dist = (float)a.getPosn().distance(parent.getPosn());
-		
 		//player within range of the enemy
 		//attack this enemy if the timer is up
 		if (attackTimer <= 0)
 		{
+			float dist = (float)a.getPosn().distance(parent.getPosn());
 			if (dist < this.attackRange()) {
 				attack(a);
 				attackTimer = attackRate();
@@ -178,7 +177,7 @@ public class AgressiveAI implements EnemyAi
 		else 
 		{
 			//wait for agro to go away once the timer is done
-			if (!isAgro() && agroTimer > 0)
+			if (agroTimer > 0)
 				agroTimer -= delta;
 			
 			//decrease walk wait timer when not pure agro
