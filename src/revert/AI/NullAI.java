@@ -40,8 +40,8 @@ public class NullAI implements EnemyAi{
 	}
 
 	@Override
-	public int attackRate() {
-		return -1;
+	public float attackRate() {
+		return -1f;
 	}
 
 	@Override
@@ -50,26 +50,27 @@ public class NullAI implements EnemyAi{
 	}
 
 	@Override
-	public void update(float delta) {
-		// DO NOTHING
-	}
-
-	@Override
 	public void walk() {
-		// TODO Auto-generated method stub
-		
+		// Do nothing
 	}
 
 	@Override
 	public boolean isAgro() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public void hit() {
-		// TODO Auto-generated method stub
-		
+		//Do nothing
 	}
 
+	@Override
+	public void update(Actor a) {
+		//Do nothing
+	}
+
+	@Override
+	public void update(float delta) {
+		// DO NOTHING
+	}
 }

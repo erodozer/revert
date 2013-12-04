@@ -40,9 +40,9 @@ public interface EnemyAi {
 	
 	/**
 	 * Get the speed at which the enemy will issue attack commands when aggressing
-	 * @return
+	 * @return rate in seconds
 	 */
-	public int attackRate();
+	public float attackRate();
 	
 	/**
 	 * Get the distance at which enemy attacks may hit
@@ -57,6 +57,8 @@ public interface EnemyAi {
 	 */
 	public void update(float delta);
 
+	public void update(Actor a);
+	
 	/**
 	 * Perform basic movement when non aggressive
 	 */
