@@ -26,10 +26,6 @@ import com.kgp.util.Vector2;
  *  @author Andrew Davison, April 2005, ad@fivedots.coe.psu.ac.th
  */
 public class Sprite extends Observable {
-	// default step sizes (how far to move in each update)
-	private static final int XSTEP = 5;
-	private static final int YSTEP = 5;
-
 	// default dimensions when there is no image
 	private static final int SIZE = 12;
 

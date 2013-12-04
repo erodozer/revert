@@ -73,15 +73,7 @@ public class BricksManager extends BrickManager {
 
 		loadBricksFile(fnm);
 
-		for (int i = 0; i < bricks.length; i++) {
-			for (int x = 0; x < bricks[i].length; x++) {
-				if (bricks[i][x] > 0)
-					System.out.print(bricks[i][x]);
-				else
-					System.out.print(" ");
-			}
-			System.out.println();
-		}
+		System.out.println(this);
 
 		// generate random spawn points because we don't have spawn locations
 		// defined in classic style maps
@@ -279,4 +271,20 @@ public class BricksManager extends BrickManager {
 		}
 	}
 
+	public String toString()
+	{
+		String output = "";
+		
+		for (int i = 0; i < bricks.length; i++) {
+			for (int x = 0; x < bricks[i].length; x++) {
+				if (bricks[i][x] > 0)
+					output += bricks[i][x];
+				else
+					output += " ";
+			}
+			output += "\n";
+		}
+		return output;
+	}
+	
 }

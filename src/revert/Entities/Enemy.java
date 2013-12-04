@@ -1,6 +1,5 @@
 package revert.Entities;
 
-import java.util.ArrayList;
 import java.util.Observable;
 
 import com.kgp.core.Game;

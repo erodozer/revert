@@ -201,7 +201,7 @@ public abstract class BrickManager {
 		Vector2 map = worldToMap(xWorld, yWorld + vertStep);
 		// System.out.println(map.y);
 		if (this.brickExists(map)) {
-			System.out.println(map);
+			//System.out.println(map);
 			Vector2 world = mapToWorld(map);
 			int distance = (int) (yWorld - world.y);
 			return distance;
