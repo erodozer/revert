@@ -8,8 +8,9 @@ o help.png
 // player's images
 o royer01.png
 o royer_jmp.png
-o royer_atk.png
+s royer_atk.png 6
 s royer_walking.png 8
+s royer_hit.png 8
 o crosshair.png
 o bullet.png
 

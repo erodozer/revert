@@ -70,14 +70,9 @@ public class Controller extends GameController {
 				note = new PlayerMovementNotification(Movement.Right);
 				setChanged();
 			}
-			else if (keyCode == KeyEvent.VK_UP || keyCode == KeyEvent.VK_W )
+			else if (keyCode == KeyEvent.VK_UP || keyCode == KeyEvent.VK_W || keyCode == KeyEvent.VK_SPACE)
 			{
 				note = new PlayerMovementNotification(true);
-				setChanged();
-			}
-			else if ((keyCode == KeyEvent.VK_DOWN || keyCode == KeyEvent.VK_S ) && (!this.player.isJumping()))
-			{
-				note = new PlayerMovementNotification(Movement.Still);
 				setChanged();
 			}
 			
@@ -88,7 +83,7 @@ public class Controller extends GameController {
 	public void keyReleased(KeyEvent e) {
 		int keyCode = e.getKeyCode();
 		
-		PlayerModeNotification note = null;
+		Object note = null;
 		
 		/*
 		 * Set attack modes
@@ -108,6 +103,12 @@ public class Controller extends GameController {
 		else if (keyCode == KeyEvent.VK_3) {
 			note = new PlayerModeNotification(2);
 			setChanged();
+		}
+		else if (keyCode == KeyEvent.VK_LEFT || keyCode == KeyEvent.VK_A || keyCode == KeyEvent.VK_RIGHT || keyCode == KeyEvent.VK_D  )
+		{
+			note = new PlayerMovementNotification(Movement.Still);
+			setChanged();
+			System.out.println("gah");
 		}
 
 		this.notifyObservers(note);

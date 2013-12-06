@@ -135,9 +135,11 @@ public abstract class Actor extends Sprite implements Observer{
 	 */
 	final public void moveLeft()
 	{
-		this.velocity.x = -moveRate;
-		this.moving = Movement.Left;
-		setNextImage();
+		if (moving != Movement.Left) {
+			velocity.x = -moveRate;
+			moving = Movement.Left;
+			setNextImage();
+		}
 	}
 	
 	/**
@@ -145,9 +147,11 @@ public abstract class Actor extends Sprite implements Observer{
 	 */
 	final public void moveRight()
 	{
-		this.velocity.x = moveRate;
-		this.moving = Movement.Right;
-		setNextImage();
+		if (moving != Movement.Right) {
+			velocity.x = moveRate;
+			moving = Movement.Right;
+			setNextImage();
+		}
 	}
 	
 	/**
