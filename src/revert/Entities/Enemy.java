@@ -34,8 +34,8 @@ public class Enemy extends Actor {
 		this.hp = 3;
 
 		this.moveRate = (int) (brickMan.getBrickWidth() * 4);
-		maxVertTravel = 40;
-		vertStep = maxVertTravel * 2;
+		maxVertTravel = 15;
+		vertStep = maxVertTravel*4;
 		vertTravel = 0f;
 
 		

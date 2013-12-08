@@ -52,7 +52,7 @@ public class Player extends Actor {
 
 		maxVertTravel = 150;
 		// should be able to jump his max height in .5 sec
-		vertStep = maxVertTravel * 2;
+		vertStep = maxVertTravel/2;
 		vertTravel = 0f;
 
 		this.hp = MAXHP;
@@ -70,6 +70,11 @@ public class Player extends Actor {
 		this.stop();
 		this.isAttacking = false;
 
+		updateStatus();
+	}
+	
+	public void takeHit() {
+		super.takeHit();
 		updateStatus();
 	}
 
