@@ -82,7 +82,7 @@ public class JsonBricksManager extends BrickManager {
 			t.numRows = height;
 			for (int row = 0, i = 0; row < height; row++)
 				for (int col = 0; col < width; col++, i++)
-					t.collisionMask[col][row] = layerData[i] == 2;
+					t.collisionMask[col][row] = layerData[i] != 1;
 			
 			//second layer is an object of collision points
 			JsonObject pointLayer = layers.get(1).getAsJsonObject();
