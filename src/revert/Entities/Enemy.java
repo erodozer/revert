@@ -141,22 +141,22 @@ public class Enemy extends Actor {
 			Vector2 enemyPosn = brickMan.worldToMap(this.getRealXPosn(), this.getRealYPosn());
 			Vector2 actorPosn = brickMan.worldToMap(a.getRealXPosn(), a.getRealYPosn());
 			Vector2[][] nextBrick;
+			Vector2 loc = enemyPosn.clone();
 			
 			if(enemyPosn.y == actorPosn.y)
 			{
 				if(this.getDirection() == Direction.Right)
 				{
-					
 					//Look out as far as the agent's view Range
 					//Um...Only go so many bricks?
 					//Not wanting to count the whole thing
-					for(float i = 0; i < ai.viewRange()/brickMan.getBrickWidth(); i+=brickMan.getBrickWidth())
+					for(float i = 0; i < ai.viewRange()/brickMan.getBrickWidth(); i++, loc.x++)
 					{
 						//Set up the means that it adds bricks to check vertically
 						//I've changed this so many time  ~o.o~
 						//Only going to trying doing one line of bricks at a time for now
 						//Needs to work on the triangular fill
-						if(brickMan.brickExists(new Vector2(i,enemyPosn.y)))
+						if(brickMan.brickExists(loc))
 							return false;
 						
 					}
@@ -164,18 +164,18 @@ public class Enemy extends Actor {
 				else
 				{
 					//Well if we're not facing Right, we're facing left
-					for(float i = ai.viewRange()/brickMan.getBrickWidth(); i > 0; i-=brickMan.getBrickWidth())
+					for(float i = ai.viewRange()/brickMan.getBrickWidth(); i > 0; i--, loc.x--)
 					{
-						if(brickMan.brickExists(new Vector2(i,enemyPosn.y)))
+						if(brickMan.brickExists(loc))
 							return false;
 					}
 				}
 			}
 			else
 			{
-				for(float i = 0; i > ai.viewRange()/brickMan.getBrickHeight(); i-=brickMan.getBrickHeight())
+				for(float i = 0; i > ai.viewRange()/brickMan.getBrickHeight(); i--, loc.y--)
 				{
-					if(brickMan.brickExists(new Vector2(enemyPosn.x,i)))
+					if(brickMan.brickExists(loc))
 						return false;
 				}
 			}
@@ -183,7 +183,6 @@ public class Enemy extends Actor {
 		}
 		else
 			return false;
-		//*/
 	}
 
 	public EnemyAi getAI() {
