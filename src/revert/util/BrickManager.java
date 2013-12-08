@@ -213,33 +213,26 @@ public abstract class BrickManager {
 	 * @return boolean indicating if a brick is located within this map
 	 */
 	public boolean brickExists(Vector2 map) {
-		//ensure values being check are within the map
-		Vector2 m = clampToMap(map);
+		//map does not loop vertically, so we clamp to failure
+		if (map.y < 0)
+			return false;
 
-		return this.collisionMask[(int)m.x][(int)m.y];
+		return this.collisionMask[clampToMap((int)map.x)][(int)map.y];
 	}
 	
 	/**
-	 * Clamps a vector's values to be within the tile map's size
+	 * Clamps a map value to be within the tile map's size
 	 * @param map
-	 * @return a new Vector holding the subjected vector's clamped values
+	 * @return x clamped within the map
 	 */
-	public Vector2 clampToMap(Vector2 m) {
-		Vector2 map = m.clone();
-		float x = map.x;
-		float y = map.y;
+	public int clampToMap(int x) {
+		
 		if (x < 0)
 			x += this.getWidth();
-		if (y < 0)
-			y += this.getHeight();
 		if (x >= this.getWidth())
 			x -= this.getWidth();
-		if (y >= this.getHeight())
-			y -= this.getHeight();
-		map.x = (int) x;
-		map.y = (int) y;
 		
-		return map;
+		return x;
 	}
 
 	/**
