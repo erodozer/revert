@@ -88,6 +88,7 @@ public class AgressiveAI implements EnemyAi
 		//player within range of the enemy
 		//attack this enemy if the timer is up
 		float dist = (float)a.getPosn().distance(parent.getPosn());
+		float y = parent.getPosn().to(a.getPosn()).normalize().y;
 		
 		if (dist < this.attackRange()) {
 			if (attackTimer <= 0)
@@ -107,6 +108,9 @@ public class AgressiveAI implements EnemyAi
 			{
 				parent.moveRight();
 			}
+			
+			if (y < 0)
+				parent.jump();
 		}
 	}
 	
@@ -199,8 +203,11 @@ public class AgressiveAI implements EnemyAi
 			}
 			
 			//decrease walk wait timer when not pure agro
-			if (walkTimer > 0) 
-				walkTimer -= delta;
+			if (walkTimer > 0)
+			{
+				if (!parent.isJumping())
+					walkTimer -= delta;
+			}
 			else
 				walk();
 		}

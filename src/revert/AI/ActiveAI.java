@@ -176,8 +176,11 @@ public class ActiveAI implements EnemyAi
 				agroTimer -= delta;
 			
 			//decrease walk wait timer when not pure agro
-			if (walkTimer > 0) 
-				walkTimer -= delta;
+			if (walkTimer > 0)
+			{
+				if (!parent.isJumping())
+					walkTimer -= delta;
+			}
 			else
 				walk();
 		}
