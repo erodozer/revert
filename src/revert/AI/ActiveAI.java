@@ -3,8 +3,6 @@ package revert.AI;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.kgp.util.Vector2;
-
 import revert.Entities.Actor;
 import revert.Entities.Actor.Direction;
 import revert.Entities.Enemy;
@@ -18,7 +16,7 @@ public class ActiveAI implements EnemyAi
 	float attackTimer;
 	float walkTimer;
 	
-	float MOVE_TIME;
+	final float MOVE_TIME = 3f;
 	
 	//keep track of all actors that are causing this AI to be aggressive
 	Set<Actor> aggressors;
@@ -77,12 +75,25 @@ public class ActiveAI implements EnemyAi
 	{
 		//player within range of the enemy
 		//attack this enemy if the timer is up
-		if (attackTimer <= 0)
-		{
-			float dist = (float)a.getPosn().distance(parent.getPosn());
-			if (dist < this.attackRange()) {
+		float dist = (float)a.getPosn().distance(parent.getPosn());
+		
+		if (dist < this.attackRange()) {
+			if (attackTimer <= 0)
+			{
 				attack(a);
 				attackTimer = attackRate();
+			}
+		}
+		//make the actor chase the aggressor
+		else {
+			parent.lookAt(a.getPosn());
+			if (parent.getDirection() == Direction.Left)
+			{
+				parent.moveLeft();
+			}
+			else
+			{
+				parent.moveRight();
 			}
 		}
 	}
@@ -105,15 +116,16 @@ public class ActiveAI implements EnemyAi
 		int i = (int)Math.random()*10;
 		if( i <= 5)
 		{
-			int j = (int)Math.random();
-			if(j == 1)
+			//System.out.println(this + " feels the burn!");
+			double j = Math.random();
+			if(j > .5)
 			{
-				parent.lookAt(Vector2.LEFT);
+				parent.faceLeft();
 				parent.moveLeft();
 			}
 			else
 			{
-				parent.lookAt(Vector2.RIGHT);
+				parent.faceRight();
 				parent.moveRight();
 			}
 			walkTimer = MOVE_TIME;
@@ -127,7 +139,7 @@ public class ActiveAI implements EnemyAi
 
 	@Override
 	public float viewRange() {
-		return 80f;
+		return 150f;
 	}
 
 	/**
@@ -135,7 +147,7 @@ public class ActiveAI implements EnemyAi
 	 */
 	@Override
 	public float aggressRange() {
-		return 40f;
+		return 90f;
 	}
 
 	@Override
@@ -145,7 +157,7 @@ public class ActiveAI implements EnemyAi
 
 	@Override
 	public float attackRange() {
-		return 20f;
+		return 50f;
 	}
 
 	@Override
@@ -203,10 +215,15 @@ public class ActiveAI implements EnemyAi
 		{
 			Enemy e = (Enemy)a;
 			
-			//if another visible enemy is agro, then this enemy is agro
+			//if another visible enemy is agro, then this enemy is agro at the same targets
 			if (e.getAI().isAgro())
-				aggressors.add(e);
+				aggressors.addAll(e.getAI().getAggressors());
 		}
+	}
+
+	@Override
+	public Set<Actor> getAggressors() {
+		return aggressors;
 	}
 	
 	

@@ -1,5 +1,8 @@
 package revert.AI;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import revert.Entities.Actor;
 
 /**
@@ -8,6 +11,8 @@ import revert.Entities.Actor;
  */
 public class NullAI implements EnemyAi{
 
+	Set<Actor> aggressors = new HashSet<Actor>();
+	
 	@Override
 	public void attack(Actor a) {
 		// Do Nothing
@@ -72,5 +77,10 @@ public class NullAI implements EnemyAi{
 	@Override
 	public void update(float delta) {
 		// DO NOTHING
+	}
+
+	@Override
+	public Set<Actor> getAggressors() {
+		return aggressors;
 	}
 }

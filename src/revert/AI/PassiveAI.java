@@ -3,7 +3,7 @@ package revert.AI;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.kgp.util.Vector2;
+import com.kgp.core.Game;
 
 import revert.Entities.Actor;
 import revert.Entities.Enemy;
@@ -14,9 +14,10 @@ public class PassiveAI implements EnemyAi
 	Enemy parent;
 	
 	//max movement time
-	private final float MOVE_TIME = (float)Math.pow(3,9);
+	private final float MOVE_TIME = 5f;
 
 	float walkTimer;
+	float attackTimer;
 	
 	Set<Actor> aggressors;
 	
@@ -64,12 +65,17 @@ public class PassiveAI implements EnemyAi
 	@Override
 	public void aggress(Actor a) 
 	{
-		attack(a);
+		if (attackTimer < 0)
+		{
+			attack(a);
+			attackTimer = this.attackRate();
+		}
+		
 	}
 	
 	@Override
 	public float viewRange() {
-		return 30;
+		return 200f;
 	}
 	
 	/**
@@ -85,7 +91,7 @@ public class PassiveAI implements EnemyAi
 	 */
 	@Override
 	public float attackRate() {
-		return -1;
+		return 3f;
 	}
 	
 	@Override
@@ -116,15 +122,15 @@ public class PassiveAI implements EnemyAi
 		int i = (int)Math.random()*10;
 		if( i <= 2)
 		{
-			int j = (int)Math.random();
-			if(j == 1)
+			double j = (int)Math.random();
+			if(j > .5)
 			{
-				parent.lookAt(Vector2.LEFT);
+				parent.faceLeft();
 				parent.moveLeft();
 			}
 			else
 			{
-				parent.lookAt(Vector2.RIGHT);
+				parent.faceRight();
 				parent.moveRight();
 			}
 			walkTimer = MOVE_TIME;
@@ -150,8 +156,16 @@ public class PassiveAI implements EnemyAi
 	public void update(Actor a) {
 		// stare at the player when he's visible to the passive AI
 		if (isAgro())
+		{
 			if (a instanceof Player)
 				aggress(a);
+			
+			attackTimer -= Game.getDeltaTime();
+		}
+	}
+	@Override
+	public Set<Actor> getAggressors() {
+		return aggressors;
 	}
 
 }

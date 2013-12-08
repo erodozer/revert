@@ -8,6 +8,7 @@ import com.kgp.util.Vector2;
 import revert.Entities.Actor;
 import revert.Entities.Enemy;
 import revert.Entities.Player;
+import revert.Entities.Actor.Direction;
 
 public class AgressiveAI implements EnemyAi 
 {
@@ -17,7 +18,7 @@ public class AgressiveAI implements EnemyAi
 	float attackTimer;	//staller to prevent constant attacks
 	float walkTimer;	//staller to create a methodical walking pattern
 	
-	float MOVE_TIME;
+	final float MOVE_TIME = 2f;
 	
 	//keep track of all actors that are causing this AI to be aggressive
 	Set<Actor> aggressors;
@@ -86,12 +87,25 @@ public class AgressiveAI implements EnemyAi
 	{
 		//player within range of the enemy
 		//attack this enemy if the timer is up
-		if (attackTimer <= 0)
-		{
-			float dist = (float)a.getPosn().distance(parent.getPosn());
-			if (dist < this.attackRange()) {
+		float dist = (float)a.getPosn().distance(parent.getPosn());
+		
+		if (dist < this.attackRange()) {
+			if (attackTimer <= 0)
+			{
 				attack(a);
 				attackTimer = attackRate();
+			}
+		}
+		//make the actor chase the aggressor
+		else {
+			parent.lookAt(a.getPosn());
+			if (parent.getDirection() == Direction.Left)
+			{
+				parent.moveLeft();
+			}
+			else
+			{
+				parent.moveRight();
 			}
 		}
 	}
@@ -101,7 +115,7 @@ public class AgressiveAI implements EnemyAi
 	 */
 	public boolean isAgro()
 	{
-		return aggressors.size() > 0 && agroTimer > 0;
+		return (aggressors.size() > 0) || (aggressors.size() == 0 && agroTimer > 0);
 	}
 
 	/**
@@ -112,15 +126,15 @@ public class AgressiveAI implements EnemyAi
 		int i = (int)Math.random()*10;
 		if( i <= 8)
 		{
-			int j = (int)Math.random();
-			if(j == 1)
+			double j = Math.random();
+			if(j > .5)
 			{
-				parent.lookAt(Vector2.LEFT);
+				parent.faceLeft();
 				parent.moveLeft();
 			}
 			else
 			{
-				parent.lookAt(Vector2.RIGHT);
+				parent.faceRight();
 				parent.moveRight();
 			}
 			walkTimer = MOVE_TIME;
@@ -134,7 +148,7 @@ public class AgressiveAI implements EnemyAi
 
 	@Override
 	public float viewRange() {
-		return 70;
+		return 150f;
 	}
 
 	/**
@@ -142,7 +156,7 @@ public class AgressiveAI implements EnemyAi
 	 */
 	@Override
 	public float aggressRange() {
-		return 70;
+		return 150f;
 	}
 
 	@Override
@@ -152,7 +166,7 @@ public class AgressiveAI implements EnemyAi
 
 	@Override
 	public float attackRange() {
-		return 30;
+		return 50f;
 	}
 
 	@Override
@@ -177,8 +191,12 @@ public class AgressiveAI implements EnemyAi
 		else 
 		{
 			//wait for agro to go away once the timer is done
-			if (agroTimer > 0)
+			if (agroTimer > 0){
 				agroTimer -= delta;
+				//remove all aggressors when no longer agro
+				if (agroTimer <= 0)
+					aggressors.clear();
+			}
 			
 			//decrease walk wait timer when not pure agro
 			if (walkTimer > 0) 
@@ -216,8 +234,13 @@ public class AgressiveAI implements EnemyAi
 			
 			//if another visible enemy is agro, then this enemy is agro
 			if (e.getAI().isAgro())
-				aggressors.add(e);
+				aggressors.addAll(e.getAI().getAggressors());
 		}
+	}
+
+	@Override
+	public Set<Actor> getAggressors() {
+		return aggressors;
 	}
 
 }

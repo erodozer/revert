@@ -1,5 +1,7 @@
 package revert.AI;
 
+import java.util.Set;
+
 import revert.Entities.Actor;
 
 public interface EnemyAi {
@@ -75,5 +77,5 @@ public interface EnemyAi {
 	 */
 	public void hit();
 	
-	
+	public Set<Actor> getAggressors();
 }
