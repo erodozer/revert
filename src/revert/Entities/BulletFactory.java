@@ -19,13 +19,12 @@ public class BulletFactory {
 	{
 		Bullet b = new Bullet(world, parent.getMode());
 		Vector2 v = new Vector2(parent.getCenterXPosn(), parent.getCenterYPosn());
-		v.add(parent.getAim());
 		
 		b.setPosition(v.x, v.y);
 		
 		v = parent.getAim().clone();
 		v.normalize();
-		v.mult(.5f);
+		v.mult(10f);
 		b.setVelocity(v.x, v.y);
 		
 		b.setOrientation(v.angle());
