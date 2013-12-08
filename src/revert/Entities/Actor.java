@@ -135,7 +135,7 @@ public abstract class Actor extends Sprite implements Observer{
 	 */
 	final public void moveLeft()
 	{
-		if (moving != Movement.Left && vertMoveMode == VertMovement.Grounded) {
+		if (moving != Movement.Left) {
 			velocity.x = -moveRate;
 			moving = Movement.Left;
 			setNextImage();
@@ -147,7 +147,7 @@ public abstract class Actor extends Sprite implements Observer{
 	 */
 	final public void moveRight()
 	{
-		if (moving != Movement.Right && vertMoveMode == VertMovement.Grounded) {
+		if (moving != Movement.Right) {
 			velocity.x = moveRate;
 			moving = Movement.Right;
 			setNextImage();
