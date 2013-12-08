@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.awt.image.RescaleOp;
 import java.util.Observable;
 
 import com.kgp.core.Game;
@@ -77,6 +78,8 @@ public class Sprite extends Observable {
 	
 	protected float duration;
 	
+	protected FlashOp flash;
+	
 	public Sprite(float x, float y, int w, int h, ImagesLoader imsLd, String name) {
 		this.position = new Vector2();
 		this.velocity = new Vector2();
@@ -85,7 +88,7 @@ public class Sprite extends Observable {
 		this.pDimensions = new Dimension(w, h);
 
 		this.imsLoader = imsLd;
-		
+		this.flash = new FlashOp(new float[]{1.0f, 1.0f, 1.0f, 1.0f});
 		// the sprite's default image is 'name'
 		setImage(name);
 		setPosition(x, y);
@@ -233,8 +236,6 @@ public class Sprite extends Observable {
 		return this.position.y + this.offset.y + this.dimensions.height/2f;
 	}
 	
-	
-	
 	/**
 	 * The sprite's position
 	 */
@@ -318,6 +319,11 @@ public class Sprite extends Observable {
 			trans.translate(this.getWidth(), 0);
 			trans.scale(-1.0, 1.0);
 		}
+		
+		//reset flash
+		for (int i = 0; i < flash.color.length; i++)
+			if (flash.color[i] < 1.0f) 
+				flash.color[i] = Math.min(flash.color[i] + Game.getDeltaTime(), 1.0f);
 	}
 
 	/**
@@ -333,9 +339,11 @@ public class Sprite extends Observable {
 				g.setColor(Color.black);
 			} 
 			else {
-				if (player != null)
+				if (player != null) {
 					image = player.getCurrentImage();
-				g.drawImage(image, trans, null);
+				}
+				BufferedImage i = flash.filter(image, null);
+				g.drawImage(i, trans, null);
 			}
 		}
 	}

@@ -98,7 +98,7 @@ public abstract class Actor extends Sprite implements Observer{
 
 	// general timer used for mode switching/response
 	protected float timer;
-
+	
 	public Actor(World w, String name) {
 		super(0, 0, w.getWidth(), w.getHeight(), AssetsManager.Images, name);
 		this.world = w;
@@ -110,7 +110,6 @@ public abstract class Actor extends Sprite implements Observer{
 		this.brickMan = w.getLevel();
 
 		this.map = new Vector2();
-		
 		this.stop();
 	}
 	
@@ -440,6 +439,11 @@ public abstract class Actor extends Sprite implements Observer{
 		hp--;
 		isHit = true;
 		timer = 2f;
+		
+		this.flash.color[0] = 1.0f;
+		this.flash.color[1] = 0.0f;
+		this.flash.color[2] = 0.0f;
+		
 		//stop();
 		setNextImage();
 	}
@@ -505,16 +509,9 @@ public abstract class Actor extends Sprite implements Observer{
 	{
 		if (isHit)
 		{
-			if (this.player != null) {
-				if (this.player.atSequenceEnd()) {
-					isHit = false;
-				}
-			}
-			else {
-				timer -= Game.getDeltaTime();
-				if (timer < 0) {
-					isHit = false;
-				}
+			timer -= Game.getDeltaTime();
+			if (timer < 0) {
+				isHit = false;
 			}
 			
 			if (!isHit)

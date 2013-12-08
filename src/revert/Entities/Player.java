@@ -16,7 +16,7 @@ public class Player extends Actor {
 
 	public static final int FULLAMMO = 6;
 	public static final int MAXHP = 100;
-	private static final float DURATION = 0.5f; // secs
+	private static final float DURATION = 1f; // secs
 
 	/*
 	 * the current point that the player is aiming at
@@ -119,7 +119,7 @@ public class Player extends Actor {
 	protected void setNextImage() {
 
 		if (isHit) {
-			this.setImage("royer_hit", true, false);
+			this.setImage("royer_hit", false, false);
 		} else if (isAttacking) {
 			this.setImage("royer_atk", true, false);
 		} else if (isJumping()) {
@@ -164,11 +164,11 @@ public class Player extends Actor {
      * @param p
      */
     public void lookAt(Vector2 target) {
-            super.lookAt(target);
-            
-            aim = this.position.to(target);
-            aim = aim.normalize();
-            aim.mult(80);
+        super.lookAt(target);
+        
+        aim = this.position.to(target);
+        aim = aim.normalize();
+        aim.mult(80);
     }
 
 	public Vector2 getAim() {
