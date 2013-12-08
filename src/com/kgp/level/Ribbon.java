@@ -6,6 +6,8 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
+import com.kgp.core.Game;
+
 import revert.Entities.Actor.Movement;
 
 //Ribbon.java
@@ -89,11 +91,11 @@ public class Ribbon {
 		//backgrounds move inversely from the player
 		if (m == Movement.Right)
 		{
-			head -= moveSize;
+			head -= moveSize * Game.getDeltaTime();
 		}
 		else if (m == Movement.Left)
 		{
-			head += moveSize;
+			head += moveSize * Game.getDeltaTime();
 		}
 		head %= width;
 		
