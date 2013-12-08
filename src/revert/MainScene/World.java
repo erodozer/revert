@@ -60,11 +60,14 @@ public class World extends Observable implements Observer{
 	
 	private boolean lock;
 	
+	public final float gravity;
+	
 	public World()
 	{
 		this.enemies = new HashSet<Enemy>();
 		this.allActors = new HashSet<Actor>();
 		this.bullets = new ArrayList<Bullet>();
+		gravity = 100f;
 	}
 	
 	/**

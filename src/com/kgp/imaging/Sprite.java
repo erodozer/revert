@@ -208,16 +208,7 @@ public class Sprite extends Observable {
 		this.position.x = x;
 		this.position.y = y;
 	}
-
-	/**
-	 * Shifts the sprites position relatively from its current position
-	 * @param xDist
-	 * @param yDist
-	 */
-	public void translate(float xDist, float yDist) {
-		this.position.translate(xDist, yDist);
-	}
-
+	
 	public float getXPosn() {
 		return this.position.x;
 	}
@@ -308,8 +299,10 @@ public class Sprite extends Observable {
 	public void updateSprite()
 	{
 		if (isActive()) {
-			this.position.translate(this.velocity.x, this.velocity.y);
-			this.angle += this.rotation;
+			System.out.println(this.position.y);
+			this.position.add(this.velocity.x * Game.getDeltaTime(), 
+							  this.velocity.y * Game.getDeltaTime());
+			this.angle += this.rotation * Game.getDeltaTime();
 			
 			// update the animation
 			if (this.player != null)

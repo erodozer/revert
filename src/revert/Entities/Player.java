@@ -1,7 +1,5 @@
 package revert.Entities;
 
-import java.awt.Point;
-import java.awt.geom.AffineTransform;
 import java.util.Observable;
 
 import revert.MainScene.Controller;
@@ -11,7 +9,6 @@ import revert.MainScene.notifications.PlayerModeNotification;
 import revert.MainScene.notifications.PlayerMovementNotification;
 import revert.MainScene.notifications.PlayerNotification;
 
-import com.kgp.core.Game;
 import com.kgp.imaging.ImagesLoader;
 import com.kgp.util.Vector2;
 
@@ -35,8 +32,7 @@ public class Player extends Actor {
 
 		// standing center screen, facing right
 		// walks 8 tiles per second
-		this.moveRate = (int) (brickMan.getBrickWidth() * 8 * Game
-				.getDeltaTime());
+		this.moveRate = (int) (brickMan.getBrickWidth() * 8);
 		// the move size is the same as the bricks ribbon
 
 		setVelocity(0, 0); // no movement
@@ -54,17 +50,17 @@ public class Player extends Actor {
 
 		this.moving = Movement.Still;
 
-		this.velocity.y = 5;
-		this.vertMoveMode = VertMovement.Falling;
-		maxVertTravel = 80;
+		maxVertTravel = 150;
 		// should be able to jump his max height in .5 sec
-		vertStep = maxVertTravel * 2 * Game.getDeltaTime();
+		vertStep = maxVertTravel * 2;
 		vertTravel = 0f;
 
 		this.hp = MAXHP;
 		this.ammo = FULLAMMO;
 
 		this.mode = Bullet.Mode.Gold;
+		
+		fall();
 	}
 
 	public void init() {

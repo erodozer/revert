@@ -135,7 +135,7 @@ public abstract class Actor extends Sprite implements Observer{
 	 */
 	final public void moveLeft()
 	{
-		if (moving != Movement.Left) {
+		if (moving != Movement.Left && vertMoveMode == VertMovement.Grounded) {
 			velocity.x = -moveRate;
 			moving = Movement.Left;
 			setNextImage();
@@ -147,7 +147,7 @@ public abstract class Actor extends Sprite implements Observer{
 	 */
 	final public void moveRight()
 	{
-		if (moving != Movement.Right) {
+		if (moving != Movement.Right && vertMoveMode == VertMovement.Grounded) {
 			velocity.x = moveRate;
 			moving = Movement.Right;
 			setNextImage();
@@ -214,7 +214,7 @@ public abstract class Actor extends Sprite implements Observer{
 	public void fall() {
 		if (vertMoveMode != VertMovement.Falling) {
 			this.vertMoveMode = VertMovement.Falling;
-			this.velocity.y = vertStep;
+			this.velocity.y = world.gravity;
 			setNextImage();
 		}
 	}
@@ -259,7 +259,7 @@ public abstract class Actor extends Sprite implements Observer{
 	protected void checkIfFalling() {
 		// could the sprite move downwards if it wanted to?
 		// test its center x-coord, base y-coord
-		float yTrans = brickMan.checkBrickTop(this.getXPosn(), this.getYPosn(), vertStep);
+		float yTrans = brickMan.checkBrickTop(this.getXPosn(), this.getYPosn(), world.gravity * Game.getDeltaTime());
 		if (yTrans != 0) {
 			fall();
 		}
@@ -275,13 +275,13 @@ public abstract class Actor extends Sprite implements Observer{
 			fall();
 		}
 		else {
-			float yTrans = brickMan.checkBrickBase(this.getXPosn(), this.getYPosn() - this.getHeight(), vertStep);
+			float yTrans = brickMan.checkBrickBase(this.getXPosn(), this.getYPosn() - this.getHeight(), vertStep * Game.getDeltaTime());
 			if (yTrans <= 0) {
 				fall();
 			}
 			else { // can move upwards another step
 				vertTravel += yTrans;
-				if (yTrans < vertStep) {
+				if (yTrans < vertStep * Game.getDeltaTime()) {
 					this.velocity.y = -yTrans;
 				}
 			}
@@ -297,9 +297,9 @@ public abstract class Actor extends Sprite implements Observer{
 	 * instance, when the sprite walks off a cliff.
 	 */
 	protected void updateFalling() {
-		float yTrans = brickMan.checkBrickTop(this.getXPosn(), this.getYPosn(), vertStep);
-		if (yTrans < vertStep) {
-			this.position.y += yTrans;
+		float yTrans = brickMan.checkBrickTop(this.getXPosn(), this.getYPosn(), world.gravity * Game.getDeltaTime());
+		if (yTrans < world.gravity * Game.getDeltaTime()) {
+			this.velocity.y = yTrans;
 			land();
 		}
 	}
@@ -377,7 +377,7 @@ public abstract class Actor extends Sprite implements Observer{
 		else if (moving == Movement.Left)
 			p.x += offset.x;
 
-		p.x += this.velocity.x;
+		p.x += this.velocity.x * Game.getDeltaTime();
 		p.y -= 1;
 
 		nextBrick = brickMan.worldToMap(p.x, p.y);
@@ -440,7 +440,7 @@ public abstract class Actor extends Sprite implements Observer{
 		hp--;
 		isHit = true;
 		timer = 2f;
-		stop();
+		//stop();
 		setNextImage();
 	}
 	

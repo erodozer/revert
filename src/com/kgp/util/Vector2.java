@@ -64,6 +64,16 @@ public class Vector2 extends Point2D.Float{
 	}
 	
 	/**
+	 * Add another vector's values to this one
+	 * @param v
+	 */
+	public void add(float x, float y)
+	{
+		this.x += x;
+		this.y += y;
+	}
+	
+	/**
 	 * Creates a copy of this vector
 	 */
 	public Vector2 clone()
@@ -92,17 +102,6 @@ public class Vector2 extends Point2D.Float{
 	{
 		x -= v.x;
 		y -= v.y;
-	}
-	
-	/**
-	 * Shifts this vector's values over
-	 * @param f
-	 * @param g
-	 */
-	public void translate(float f, float g)
-	{
-		x += f;
-		y += g;
 	}
 	
 	/**

@@ -33,10 +33,9 @@ public class Enemy extends Actor {
 
 		this.hp = 3;
 
-		this.velocity.y = 2;
-		this.vertMoveMode = VertMovement.Falling;
+		this.moveRate = (int) (brickMan.getBrickWidth() * 4);
 		maxVertTravel = 40;
-		vertStep = maxVertTravel * 2 * Game.getDeltaTime();
+		vertStep = maxVertTravel * 2;
 		vertTravel = 0f;
 
 		
@@ -60,6 +59,8 @@ public class Enemy extends Actor {
 		}
 		
 		name = "enemy_" + (type+1);
+		
+		fall();
 	}
 	
 	@Override
@@ -70,7 +71,7 @@ public class Enemy extends Actor {
 		else if (isJumping())
 			setImage(name, false);
 		else if (!isStill())
-			setImage(name, false);
+			setImage(name, true);
 		else
 			setImage(name, false);
 	}
@@ -89,7 +90,6 @@ public class Enemy extends Actor {
 	 */
 	@Override
 	protected void reactOnInView(Actor a) {
-		System.out.println("woot");
 		ai.inView(a);
 	}
 
@@ -110,7 +110,6 @@ public class Enemy extends Actor {
 	 */
 	public boolean hit(Bullet b) {
 		if (getMyRectangle().contains(b.getPosn())) {
-			System.out.println("hit");
 			if (b.getType() == this.getType()) {
 				takeHit();
 				this.timer = 2f;
