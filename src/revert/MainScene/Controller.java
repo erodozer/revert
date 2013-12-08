@@ -75,6 +75,11 @@ public class Controller extends GameController {
 				note = new PlayerMovementNotification(true);
 				setChanged();
 			}
+			else if (keyCode == KeyEvent.VK_S || keyCode == KeyEvent.VK_DOWN)
+			{
+				note = new PlayerMovementNotification(Movement.Still);
+				setChanged();
+			}
 			
 			this.notifyObservers(note);
 		}
@@ -104,12 +109,14 @@ public class Controller extends GameController {
 			note = new PlayerModeNotification(2);
 			setChanged();
 		}
+		/*
 		else if (keyCode == KeyEvent.VK_LEFT || keyCode == KeyEvent.VK_A || keyCode == KeyEvent.VK_RIGHT || keyCode == KeyEvent.VK_D  )
 		{
 			note = new PlayerMovementNotification(Movement.Still);
 			setChanged();
 			System.out.println("gah");
 		}
+		*/
 
 		this.notifyObservers(note);
 	}
