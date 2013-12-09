@@ -6,9 +6,9 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
-import com.kgp.core.Game;
-
 import revert.Entities.Actor.Movement;
+
+import com.kgp.core.Game;
 
 //Ribbon.java
 //Andrew Davison, April 2005, ad@fivedots.coe.psu.ac.th

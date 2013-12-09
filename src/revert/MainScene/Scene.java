@@ -72,7 +72,6 @@ public class Scene extends GamePanel {
 	HUD hud;
 	
 	private float hitTimer = 0f;
-	private float zoomTimer = 0f;
 
 	public Scene(GameFrame parent) {
 		super(parent);
@@ -184,7 +183,6 @@ public class Scene extends GamePanel {
 		if (this.getState() == GameState.Active) {
 			// stop jack and scenery on collision
 			world.update();
-			player.updateSprite();
 			crosshair.updateSprite();
 			if (!player.isStill()) {
 				parallaxBg.update(player.getMovement());

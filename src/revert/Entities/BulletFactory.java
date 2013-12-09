@@ -18,7 +18,7 @@ public class BulletFactory {
 	public Bullet spawnBullet()
 	{
 		Bullet b = new Bullet(world, parent.getMode());
-		Vector2 v = new Vector2(parent.getCenterXPosn(), parent.getCenterYPosn());
+		Vector2 v = new Vector2(parent.getCenterXPosn(), parent.getYPosn() - (parent.getHeight()*.8f));
 		
 		b.setPosition(v.x, v.y);
 		

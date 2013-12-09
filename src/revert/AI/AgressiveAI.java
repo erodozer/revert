@@ -3,12 +3,12 @@ package revert.AI;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.kgp.util.Vector2;
-
 import revert.Entities.Actor;
+import revert.Entities.Actor.Direction;
 import revert.Entities.Enemy;
 import revert.Entities.Player;
-import revert.Entities.Actor.Direction;
+
+import com.kgp.util.Vector2;
 
 public class AgressiveAI implements EnemyAi 
 {

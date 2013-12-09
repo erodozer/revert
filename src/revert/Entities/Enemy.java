@@ -2,9 +2,6 @@ package revert.Entities;
 
 import java.util.Observable;
 
-import com.kgp.core.Game;
-import com.kgp.util.Vector2;
-
 import revert.AI.ActiveAI;
 import revert.AI.AgressiveAI;
 import revert.AI.EnemyAi;
@@ -13,6 +10,9 @@ import revert.AI.PassiveAI;
 import revert.Entities.Bullet.Mode;
 import revert.MainScene.World;
 import revert.MainScene.notifications.ActorsRemoved;
+
+import com.kgp.core.Game;
+import com.kgp.util.Vector2;
 
 /**
  * Main enemy object that the player will have to fight during the
@@ -30,9 +30,10 @@ public class Enemy extends Actor {
 	private Mode type;
 
 	protected Enemy(World w, Player player, int type) {
-		super(w, "enemy");
+		super(w, "enemy_" + (type+1));
 
 		this.hp = 3;
+		this.duration = .5f;
 
 		maxVertTravel = 15;
 		vertStep = maxVertTravel*4;
@@ -68,10 +69,7 @@ public class Enemy extends Actor {
 	
 	@Override
 	protected void setNextImage() {
-		if (isHit)
-			return;
-			//setImage(name + "_hit", true, false);
-		else if (isJumping())
+		if (isJumping())
 			setImage(name, false);
 		else if (!isStill())
 			setImage(name, true);
@@ -142,7 +140,6 @@ public class Enemy extends Actor {
 		{
 			Vector2 enemyPosn = brickMan.worldToMap(this.getRealXPosn(), this.getRealYPosn());
 			Vector2 actorPosn = brickMan.worldToMap(a.getRealXPosn(), a.getRealYPosn());
-			Vector2[][] nextBrick;
 			Vector2 loc = enemyPosn.clone();
 			
 			if(enemyPosn.y == actorPosn.y)

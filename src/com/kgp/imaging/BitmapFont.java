@@ -56,8 +56,6 @@ public class BitmapFont {
 		// second line specifies so general values
 		this.lineHeight = reader.nextInt();
 
-		System.out.println(lineHeight);
-
 		while (reader.hasNextLine()) {
 			char character = (char) reader.nextInt();
 			int x = reader.nextInt();

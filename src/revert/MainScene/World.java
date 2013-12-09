@@ -2,13 +2,20 @@ package revert.MainScene;
 
 import java.awt.Graphics2D;
 import java.util.ArrayList;
-import java.util.Set;
 import java.util.HashSet;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
 
-import revert.Entities.*;
-import revert.MainScene.notifications.*;
+import revert.Entities.Actor;
+import revert.Entities.Bullet;
+import revert.Entities.BulletFactory;
+import revert.Entities.Enemy;
+import revert.Entities.EnemyFactory;
+import revert.Entities.Player;
+import revert.MainScene.notifications.ActorsRemoved;
+import revert.MainScene.notifications.PlayerAttackNotification;
+import revert.MainScene.notifications.WorldNotification;
 import revert.util.BrickManager;
 
 import com.kgp.core.Game;

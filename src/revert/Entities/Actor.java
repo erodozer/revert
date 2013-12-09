@@ -477,6 +477,7 @@ public abstract class Actor extends Sprite implements Observer{
 		}
 		else if (args instanceof Set)
 		{
+			@SuppressWarnings("unchecked")
 			Set<Actor> a = (Set<Actor>)args;
 			for (Actor actor : a)
 			{

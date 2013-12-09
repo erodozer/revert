@@ -109,9 +109,7 @@ public class ImagesLoader {
 		String imsFNm = IMAGE_DIR + fnm;
 		System.out.println("Reading file: " + imsFNm);
 		try {
-			InputStream in = getClass().getClassLoader().getResourceAsStream(
-					imsFNm);
-			System.out.println(in);
+			InputStream in = getClass().getClassLoader().getResourceAsStream(imsFNm);
 			BufferedReader br = new BufferedReader(new InputStreamReader(in));
 			// BufferedReader br = new BufferedReader( new FileReader(imsFNm));
 			String line;

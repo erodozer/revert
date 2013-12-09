@@ -11,7 +11,8 @@ import java.awt.geom.Point2D;
  * @author Nicholas Hydock
  */
 public class Vector2 extends Point2D.Float{
-
+	private static final long serialVersionUID = -8925785024755308800L;
+	
 	/**
 	 * Basic general vectors
 	 */

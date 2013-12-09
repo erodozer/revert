@@ -3,11 +3,11 @@ package revert.AI;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.kgp.core.Game;
-
 import revert.Entities.Actor;
 import revert.Entities.Enemy;
 import revert.Entities.Player;
+
+import com.kgp.core.Game;
 
 public class PassiveAI implements EnemyAi 
 {

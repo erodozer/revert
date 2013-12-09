@@ -125,7 +125,7 @@ public class Player extends Actor {
 		} else if (!isStill()) {
 			this.setImage("royer_walking", true);
 		} else if (isHit) {
-			this.setImage("royer_hit", false, false);
+			this.setImage("royer_hit", false);
 		} else {
 			this.setImage("royer01", false);
 		}

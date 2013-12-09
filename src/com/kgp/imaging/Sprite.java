@@ -8,7 +8,6 @@ import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
-import java.awt.image.RescaleOp;
 import java.awt.image.WritableRaster;
 import java.util.Observable;
 
