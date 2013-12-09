@@ -50,7 +50,7 @@ public class HUD implements Observer {
 		font.drawString(g, hp, 10, view.height - 10);
 		font.drawString(g, time, view.width - 10, 10 + font.getLineHeight(), Alignment.Right);
 		
-		for (int i = 1, x = 10, y = view.height - 100; i <= Player.FULLAMMO; i++, x += bulletIm.getWidth() + 4)
+		for (int i = 0, x = view.width/2 - (bulletIm.getWidth() + 4) * Player.FULLAMMO/2, y = view.height - bulletIm.getHeight() - 10; i <= Player.FULLAMMO; i++, x += bulletIm.getWidth() + 4)
 		{
 			if (i > ammo)
 			{
