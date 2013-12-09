@@ -89,6 +89,7 @@ public class AgressiveAI implements EnemyAi
 		//attack this enemy if the timer is up
 		Vector2 v = parent.getPosn().to(a.getPosn());
 		float dist = (float)v.length();
+		parent.lookAt(a.getPosn());
 		if (dist < this.attackRange()) {
 			if (attackTimer <= 0)
 			{
@@ -98,7 +99,6 @@ public class AgressiveAI implements EnemyAi
 		}
 		//make the actor chase the aggressor
 		else {
-			parent.lookAt(a.getPosn());
 			if (parent.getDirection() == Direction.Left)
 			{
 				parent.moveLeft();

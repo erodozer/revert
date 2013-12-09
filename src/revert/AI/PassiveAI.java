@@ -65,6 +65,7 @@ public class PassiveAI implements EnemyAi
 	@Override
 	public void aggress(Actor a) 
 	{
+		parent.lookAt(a.getPosn());
 		if (attackTimer < 0)
 		{
 			attack(a);
@@ -122,7 +123,7 @@ public class PassiveAI implements EnemyAi
 		int i = (int)Math.random()*10;
 		if( i <= 2)
 		{
-			double j = (int)Math.random();
+			double j = Math.random();
 			if(j > .5)
 			{
 				parent.faceLeft();

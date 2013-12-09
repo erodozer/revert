@@ -76,6 +76,7 @@ public class ActiveAI implements EnemyAi
 		//player within range of the enemy
 		//attack this enemy if the timer is up
 		float dist = (float)a.getPosn().distance(parent.getPosn());
+		parent.lookAt(a.getPosn());
 		
 		if (dist < this.attackRange()) {
 			if (attackTimer <= 0)
@@ -86,7 +87,6 @@ public class ActiveAI implements EnemyAi
 		}
 		//make the actor chase the aggressor
 		else {
-			parent.lookAt(a.getPosn());
 			if (parent.getDirection() == Direction.Left)
 			{
 				parent.moveLeft();
