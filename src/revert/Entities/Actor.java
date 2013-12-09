@@ -440,9 +440,7 @@ public abstract class Actor extends Sprite implements Observer{
 		isHit = true;
 		timer = 2f;
 		
-		this.flash.color[0] = 1.0f;
-		this.flash.color[1] = 0.0f;
-		this.flash.color[2] = 0.0f;
+		this.flash.flash(1.0f, 0.0f, 0.0f);
 		
 		//stop();
 		setNextImage();

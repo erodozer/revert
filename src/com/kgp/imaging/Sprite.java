@@ -7,7 +7,9 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
 import java.awt.image.RescaleOp;
+import java.awt.image.WritableRaster;
 import java.util.Observable;
 
 import com.kgp.core.Game;
@@ -79,6 +81,7 @@ public class Sprite extends Observable {
 	protected float duration;
 	
 	protected FlashOp flash;
+	private BufferedImage mask;
 	
 	public Sprite(float x, float y, int w, int h, ImagesLoader imsLd, String name) {
 		this.position = new Vector2();
@@ -88,7 +91,7 @@ public class Sprite extends Observable {
 		this.pDimensions = new Dimension(w, h);
 
 		this.imsLoader = imsLd;
-		this.flash = new FlashOp(new float[]{1.0f, 1.0f, 1.0f, 1.0f});
+		this.flash = new FlashOp();
 		// the sprite's default image is 'name'
 		setImage(name);
 		setPosition(x, y);
@@ -108,11 +111,13 @@ public class Sprite extends Observable {
 			dimensions = new Dimension(SIZE, SIZE);
 		} else {
 			dimensions = new Dimension(image.getWidth(), image.getHeight());
+			mask = cloneImage(image);
 		}
 		//create bounding box
 		this.myRect = new Rectangle(0, 0, dimensions.width, dimensions.height);
 		// no image loop playing
 		player = null;
+		
 	}
 	
 	/**
@@ -300,7 +305,6 @@ public class Sprite extends Observable {
 	public void updateSprite()
 	{
 		if (isActive()) {
-			System.out.println(this.position.y);
 			this.position.add(this.velocity.x * Game.getDeltaTime(), 
 							  this.velocity.y * Game.getDeltaTime());
 			this.angle += this.rotation * Game.getDeltaTime();
@@ -320,10 +324,7 @@ public class Sprite extends Observable {
 			trans.scale(-1.0, 1.0);
 		}
 		
-		//reset flash
-		for (int i = 0; i < flash.color.length; i++)
-			if (flash.color[i] < 1.0f) 
-				flash.color[i] = Math.min(flash.color[i] + Game.getDeltaTime(), 1.0f);
+		flash.update(Game.getDeltaTime());
 	}
 
 	/**
@@ -340,12 +341,29 @@ public class Sprite extends Observable {
 			} 
 			else {
 				if (player != null) {
-					image = player.getCurrentImage();
+					BufferedImage i = player.getCurrentImage();
+					if (i != image)
+					{
+						image = i;
+						//only clone when the frame is changed
+						mask = cloneImage(image);
+					}
 				}
-				BufferedImage i = flash.filter(image, null);
-				g.drawImage(i, trans, null);
+				if (flash.active()){
+					flash.filter(image, mask);
+					g.drawImage(image, trans, null);
+					g.drawImage(mask, trans, null);
+				}
+				else
+					g.drawImage(image, trans, null);		
 			}
 		}
 	}
 
+	private static BufferedImage cloneImage(BufferedImage bi) {
+		 ColorModel cm = bi.getColorModel();
+		 boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
+		 WritableRaster raster = bi.copyData(null);
+		 return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
+	}
 }
