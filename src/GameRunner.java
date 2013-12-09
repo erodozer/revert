@@ -22,7 +22,7 @@ public class GameRunner {
 		
 		Scene s = new Scene(g);
 		
-		if (args[0].equals("fullscreen")) {
+		if (args.length > 0 && args[0].equals("fullscreen")) {
 			GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 			if (gd.isFullScreenSupported()){
 				try{
@@ -40,6 +40,7 @@ public class GameRunner {
 
 					//center the window on screen
 					g.setLocation(res.width / 2 - g.getWidth() / 2, res.height / 2 - g.getHeight() / 2);
+					g.setVisible(true);
 				}
 			}
 		}
@@ -54,6 +55,8 @@ public class GameRunner {
 			//center the window on screen
 			g.setLocation(res.width / 2 - g.getWidth() / 2, res.height / 2
 					- g.getHeight() / 2);
+			
+			g.setVisible(true);
 		}
 	}
 }
