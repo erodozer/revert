@@ -32,7 +32,7 @@ public class Player extends Actor {
 
 		// standing center screen, facing right
 		// walks 8 tiles per second
-		this.moveRate = (int) (brickMan.getBrickWidth() * 8);
+		this.moveRate = 80;
 		// the move size is the same as the bricks ribbon
 
 		setVelocity(0, 0); // no movement
@@ -118,14 +118,14 @@ public class Player extends Actor {
 	@Override
 	protected void setNextImage() {
 
-		if (isHit) {
-			this.setImage("royer_hit", false, false);
-		} else if (isAttacking) {
+		if (isAttacking) {
 			this.setImage("royer_atk", true, false);
 		} else if (isJumping()) {
 			this.setImage("royer_jmp", false);
 		} else if (!isStill()) {
 			this.setImage("royer_walking", true);
+		} else if (isHit) {
+			this.setImage("royer_hit", false, false);
 		} else {
 			this.setImage("royer01", false);
 		}
@@ -136,12 +136,14 @@ public class Player extends Actor {
 	 */
 	@Override
 	public void attack() {
-		ammo--;
-		timer = 1000;
-		isAttacking = true;
-		stop();
-		setNextImage();
-		updateStatus();
+		if (!isJumping()) {
+			ammo--;
+			timer = 1000;
+			isAttacking = true;
+			stop();
+			setNextImage();
+			updateStatus();
+		}
 	}
 
 	private void reload() {

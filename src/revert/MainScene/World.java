@@ -165,6 +165,11 @@ public class World extends Observable implements Observer{
 		
 		this.setChanged();
 		this.notifyObservers(new WorldNotification(score, time));
+		
+		if (this.enemies.size() <= 0 && currentWave < waves)
+		{
+			this.startWave();
+		}
 	}
 	
 	/**
@@ -311,7 +316,7 @@ public class World extends Observable implements Observer{
 		{
 			if (args instanceof PlayerAttackNotification)
 			{
-				if (player.hasAmmo())
+				if (player.hasAmmo() && !player.isJumping())
 				{
 					this.add(bulletFactory.spawnBullet());
 				}
