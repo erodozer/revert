@@ -13,6 +13,7 @@ import revert.Entities.Player;
 import revert.util.JsonBricksManager;
 
 import com.kgp.core.AssetsManager;
+import com.kgp.core.Game;
 import com.kgp.core.GameController;
 import com.kgp.core.GameFrame;
 import com.kgp.core.GamePanel;
@@ -69,6 +70,9 @@ public class Scene extends GamePanel {
 
 	// display of in-game stats
 	HUD hud;
+	
+	private float hitTimer = 0f;
+	private float zoomTimer = 0f;
 
 	public Scene(GameFrame parent) {
 		super(parent);
@@ -108,7 +112,7 @@ public class Scene extends GamePanel {
 			}
 		}
 
-		if (keyCode == KeyEvent.VK_PLUS) {
+		if (keyCode == KeyEvent.VK_EQUALS || keyCode == KeyEvent.VK_PLUS) {
 			zoom = (float) Math.min(3.0, zoom + .1);
 		}
 		if (keyCode == KeyEvent.VK_MINUS) {
@@ -188,9 +192,27 @@ public class Scene extends GamePanel {
 			}
 			// transform a camera that follows the player around
 			camera.set(player.getCenterXPosn(), player.getRealYPosn());
-			camMatrix.setToTranslation(-camera.x, -camera.y);
-			camMatrix.translate(PWIDTH / 2, PHEIGHT / 2);
+			camMatrix.setToIdentity();
 			camMatrix.scale(zoom, zoom);
+			camMatrix.translate(-camera.x, -camera.y);
+			camMatrix.translate(PWIDTH * (.5 / zoom), PHEIGHT * (.5 / zoom));
+			
+			if (player.isHit())
+			{
+				hitTimer = 3.0f;
+			}
+			
+			if (hitTimer >= 3.0f && zoom < 1.25f)
+			{
+				zoom = Math.min(zoom + Game.getDeltaTime() * 3, 1.25f);
+				if (zoom > 1.25f)
+					hitTimer -= Game.getDeltaTime();
+			}
+			else if (hitTimer > 0f && zoom > 1.0f)
+			{
+				zoom = Math.max(zoom - Game.getDeltaTime() * .25f, 1.0f);
+				hitTimer -= Game.getDeltaTime();	
+			}
 		}
 	}
 
