@@ -87,9 +87,8 @@ public class AgressiveAI implements EnemyAi
 	{
 		//player within range of the enemy
 		//attack this enemy if the timer is up
-		float dist = (float)a.getPosn().distance(parent.getPosn());
-		float y = parent.getPosn().to(a.getPosn()).normalize().y;
-		
+		Vector2 v = parent.getPosn().to(a.getPosn());
+		float dist = (float)v.length();
 		if (dist < this.attackRange()) {
 			if (attackTimer <= 0)
 			{
@@ -109,7 +108,7 @@ public class AgressiveAI implements EnemyAi
 				parent.moveRight();
 			}
 			
-			if (y < 0)
+			if (v.y < 0 && v.x < .5 && v.x > -.5)
 				parent.jump();
 		}
 	}
@@ -248,6 +247,11 @@ public class AgressiveAI implements EnemyAi
 	@Override
 	public Set<Actor> getAggressors() {
 		return aggressors;
+	}
+
+	@Override
+	public float moveRate() {
+		return 60f;
 	}
 
 }

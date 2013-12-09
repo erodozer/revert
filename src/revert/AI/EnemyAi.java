@@ -78,4 +78,6 @@ public interface EnemyAi {
 	public void hit();
 	
 	public Set<Actor> getAggressors();
+
+	public float moveRate();
 }

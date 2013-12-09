@@ -34,7 +34,6 @@ public class Enemy extends Actor {
 
 		this.hp = 3;
 
-		this.moveRate = (int) (brickMan.getBrickWidth() * 4);
 		maxVertTravel = 15;
 		vertStep = maxVertTravel*4;
 		vertTravel = 0f;
@@ -58,6 +57,9 @@ public class Enemy extends Actor {
 			System.out.println("No enemy AI type corresponds to value: " + type + ".  Instantiating basic enemy");
 			ai = new NullAI();
 		}
+		
+		this.moveRate = ai.moveRate();
+		
 		
 		name = "enemy_" + (type+1);
 		

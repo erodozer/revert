@@ -83,4 +83,9 @@ public class NullAI implements EnemyAi{
 	public Set<Actor> getAggressors() {
 		return aggressors;
 	}
+
+	@Override
+	public float moveRate() {
+		return 0f;
+	}
 }

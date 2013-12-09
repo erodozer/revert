@@ -167,5 +167,9 @@ public class PassiveAI implements EnemyAi
 	public Set<Actor> getAggressors() {
 		return aggressors;
 	}
+	@Override
+	public float moveRate() {
+		return 20f;
+	}
 
 }
