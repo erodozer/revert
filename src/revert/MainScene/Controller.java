@@ -28,6 +28,8 @@ public class Controller extends GameController {
 	GamePanel panel;
 	World world;
 
+	Vector2 mouse = new Vector2();
+	
 	/**
 	 * Creates a game controller that interacts directly with the player
 	 * 
@@ -45,13 +47,10 @@ public class Controller extends GameController {
 		int x = e.getX();
 		int y = e.getY();
 		
-		Vector2 v = new Vector2(x, y);
-		v.x -= panel.getWidth()/2f;
-		v.x += player.getXPosn();
-		v.y -= panel.getHeight()/2f;
-		v.y += player.getYPosn() - player.getHeight()/2f;
+		mouse.x = x - panel.getWidth()/2f + player.getCenterXPosn();
+		mouse.y = y - panel.getHeight()/2f + player.getCenterYPosn();
 		
-		this.player.lookAt(v);
+		this.player.lookAt(mouse);
 	}
 
 	public void keyPressed(KeyEvent e) {
@@ -90,61 +89,59 @@ public class Controller extends GameController {
 		
 		Object note = null;
 		
-		/*
-		 * Set attack modes
-		 */
-		if (keyCode == KeyEvent.VK_SHIFT) {
-			note = new PlayerModeNotification(true);
-			setChanged();
-		} 
-		else if (keyCode == KeyEvent.VK_1) {
-			note = new PlayerModeNotification(0);
-			setChanged();
-		} 
-		else if (keyCode == KeyEvent.VK_2) {
-			note = new PlayerModeNotification(1);
-			setChanged();
-		} 
-		else if (keyCode == KeyEvent.VK_3) {
-			note = new PlayerModeNotification(2);
-			setChanged();
+		if (panel.getState() == GameState.Active) {
+			/*
+			 * Set attack modes
+			 */
+			if (keyCode == KeyEvent.VK_SHIFT) {
+				note = new PlayerModeNotification(true);
+				setChanged();
+			} 
+			else if (keyCode == KeyEvent.VK_1) {
+				note = new PlayerModeNotification(0);
+				setChanged();
+			} 
+			else if (keyCode == KeyEvent.VK_2) {
+				note = new PlayerModeNotification(1);
+				setChanged();
+			} 
+			else if (keyCode == KeyEvent.VK_3) {
+				note = new PlayerModeNotification(2);
+				setChanged();
+			}
 		}
-		/*
-		else if (keyCode == KeyEvent.VK_LEFT || keyCode == KeyEvent.VK_A || keyCode == KeyEvent.VK_RIGHT || keyCode == KeyEvent.VK_D  )
-		{
-			note = new PlayerMovementNotification(Movement.Still);
-			setChanged();
-			System.out.println("gah");
-		}
-		*/
 
 		this.notifyObservers(note);
 	}
 
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
-		//scroll through attack modes
-		PlayerModeNotification note = null;
-		if (e.getWheelRotation() < 0)
-		{
-			note = new PlayerModeNotification(false);
-			setChanged();
+		if (panel.getState() == GameState.Active) {
+			//scroll through attack modes
+			PlayerModeNotification note = null;
+			if (e.getWheelRotation() < 0)
+			{
+				note = new PlayerModeNotification(false);
+				setChanged();
+			}
+			else if (e.getWheelRotation() > 0)
+			{
+				note = new PlayerModeNotification(true);
+				setChanged();
+			}
+			this.notifyObservers(note);
 		}
-		else if (e.getWheelRotation() > 0)
-		{
-			note = new PlayerModeNotification(true);
-			setChanged();
-		}
-		this.notifyObservers(note);
 
 	}
 	
 	public void mouseReleased(MouseEvent e){
-		if (e.getButton() == MouseEvent.BUTTON1)
-		{
-			//mouse clicked to fire a bullet
-			this.setChanged();
-			this.notifyObservers(new PlayerAttackNotification());
+		if (panel.getState() == GameState.Active) {
+			if (e.getButton() == MouseEvent.BUTTON1)
+			{
+				//mouse clicked to fire a bullet
+				this.setChanged();
+				this.notifyObservers(new PlayerAttackNotification());
+			}
 		}
 	}
 }
