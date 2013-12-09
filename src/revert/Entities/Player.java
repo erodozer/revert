@@ -16,7 +16,7 @@ public class Player extends Actor {
 
 	public static final int FULLAMMO = 6;
 	public static final int MAXHP = 100;
-	private static final float DURATION = 1f; // secs
+	private static final float DURATION = .75f; // secs
 
 	/*
 	 * the current point that the player is aiming at
@@ -30,11 +30,8 @@ public class Player extends Actor {
 	public Player(World w, ImagesLoader imsLd) {
 		super(w, "royer01");
 
-		// standing center screen, facing right
-		// walks 8 tiles per second
-		this.moveRate = 80;
-		// the move size is the same as the bricks ribbon
-
+		this.moveRate = 120;
+		
 		setVelocity(0, 0); // no movement
 
 		this.duration = DURATION;
