@@ -5,7 +5,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
@@ -77,7 +76,6 @@ public class Scene extends GamePanel {
 	HUD hud;
 	
 	private float hitTimer = 0f;
-	private float faderTimer = 0f;
 
 	//fade used for game over screen
 	private BufferedImage fadeIm;
@@ -108,16 +106,16 @@ public class Scene extends GamePanel {
 				|| ((keyCode == KeyEvent.VK_C) && e.isControlDown()))
 			this.stopGame();
 
-		if (this.getState() == GameState.Start)
-		{
-			this.setState(GameState.Help);
+		if (this.getState() == GameState.Start){
+			this.state = GameState.Help;
+			this.prevState = GameState.Active;
 			return;
 		}
 		
 		// help controls
 		if (keyCode == KeyEvent.VK_H) {
 			if (this.getState() == GameState.Help) { // help being shown
-				this.setState(GameState.Active);
+				this.setState(this.prevState);
 			} else { // help not being shown
 				this.setState(GameState.Help);
 			}
@@ -225,7 +223,7 @@ public class Scene extends GamePanel {
 			if (!player.isAlive()) {
 				this.setState(GameState.GameOver);
 				//force set to transparent and have it fade to opaque
-				fadeOp.fade(1.0f, 1.0f, 1.0f, 0.0f, 2f);
+				fadeOp.fade(1.0f, 1.0f, 1.0f, 0.0f, 0f);
 				fadeOp.fade(1.0f, 1.0f, 1.0f, 1.0f, 2f);
 			}
 			else if (world.done())
@@ -287,12 +285,14 @@ public class Scene extends GamePanel {
 			case GameOver: {
 				fadeOp.filter(gameoverIm, fadeIm);
 				dbg.drawImage(fadeIm, (PWIDTH - gameoverIm.getWidth()) / 2, (PHEIGHT - gameoverIm.getHeight()) / 2, null);
-				dbg.setColor(Color.white);
-				dbg.setFont(font);
-				dbg.drawString("Survived for " + world.currentWave + " waves", 100, 300);
-				dbg.drawString("Survived for " + world.time + " seconds", 100, 338);
-				dbg.drawString("Time Bonus: " + (int)world.timeBonus, 100, 376);
-				dbg.drawString("Total Score: " + (world.score + world.timeBonus), 150, 420);
+				if (!fadeOp.active()) {
+					dbg.setColor(Color.white);
+					dbg.setFont(font);
+					dbg.drawString("Survived for " + world.currentWave + " waves", 100, 300);
+					dbg.drawString("Survived for " + (int)world.time + " seconds", 100, 338);
+					dbg.drawString("Time Bonus: " + world.timeBonus, 100, 376);
+					dbg.drawString("Total Score: " + (world.score + world.timeBonus), 150, 420);
+				}
 				break;
 			}
 			default:
