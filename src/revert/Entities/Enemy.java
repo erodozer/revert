@@ -12,6 +12,7 @@ import revert.AI.NullAI;
 import revert.AI.PassiveAI;
 import revert.Entities.Bullet.Mode;
 import revert.MainScene.World;
+import revert.MainScene.notifications.ActorsRemoved;
 
 /**
  * Main enemy object that the player will have to fight during the
@@ -211,6 +212,13 @@ public class Enemy extends Actor {
 				if (visibility.get(args)) {
 					ai.update((Actor) args);
 				}
+			}
+		}
+		if (args instanceof ActorsRemoved)
+		{
+			for (Actor a : ((ActorsRemoved)args).actors)
+			{
+				visibility.remove(a);
 			}
 		}
 	}
