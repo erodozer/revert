@@ -3,11 +3,14 @@ package revert.MainScene;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 import revert.Entities.Player;
 import revert.util.JsonBricksManager;
@@ -18,6 +21,7 @@ import com.kgp.core.GameController;
 import com.kgp.core.GameFrame;
 import com.kgp.core.GamePanel;
 import com.kgp.core.GameState;
+import com.kgp.imaging.FadeOp;
 import com.kgp.imaging.ImagesLoader;
 import com.kgp.level.RibbonsManager;
 
@@ -60,6 +64,7 @@ public class Scene extends GamePanel {
 	// to display the title/help screen
 	private BufferedImage helpIm;
 	private BufferedImage titleIm;
+	private BufferedImage gameoverIm;
 
 	private float zoom = 1.0f;
 
@@ -72,6 +77,13 @@ public class Scene extends GamePanel {
 	HUD hud;
 	
 	private float hitTimer = 0f;
+	private float faderTimer = 0f;
+
+	//fade used for game over screen
+	private BufferedImage fadeIm;
+	private FadeOp fadeOp;
+	
+	private Font font;
 
 	public Scene(GameFrame parent) {
 		super(parent);
@@ -168,7 +180,17 @@ public class Scene extends GamePanel {
 		// prepare title/help screen
 		helpIm = images.getImage("help");
 		titleIm = images.getImage("title");
+		gameoverIm = images.getImage("gameover");
+		
+		fadeOp = new FadeOp();
+		fadeIm = fadeOp.filter(gameoverIm, null);
 
+		try {
+			font = Font.createFont(Font.TRUETYPE_FONT, AssetsManager.getResource("Fonts/default.ttf")).deriveFont(32f);
+		} catch (FontFormatException | IOException e1) {
+			font = Font.getFont("arial").deriveFont(32f);
+		}
+		
 		this.state = GameState.Active;
 		this.gameUpdate();
 		this.state = GameState.Start;
@@ -200,17 +222,33 @@ public class Scene extends GamePanel {
 				hitTimer = 3.0f;
 			}
 			
-			if (hitTimer >= 3.0f && zoom < 1.25f)
-			{
-				zoom = Math.min(zoom + Game.getDeltaTime() * 3, 1.25f);
-				if (zoom > 1.25f)
-					hitTimer -= Game.getDeltaTime();
+			if (!player.isAlive()) {
+				this.setState(GameState.GameOver);
+				//force set to transparent and have it fade to opaque
+				fadeOp.fade(1.0f, 1.0f, 1.0f, 0.0f, 2f);
+				fadeOp.fade(1.0f, 1.0f, 1.0f, 1.0f, 2f);
 			}
-			else if (hitTimer > 0f && zoom > 1.0f)
+			else if (world.done())
 			{
-				zoom = Math.max(zoom - Game.getDeltaTime() * .25f, 1.0f);
-				hitTimer -= Game.getDeltaTime();	
+				this.setState(GameState.GameWon);
 			}
+		}
+		if (hitTimer >= 3.0f && zoom < 1.25f)
+		{
+			zoom = Math.min(zoom + Game.getDeltaTime() * 3, 1.25f);
+			if (zoom > 1.25f)
+				hitTimer -= Game.getDeltaTime();
+		}
+		else if (hitTimer > 0f && zoom > 1.0f)
+		{
+			zoom = Math.max(zoom - Game.getDeltaTime() * .25f, 1.0f);
+			hitTimer -= Game.getDeltaTime();	
+		}
+		
+		
+		if (this.state == GameState.GameOver)
+		{
+			fadeOp.update(Game.getDeltaTime());
 		}
 	}
 
@@ -246,6 +284,17 @@ public class Scene extends GamePanel {
 			case Start:
 				dbg.drawImage(titleIm, 0, 0, PWIDTH, PHEIGHT, null);
 				break;
+			case GameOver: {
+				fadeOp.filter(gameoverIm, fadeIm);
+				dbg.drawImage(fadeIm, (PWIDTH - gameoverIm.getWidth()) / 2, (PHEIGHT - gameoverIm.getHeight()) / 2, null);
+				dbg.setColor(Color.white);
+				dbg.setFont(font);
+				dbg.drawString("Survived for " + world.currentWave + " waves", 100, 300);
+				dbg.drawString("Survived for " + world.time + " seconds", 100, 338);
+				dbg.drawString("Time Bonus: " + (int)world.timeBonus, 100, 376);
+				dbg.drawString("Total Score: " + (world.score + world.timeBonus), 150, 420);
+				break;
+			}
 			default:
 				break;
 		}

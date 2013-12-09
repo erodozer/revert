@@ -15,7 +15,7 @@ import com.kgp.util.Vector2;
 public class Player extends Actor {
 
 	public static final int FULLAMMO = 6;
-	public static final int MAXHP = 100;
+	public static final int MAXHP = 15;
 	private static final float DURATION = .75f; // secs
 
 	/*

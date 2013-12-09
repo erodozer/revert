@@ -62,8 +62,9 @@ public class World extends Observable implements Observer{
 	private EnemyFactory enemyFactory;
 	private BulletFactory bulletFactory;
 	
-	private int score;
-	private int time;
+	int score;
+	float time;
+	int timeBonus;
 	
 	private boolean lock;
 	
@@ -169,15 +170,20 @@ public class World extends Observable implements Observer{
 		
 		this.level.update(this.player.getRealXPosn(), this.player.getRealYPosn());
 		
-		this.time += Game.getPeriodInMSec();
+		this.time += Game.getDeltaTime();
+		this.timeBonus = (int)Math.max(0, ((currentWave * 30) - time) * 1000);
 		
 		this.setChanged();
 		this.notifyObservers(new WorldNotification(score, time));
 		
-		if (this.enemies.size() <= 0 && currentWave < waves)
+		if (this.enemies.size() <= 0 && currentWave < waves && !player.isJumping())
 		{
 			this.startWave();
 		}
+	}
+	
+	public boolean done() {
+		return this.currentWave == waves && this.enemies.size() <= 0;
 	}
 	
 	/**
@@ -218,7 +224,6 @@ public class World extends Observable implements Observer{
 		this.notifyObservers(allActors);
 		
 		currentWave++;
-		waves--;
 	}
 
 	/**
@@ -251,7 +256,6 @@ public class World extends Observable implements Observer{
 	public void init()
 	{
 		this.waves = 5;
-		this.startWave();
 	}
 
 	/**

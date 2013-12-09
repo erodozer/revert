@@ -12,6 +12,7 @@ public enum GameState {
 	Active,
 	GameOver,
 	Help, 
-	Start;
+	Start, 
+	GameWon;
 	
 }

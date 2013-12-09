@@ -4,6 +4,7 @@
 // title/help screen
 o title.png
 o help.png
+o gameover.png
 
 // player's images
 o royer01.png

@@ -13,11 +13,17 @@ public class WorldNotification {
 	public final String score;
 	public final String time;
 
+	public WorldNotification(final int score, final float time)
+	{
+		this.score = String.format(SCORE_FMT, score);
+		//make sure to convert time from ms to sec
+		this.time = String.format(TIME_FMT, (int)(time));
+	}
+	
 	public WorldNotification(final int score, final int time)
 	{
 		this.score = String.format(SCORE_FMT, score);
 		//make sure to convert time from ms to sec
 		this.time = String.format(TIME_FMT, (int)(time/1000));
 	}
-	
 }

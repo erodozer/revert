@@ -35,6 +35,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.geom.AffineTransform;
 
@@ -248,6 +249,7 @@ public abstract class GamePanel extends JPanel implements Runnable {
 				return;
 			} else
 				dbg = dbImage.getGraphics();
+			((Graphics2D)dbg).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		}
 
 		draw((Graphics2D) dbg);
