@@ -72,7 +72,7 @@ public class FadeOp implements BufferedImageOp {
 		if (timer > 0f){
 			timer -= delta;
 			for (int i = 0; i < 4; i++)
-				color[i] += step[i];
+				color[i] += step[i] * delta;
 			
 			//force jump to destination when timer is up
 			if (timer <= 0f){
@@ -121,9 +121,16 @@ public class FadeOp implements BufferedImageOp {
 		next[2] = b;
 		next[3] = a;
 		
-		for (int i = 0; i < 4; i++) {
-			color[i] = prev[i];
-			step[i] = (next[i] - prev[i])/duration;
+		if (duration > 0){
+			for (int i = 0; i < 4; i++) {
+				color[i] = prev[i];
+				step[i] = (next[i] - prev[i])/duration;
+			}
+		}
+		else {
+			for (int i = 0; i < 4; i++) {
+				color[i] = next[i];
+			}
 		}
 		
 		timer = duration;
