@@ -102,8 +102,9 @@ public class World extends Observable implements Observer{
 					enemies.remove(a);
 					score += KILL_BONUS;
 				}
+				this.deleteObserver(a);
 			}
-			
+			this.setChanged();
 			this.notifyObservers(new ActorsRemoved(dead));
 		}
 		
