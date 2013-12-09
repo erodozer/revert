@@ -98,6 +98,8 @@ public abstract class Actor extends Sprite implements Observer{
 
 	// general timer used for mode switching/response
 	protected float timer;
+	private final float HIT_SLOWDOWN = .75f;
+	private float hitTimer;
 	
 	public Actor(World w, String name) {
 		super(0, 0, w.getWidth(), w.getHeight(), AssetsManager.Images, name);
@@ -118,7 +120,7 @@ public abstract class Actor extends Sprite implements Observer{
 		super.setImage(name);
 		
 		if (this.brickMan != null)
-			this.tileHeight = (int)(this.dimensions.height / this.brickMan.getBrickHeight());
+			this.tileHeight = (int)Math.ceil((float)this.dimensions.height / (float)this.brickMan.getBrickHeight());
 	
 		this.offset.x = -this.dimensions.width / 2;
 		this.offset.y = -this.dimensions.height;
@@ -137,6 +139,7 @@ public abstract class Actor extends Sprite implements Observer{
 		if (moving != Movement.Left) {
 			velocity.x = -moveRate;
 			moving = Movement.Left;
+			isHit = false;
 			setNextImage();
 		}
 	}
@@ -149,6 +152,7 @@ public abstract class Actor extends Sprite implements Observer{
 		if (moving != Movement.Right) {
 			velocity.x = moveRate;
 			moving = Movement.Right;
+			isHit = false;
 			setNextImage();
 		}
 	}
@@ -160,6 +164,7 @@ public abstract class Actor extends Sprite implements Observer{
 	{
 		this.velocity.x = 0;
 		this.moving = Movement.Still;
+		this.isHit = false;
 		setNextImage();
 	}
 	
@@ -250,6 +255,18 @@ public abstract class Actor extends Sprite implements Observer{
 	{
 		return this.moveRate;
 	}
+	
+	final public float getForwardX()
+	{
+		float x = position.x;
+		// adjust for visible offset
+		if (moving == Movement.Right)
+			x -= offset.x;
+		else if (moving == Movement.Left)
+			x += offset.x;
+		
+		return x;
+	}
 
 	/**
 	 * If the left/right move has put the sprite out in thin air, then put it
@@ -258,7 +275,8 @@ public abstract class Actor extends Sprite implements Observer{
 	protected void checkIfFalling() {
 		// could the sprite move downwards if it wanted to?
 		// test its center x-coord, base y-coord
-		float yTrans = brickMan.checkBrickTop(this.getXPosn(), this.getYPosn(), world.gravity * Game.getDeltaTime());
+		float x = getForwardX() + velocity.x * Game.getDeltaTime();
+		float yTrans = brickMan.checkBrickTop(x, position.y, world.gravity * Game.getDeltaTime());
 		if (yTrans != 0) {
 			fall();
 		}
@@ -281,7 +299,8 @@ public abstract class Actor extends Sprite implements Observer{
 			else { // can move upwards another step
 				vertTravel += yTrans;
 				if (yTrans < vertStep * Game.getDeltaTime()) {
-					this.velocity.y = -yTrans;
+					this.velocity.y = 0;
+					this.position.y -= yTrans;
 				}
 			}
 		}
@@ -298,7 +317,7 @@ public abstract class Actor extends Sprite implements Observer{
 	protected void updateFalling() {
 		float yTrans = brickMan.checkBrickTop(this.getXPosn(), this.getYPosn(), world.gravity * Game.getDeltaTime());
 		if (yTrans < world.gravity * Game.getDeltaTime()) {
-			this.velocity.y = yTrans;
+			this.position.y += yTrans;
 			land();
 		}
 	}
@@ -318,16 +337,9 @@ public abstract class Actor extends Sprite implements Observer{
 		// adjust to base and check brick ahead
 		Vector2 p = position.clone();
 
-		// adjust for visible offset
-		if (moving == Movement.Right)
-			p.x -= offset.x;
-		else if (moving == Movement.Left)
-			p.x += offset.x;
+		p.x = getForwardX() + this.velocity.x * Game.getDeltaTime();
 
-		p.x += this.velocity.x;
-		p.y -= 1;
-
-		nextBrick = brickMan.worldToMap(p.x, p.y);
+		nextBrick = brickMan.worldToMap(p.x, p.y-brickMan.getBrickHeight()/2);
 		
 		return this.checkAhead(nextBrick);
 	}
@@ -347,9 +359,8 @@ public abstract class Actor extends Sprite implements Observer{
 		if (nextBrick.equals(this.map))
 			return false;
 
-		// if the next brick exists, we check the brick above it to see if it's
-		// empty
-		for (int i = 0; i < this.tileHeight-1; i++) {
+		// if the next brick exists, we check the brick above it to see if it's empty
+		for (int i = 0; i < this.tileHeight; i++) {
 			nextBrick.y--;
 			
 			// if it isn't and we run into a wall and stop
@@ -362,8 +373,7 @@ public abstract class Actor extends Sprite implements Observer{
 	}
 
 	/**
-	 * Causes Royer to advance up the tilemap if the next tile is only 1 up Does
-	 * not cause Royer to think he's jumping
+	 * Causes the actor to advance up the tilemap if the next tile is only 1 up
 	 */
 	protected void stepNext() {
 		Vector2 nextBrick;
@@ -386,7 +396,7 @@ public abstract class Actor extends Sprite implements Observer{
 		if (!brickMan.brickExists(nextBrick))
 			return;
 
-		if (brickMan.getBrickHeight() > this.getHeight() * .25 && checkAhead(nextBrick))
+		if (checkAhead(nextBrick))
 		{
 			stop();
 		}
@@ -438,7 +448,7 @@ public abstract class Actor extends Sprite implements Observer{
 	{
 		hp--;
 		isHit = true;
-		timer = 2f;
+		hitTimer = 2f;
 		
 		this.flash.flash(1.0f, 0.0f, 0.0f);
 		
@@ -507,8 +517,8 @@ public abstract class Actor extends Sprite implements Observer{
 	{
 		if (isHit)
 		{
-			timer -= Game.getDeltaTime();
-			if (timer < 0) {
+			hitTimer -= Game.getDeltaTime();
+			if (hitTimer < 0) {
 				isHit = false;
 			}
 			
@@ -536,7 +546,6 @@ public abstract class Actor extends Sprite implements Observer{
 			if (timer < 0)
 			{
 				isAttacking = false;
-				stop();
 			}
 		}
 
@@ -545,7 +554,15 @@ public abstract class Actor extends Sprite implements Observer{
 		else if (vertMoveMode == VertMovement.Falling)
 			updateFalling();
 
+		//slowdown when hurt
+		if (hitTimer > 0)
+			velocity.x *= HIT_SLOWDOWN;
+		
 		super.updateSprite();
+		
+		//restore
+		if (hitTimer > 0)
+			velocity.x /= HIT_SLOWDOWN;
 
 		if (this.getXPosn() > world.getWidth()) {
 			this.setPosition(this.getXPosn() - world.getWidth(), this.getYPosn());
