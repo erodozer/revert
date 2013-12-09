@@ -2,6 +2,7 @@ package com.kgp.core;
 
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -47,16 +48,7 @@ public class GameFrame extends JFrame implements WindowListener {
 		c.add(game);
 
 		addWindowListener(this);
-		pack();
 		setResizable(false);
-
-		Dimension res = Toolkit.getDefaultToolkit().getScreenSize();
-
-		//center the window on screen
-		this.setLocation(res.width / 2 - this.getWidth() / 2, res.height / 2
-				- this.getHeight() / 2);
-
-		setVisible(true);
 	}
 
 	// ----------------- window listener methods -------------
